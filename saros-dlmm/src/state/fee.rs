@@ -20,11 +20,11 @@ impl IsInitialized for StaticFeeParameters {
 }
 impl Sealed for StaticFeeParameters {}
 impl Pack for StaticFeeParameters {
-    const LEN: usize = 64;
+    const LEN: usize = 20;
     fn pack_into_slice(&self, output: &mut [u8]) {
         let output = array_mut_ref![output, 0, 20];
         let (
-            base_factory,
+            base_factor,
             filter_period,
             decay_period,
             reduction_factor,
@@ -34,7 +34,7 @@ impl Pack for StaticFeeParameters {
             _space,
         ) = mut_array_refs![output, 2, 2, 2, 2, 4, 4, 2, 2];
 
-        *base_factory = self.base_factor.to_le_bytes();
+        *base_factor = self.base_factor.to_le_bytes();
         *filter_period = self.filter_period.to_le_bytes();
         *decay_period = self.decay_period.to_le_bytes();
         *reduction_factor = self.reduction_factor.to_le_bytes();
@@ -48,7 +48,7 @@ impl Pack for StaticFeeParameters {
         let input = array_ref![input, 0, 20];
         #[allow(clippy::ptr_offset_with_cast)]
         let (
-            base_factory,
+            base_factor,
             filter_period,
             decay_period,
             reduction_factor,
@@ -59,7 +59,7 @@ impl Pack for StaticFeeParameters {
         ) = array_refs![input, 2, 2, 2, 2, 4, 4, 2, 2];
 
         Ok(Self {
-            base_factor: u16::from_le_bytes(*base_factory),
+            base_factor: u16::from_le_bytes(*base_factor),
             filter_period: u16::from_le_bytes(*filter_period),
             decay_period: u16::from_le_bytes(*decay_period),
             reduction_factor: u16::from_le_bytes(*reduction_factor),

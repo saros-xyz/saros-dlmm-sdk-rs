@@ -196,7 +196,67 @@ impl Bin {
         fee: u64,
         protocol_share: u64,
         swap_for_y: bool,
-    ) -> Result<(u64, u64, u64, u64), ProgramError> {
-        unimplemented!()
+    ) -> Result<(u64, u64, u64, u64)> {
+        let price = get_price_from_id(bin_step, bin_id);
+
+        let bin_reserve_out = if swap_for_y {
+            self.reserve_y
+        } else {
+            self.reserve_x
+        };
+
+        if bin_reserve_out == 0 {
+            return Ok((0, 0, 0, 0));
+        }
+
+        let amount_out = if amount_out_left > bin_reserve_out {
+            bin_reserve_out
+        } else {
+            amount_out_left
+        };
+
+        let amount_in_without_fee = if swap_for_y {
+            u64::try_from(shl_div(amount_out as u128, price, SCALE_OFFSET, Rounding::Up).unwrap())
+                .unwrap()
+        } else {
+            u64::try_from(mul_shr(amount_out as u128, price, SCALE_OFFSET, Rounding::Up).unwrap())
+                .unwrap()
+        };
+
+        let fee_amount = get_fee_for_amount(amount_in_without_fee, fee)?;
+
+        let amount_in = amount_in_without_fee
+            .checked_add(fee_amount)
+            .ok_or(ErrorCode::AmountOverflow)?;
+
+        let protocol_fee_amount = get_protocol_fee(fee_amount, protocol_share);
+
+        if swap_for_y {
+            self.reserve_x = self
+                .reserve_x
+                .checked_add(amount_in)
+                .ok_or(ErrorCode::AmountOverflow)?
+                .checked_sub(protocol_fee_amount)
+                .ok_or(ErrorCode::AmountUnderflow)?;
+
+            self.reserve_y = self
+                .reserve_y
+                .checked_sub(amount_out)
+                .ok_or(ErrorCode::AmountUnderflow)?;
+        } else {
+            self.reserve_x = self
+                .reserve_x
+                .checked_sub(amount_out)
+                .ok_or(ErrorCode::AmountUnderflow)?;
+
+            self.reserve_y = self
+                .reserve_y
+                .checked_add(amount_in)
+                .ok_or(ErrorCode::AmountOverflow)?
+                .checked_sub(protocol_fee_amount)
+                .ok_or(ErrorCode::AmountUnderflow)?;
+        }
+
+        Ok((amount_in, amount_out, fee_amount, protocol_fee_amount))
     }
 }

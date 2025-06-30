@@ -12,7 +12,7 @@ pub fn get_swap_result(
     swap_for_y: bool,
     swap_type: SwapMode,
     block_timestamp: u64,
-) -> Result<u64> {
+) -> Result<(u64, u64)> {
     pair.update_references(block_timestamp)?;
 
     match swap_type {
@@ -20,6 +20,7 @@ pub fn get_swap_result(
             let mut amount_in_left: u64 = amount;
             let mut amount_out: u64 = 0;
             let mut total_protocol_fee: u64 = 0;
+            let mut total_fee_amount: u64 = 0;
 
             while amount_in_left > 0 {
                 pair.update_volatility_accumulator()?;
@@ -50,6 +51,10 @@ pub fn get_swap_result(
                     .checked_add(protocol_fee)
                     .ok_or(ErrorCode::AmountOverflow)?;
 
+                total_fee_amount = total_fee_amount
+                    .checked_add(fee_amount)
+                    .ok_or(ErrorCode::AmountOverflow)?;
+
                 if amount_in_left == 0 {
                     break;
                 } else {
@@ -57,25 +62,14 @@ pub fn get_swap_result(
                 }
             }
 
-            if swap_for_y {
-                pair.protocol_fees_x = pair
-                    .protocol_fees_x
-                    .checked_add(total_protocol_fee)
-                    .ok_or(ErrorCode::AmountOverflow)?;
-            } else {
-                pair.protocol_fees_y = pair
-                    .protocol_fees_y
-                    .checked_add(total_protocol_fee)
-                    .ok_or(ErrorCode::AmountOverflow)?;
-            }
-
-            Ok(amount_out)
+            Ok((amount_out, total_fee_amount))
         }
 
         SwapMode::ExactOut => {
             let mut amount_out_left: u64 = amount;
             let mut amount_in: u64 = 0;
             let mut total_protocol_fee: u64 = 0;
+            let mut total_fee_amount: u64 = 0;
 
             while amount_out_left > 0 {
                 pair.update_volatility_accumulator()?;
@@ -106,6 +100,10 @@ pub fn get_swap_result(
                     .checked_add(protocol_fee)
                     .ok_or(ErrorCode::AmountOverflow)?;
 
+                total_fee_amount = total_fee_amount
+                    .checked_add(fee_amount)
+                    .ok_or(ErrorCode::AmountOverflow)?;
+
                 if amount_out_left == 0 {
                     break;
                 } else {
@@ -113,19 +111,7 @@ pub fn get_swap_result(
                 }
             }
 
-            if swap_for_y {
-                pair.protocol_fees_x = pair
-                    .protocol_fees_x
-                    .checked_add(total_protocol_fee)
-                    .ok_or(ErrorCode::AmountOverflow)?;
-            } else {
-                pair.protocol_fees_y = pair
-                    .protocol_fees_y
-                    .checked_add(total_protocol_fee)
-                    .ok_or(ErrorCode::AmountOverflow)?;
-            }
-
-            Ok(amount_in)
+            Ok((amount_in, total_fee_amount))
         }
     }
 }
