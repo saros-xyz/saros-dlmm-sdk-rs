@@ -1,6 +1,8 @@
 use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
 use solana_sdk::program_error::ProgramError;
 use solana_sdk::program_pack::{IsInitialized, Pack, Sealed};
+
+#[derive(PartialEq)]
 pub struct StaticFeeParameters {
     pub base_factor: u16,
     pub filter_period: u16,
@@ -12,12 +14,6 @@ pub struct StaticFeeParameters {
     pub _space: [u8; 2],
 }
 
-/// IsInitialized is required to use `Pack::pack` and `Pack::unpack`
-impl IsInitialized for StaticFeeParameters {
-    fn is_initialized(&self) -> bool {
-        true
-    }
-}
 impl Sealed for StaticFeeParameters {}
 impl Pack for StaticFeeParameters {
     const LEN: usize = 20;
@@ -34,14 +30,14 @@ impl Pack for StaticFeeParameters {
             _space,
         ) = mut_array_refs![output, 2, 2, 2, 2, 4, 4, 2, 2];
 
-        *base_factor = self.base_factor.to_le_bytes();
-        *filter_period = self.filter_period.to_le_bytes();
-        *decay_period = self.decay_period.to_le_bytes();
-        *reduction_factor = self.reduction_factor.to_le_bytes();
-        *variable_fee_control = self.variable_fee_control.to_le_bytes();
-        *max_volatility_accumulator = self.max_volatility_accumulator.to_le_bytes();
-        *protocol_share = self.protocol_share.to_le_bytes();
-        *_space = self._space;
+        base_factor.copy_from_slice(&self.base_factor.to_le_bytes());
+        filter_period.copy_from_slice(&self.filter_period.to_le_bytes());
+        decay_period.copy_from_slice(&self.decay_period.to_le_bytes());
+        reduction_factor.copy_from_slice(&self.reduction_factor.to_le_bytes());
+        variable_fee_control.copy_from_slice(&self.variable_fee_control.to_le_bytes());
+        max_volatility_accumulator.copy_from_slice(&self.max_volatility_accumulator.to_le_bytes());
+        protocol_share.copy_from_slice(&self.protocol_share.to_le_bytes());
+        _space.copy_from_slice(&self._space);
     }
 
     fn unpack_from_slice(input: &[u8]) -> Result<StaticFeeParameters, ProgramError> {
@@ -86,6 +82,7 @@ impl Clone for StaticFeeParameters {
     }
 }
 
+#[derive(PartialEq)]
 pub struct DynamicFeeParameters {
     pub time_last_updated: u64,
     pub volatility_accumulator: u32,
@@ -106,11 +103,11 @@ impl Pack for DynamicFeeParameters {
         let output = array_mut_ref![output, 0, 24];
         let (time_last_updated, volatility_accumulator, volatility_reference, id_reference, _space) =
             mut_array_refs![output, 8, 4, 4, 4, 4];
-        *time_last_updated = self.time_last_updated.to_le_bytes();
-        *volatility_accumulator = self.volatility_accumulator.to_le_bytes();
-        *volatility_reference = self.volatility_reference.to_le_bytes();
-        *id_reference = self.id_reference.to_le_bytes();
-        *_space = self._space;
+        time_last_updated.copy_from_slice(&self.time_last_updated.to_le_bytes());
+        volatility_accumulator.copy_from_slice(&self.volatility_accumulator.to_le_bytes());
+        volatility_reference.copy_from_slice(&self.volatility_reference.to_le_bytes());
+        id_reference.copy_from_slice(&self.id_reference.to_le_bytes());
+        _space.copy_from_slice(&self._space);
     }
 
     fn unpack_from_slice(input: &[u8]) -> Result<DynamicFeeParameters, ProgramError> {

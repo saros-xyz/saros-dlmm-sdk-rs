@@ -32,6 +32,12 @@ pub enum ErrorCode {
 
     #[error("Active id overflow")]
     ActiveIdOverflow, // 0x1779
+
+    #[error("Invalid amount in")]
+    InvalidAmountIn, // 0x177a
+
+    #[error("Invalid amount out")]
+    InvalidAmountOut, // 0x177b
 }
 
 impl From<TryFromIntError> for ErrorCode {

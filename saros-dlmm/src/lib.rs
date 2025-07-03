@@ -4,9 +4,11 @@ pub mod errors;
 pub mod math;
 pub mod route;
 pub mod state;
+pub mod swap_instruction;
 pub mod utils;
 
 use crate::math::swap_manager::get_swap_result;
+use crate::utils::helper::{find_event_authority, get_hook_bin_array, is_swap_for_y};
 use crate::{
     math::fees::TokenTransferFee,
     state::{
@@ -19,11 +21,13 @@ pub use amms::amm;
 use anchor_lang::prelude::AccountMeta;
 use anyhow::Result;
 use jupiter_amm_interface::{
-    AccountMap, Amm, AmmContext, KeyedAccount, Quote, QuoteParams, SwapAndAccountMetas, SwapMode,
-    SwapParams, try_get_account_data, try_get_account_data_and_owner,
+    AccountMap, Amm, AmmContext, KeyedAccount, Quote, QuoteParams, Swap, SwapAndAccountMetas,
+    SwapMode, SwapParams, try_get_account_data, try_get_account_data_and_owner,
 };
-use solana_sdk::pubkey;
-use solana_sdk::{clock::Clock, program_pack::Pack, pubkey::Pubkey, sysvar::Sysvar};
+use solana_sdk::program_pack::Pack;
+use solana_sdk::{pubkey, pubkey::Pubkey};
+use std::sync::Arc;
+use std::sync::atomic::{AtomicI64, AtomicU64};
 
 #[derive(Clone)]
 pub struct SarosDlmm {
@@ -36,7 +40,26 @@ pub struct SarosDlmm {
 
     pub bin_array_lower: BinArray,
     pub bin_array_upper: BinArray,
+
+    pub bin_array_key: [Pubkey; 2],
+    pub hook_bin_array_key: [Pubkey; 2],
+    pub token_vault: [Pubkey; 2],
+    pub token_program: [Pubkey; 2],
+
+    pub event_authority: Pubkey,
+    pub epoch: Arc<AtomicU64>,
+    pub timestamp: Arc<AtomicI64>,
 }
+
+impl SarosDlmm {
+    const ASSOCIATED_TOKEN_PROGRAM_ADDRESS: Pubkey =
+        pubkey!("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
+
+    const MEMO_TOKEN_PROGRAM: Pubkey = pubkey!("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+    const HOOK_PROGRAM_ID: Pubkey = pubkey!("mdmavMvJpF4ZcLJNg6VSjuKVMiBo5uKwERTg1ZB9yUH");
+    const HOOK_CONFIG: Pubkey = pubkey!("DgW5ARD9sU3W6SJqtyJSH3QPivxWt7EMvjER9hfFKWXF");
+}
+
 impl Amm for SarosDlmm {
     fn key(&self) -> Pubkey {
         self.key
@@ -50,25 +73,46 @@ impl Amm for SarosDlmm {
         self.program_id
     }
 
-    fn from_keyed_account(keyed_account: &KeyedAccount, _amm_context: &AmmContext) -> Result<Self>
+    fn from_keyed_account(keyed_account: &KeyedAccount, amm_context: &AmmContext) -> Result<Self>
     where
         Self: Sized,
     {
-        let key = keyed_account.key;
-        let label = "SarosDlmm"[..].to_string();
-        let pair = Pair::unpack(&keyed_account.account.data[..])?;
+        let account_data = &keyed_account.account.data[8..];
+        let pair = Pair::unpack(&account_data)?;
 
-        let bin_array_lower = BinArray::default();
-        let bin_array_upper = BinArray::default();
+        let bin_array_index = pair.bin_array_index();
+
+        let (bin_array_lower_key, _) = get_bin_array_lower(
+            bin_array_index,
+            &keyed_account.key,
+            &keyed_account.account.owner,
+        );
+        let (bin_array_upper_key, _) = get_bin_array_upper(
+            bin_array_index,
+            &keyed_account.key,
+            &keyed_account.account.owner,
+        );
+
+        let (hook_bin_array_lower_key, hook_bin_array_upper_key) =
+            get_hook_bin_array(bin_array_index, &keyed_account.key);
+
+        let event_authority = find_event_authority(keyed_account.account.owner);
 
         Ok(Self {
             program_id: keyed_account.account.owner,
-            key,
-            label,
+            key: keyed_account.key,
+            label: "saros_dlmm"[..].to_string(),
             pair,
             token_transfer_fee: TokenTransferFee::default(),
-            bin_array_lower,
-            bin_array_upper,
+            bin_array_lower: BinArray::default(),
+            bin_array_upper: BinArray::default(),
+            bin_array_key: [bin_array_lower_key, bin_array_upper_key],
+            hook_bin_array_key: [hook_bin_array_lower_key, hook_bin_array_upper_key],
+            token_vault: [Pubkey::default(), Pubkey::default()],
+            token_program: [Pubkey::default(), Pubkey::default()],
+            event_authority,
+            epoch: amm_context.clock_ref.epoch.clone(),
+            timestamp: amm_context.clock_ref.unix_timestamp.clone(),
         })
     }
 
@@ -77,33 +121,37 @@ impl Amm for SarosDlmm {
     }
 
     fn get_accounts_to_update(&self) -> Vec<Pubkey> {
-        let bin_array_index = self.pair.bin_array_index();
-        let (bin_array_lower, _) =
-            get_bin_array_lower(bin_array_index, &self.key, &self.program_id());
-        let (bin_array_upper, _) =
-            get_bin_array_upper(bin_array_index, &self.key, &self.program_id());
         return vec![
-            bin_array_lower,
-            bin_array_upper,
+            self.key,
+            self.bin_array_key[0],
+            self.bin_array_key[1],
             self.pair.token_mint_x,
             self.pair.token_mint_y,
+            self.hook_bin_array_key[0],
+            self.hook_bin_array_key[1],
+            self.token_vault[0],
+            self.token_vault[1],
         ];
     }
 
     fn update(&mut self, account_map: &AccountMap) -> Result<()> {
         println!("start update:");
+        let pair_data = try_get_account_data(account_map, &self.key())?;
+
+        self.pair = Pair::unpack(&pair_data[8..])?;
 
         let bin_array_index = self.pair.bin_array_index();
-        let (bin_array_lower, _) =
+        let (bin_array_lower_key, _) =
             get_bin_array_lower(bin_array_index, &self.key, &self.program_id());
-        let (bin_array_upper, _) =
+
+        let (bin_array_upper_key, _) =
             get_bin_array_upper(bin_array_index, &self.key, &self.program_id());
 
-        let bin_array_lower_data = try_get_account_data(account_map, &bin_array_lower)?;
-        let bin_array_lower = &BinArray::unpack(&bin_array_lower_data)?;
+        let bin_array_lower_data = try_get_account_data(account_map, &self.bin_array_key[0])?;
+        let bin_array_lower = &BinArray::unpack(&bin_array_lower_data[8..])?;
 
-        let bin_array_upper_data = try_get_account_data(account_map, &bin_array_upper)?;
-        let bin_array_upper = &BinArray::unpack(&bin_array_upper_data)?;
+        let bin_array_upper_data = try_get_account_data(account_map, &self.bin_array_key[1])?;
+        let bin_array_upper = &BinArray::unpack(&bin_array_upper_data[8..])?;
 
         let (mint_x_data, mint_x_owner) =
             try_get_account_data_and_owner(account_map, &self.pair.token_mint_x)?;
@@ -121,59 +169,105 @@ impl Amm for SarosDlmm {
         self.bin_array_lower = bin_array_lower.clone();
         self.bin_array_upper = bin_array_upper.clone();
 
+        (self.token_vault[0], _) = Pubkey::find_program_address(
+            &[
+                &self.key.to_bytes(),
+                &mint_x_owner.to_bytes(),
+                &self.pair.token_mint_x.to_bytes(),
+            ],
+            &SarosDlmm::ASSOCIATED_TOKEN_PROGRAM_ADDRESS,
+        );
+
+        (self.token_vault[1], _) = Pubkey::find_program_address(
+            &[
+                &self.key.to_bytes(),
+                &mint_y_owner.to_bytes(),
+                &self.pair.token_mint_y.to_bytes(),
+            ],
+            &SarosDlmm::ASSOCIATED_TOKEN_PROGRAM_ADDRESS,
+        );
+
+        let (hook_bin_array_lower_key, hook_bin_array_upper_key) =
+            get_hook_bin_array(bin_array_index, &self.key);
+
+        self.bin_array_key = [bin_array_lower_key, bin_array_upper_key];
+        self.token_program = [*mint_x_owner, *mint_y_owner];
+        self.hook_bin_array_key = [hook_bin_array_lower_key, hook_bin_array_upper_key];
+
         Ok(())
     }
 
     fn quote(&self, quote_params: &QuoteParams) -> Result<Quote> {
-        let from_amount = quote_params.amount;
+        let QuoteParams {
+            amount,
+            swap_mode,
+            input_mint,
+            ..
+        } = *quote_params;
+        let mut pair = self.pair.clone();
 
-        let mut current_pair = self.pair.clone();
-
-        let mut bin_array =
+        let bin_array =
             BinArrayPair::merge(self.bin_array_lower.clone(), self.bin_array_upper.clone())?;
 
-        let clock = Clock::get()?;
-        let block_timestamp = clock.unix_timestamp as u64;
-        let swap_for_y = self.pair.resolve_mints(quote_params.input_mint)?;
+        let block_timestamp = self.timestamp.load(std::sync::atomic::Ordering::Relaxed) as u64;
 
-        let (amount_in, amount_out, fee_amount) = match quote_params.swap_mode {
+        let swap_for_y = is_swap_for_y(input_mint, self.pair.token_mint_x);
+
+        let (mint_in, epoch_transfer_fee_in, epoch_transfer_fee_out) = if swap_for_y {
+            (
+                self.pair.token_mint_x,
+                self.token_transfer_fee.epoch_transfer_fee_x,
+                self.token_transfer_fee.epoch_transfer_fee_y,
+            )
+        } else {
+            (
+                self.pair.token_mint_y,
+                self.token_transfer_fee.epoch_transfer_fee_y,
+                self.token_transfer_fee.epoch_transfer_fee_x,
+            )
+        };
+
+        let (amount_in, amount_out, fee_amount) = match swap_mode {
             SwapMode::ExactIn => {
                 let (amount_in_after_transfer_fee, _) = self
                     .token_transfer_fee
-                    .compute_transfer_fee_amount(swap_for_y, from_amount)
+                    .compute_transfer_fee_amount(epoch_transfer_fee_in, amount)
                     .unwrap();
 
                 let (amount_out, fee_amount) = get_swap_result(
-                    &mut current_pair,
-                    &mut bin_array,
+                    &mut pair,
+                    bin_array,
                     amount_in_after_transfer_fee,
                     swap_for_y,
-                    quote_params.swap_mode,
+                    swap_mode,
                     block_timestamp,
                 )?;
 
-                (from_amount, amount_out, fee_amount)
+                (amount, amount_out, fee_amount)
             }
             SwapMode::ExactOut => {
-                let (amount_out_after_transfer_fee, _) = self
+                let (amount_out_before_transfer_fee, _) = self
                     .token_transfer_fee
-                    .compute_transfer_fee_amount(swap_for_y, from_amount)
+                    .compute_transfer_fee_amount(epoch_transfer_fee_out, amount)
                     .unwrap();
 
                 let (amount_in, fee_amount) = get_swap_result(
-                    &mut current_pair,
-                    &mut bin_array,
-                    amount_out_after_transfer_fee,
+                    &mut pair,
+                    bin_array,
+                    amount_out_before_transfer_fee,
                     swap_for_y,
-                    quote_params.swap_mode,
+                    swap_mode,
                     block_timestamp,
                 )?;
 
                 let (amount_in_before_transfer_fee, _) = self
                     .token_transfer_fee
-                    .compute_transfer_amount_for_expected_output(swap_for_y, amount_in)?;
+                    .compute_transfer_amount_for_expected_output(
+                        epoch_transfer_fee_in,
+                        amount_in,
+                    )?;
 
-                (amount_in_before_transfer_fee, from_amount, fee_amount)
+                (amount_in_before_transfer_fee, amount, fee_amount)
             }
         };
 
@@ -181,11 +275,7 @@ impl Amm for SarosDlmm {
             in_amount: amount_in,
             out_amount: amount_out,
             fee_amount,
-            fee_mint: if swap_for_y {
-                self.pair.token_mint_y
-            } else {
-                self.pair.token_mint_x
-            },
+            fee_mint: mint_in,
             ..Default::default()
         })
     }
@@ -199,50 +289,42 @@ impl Amm for SarosDlmm {
             ..
         } = swap_params;
 
-        let (user_vault_x, user_vault_y) = if *source_mint == self.pair.token_mint_x {
+        let swap_for_y = is_swap_for_y(*source_mint, self.pair.token_mint_x);
+
+        let (user_vault_x, user_vault_y) = if swap_for_y {
             (source_token_account, destination_token_account)
         } else {
             (destination_token_account, source_token_account)
         };
 
-        let pair = self.key();
-        let token_mint_x = self.pair.token_mint_x;
-        let token_mint_y = self.pair.token_mint_y;
-        let bin_array_lower: Pubkey =
-            get_bin_array_lower(self.pair.bin_array_index(), &pair, &self.program_id()).0;
-        let bin_array_upper: Pubkey =
-            get_bin_array_upper(self.pair.bin_array_index(), &pair, &self.program_id()).0;
-        let token_vault_x = Pubkey::default(); // Placeholder, replace with actual vault key
-        let token_vault_y = Pubkey::default(); // Placeholder, replace with actual vault key
-
-        let token_program_x = Pubkey::default(); // Placeholder, replace with actual token program key
-        let token_program_y = Pubkey::default(); // Placeholder, replace with actual token program key
-        let memo_program = Pubkey::default(); // Placeholder
+        let user = *token_transfer_authority;
 
         let account_metas = vec![
-            AccountMeta::new(pair, false),
-            AccountMeta::new(token_mint_x, false),
-            AccountMeta::new(token_mint_y, false),
-            AccountMeta::new(bin_array_lower, false),
-            AccountMeta::new(bin_array_upper, false),
-            AccountMeta::new(token_vault_x, false),
-            AccountMeta::new(token_vault_y, false),
+            AccountMeta::new(self.key, false),
+            AccountMeta::new_readonly(self.pair.token_mint_x, false),
+            AccountMeta::new_readonly(self.pair.token_mint_y, false),
+            AccountMeta::new(self.bin_array_key[0], false),
+            AccountMeta::new(self.bin_array_key[1], false),
+            AccountMeta::new(self.token_vault[0], false),
+            AccountMeta::new(self.token_vault[1], false),
             AccountMeta::new(*user_vault_x, false),
             AccountMeta::new(*user_vault_y, false),
-            AccountMeta::new(*token_transfer_authority, true),
-            AccountMeta::new(token_program_x, false),
-            AccountMeta::new(token_program_y, false),
-            AccountMeta::new(memo_program, false),
+            AccountMeta::new_readonly(user, true),
+            AccountMeta::new_readonly(self.token_program[0], false),
+            AccountMeta::new_readonly(self.token_program[1], false),
+            AccountMeta::new_readonly(SarosDlmm::MEMO_TOKEN_PROGRAM, false),
+            AccountMeta::new_readonly(self.event_authority, false),
+            AccountMeta::new_readonly(self.program_id, false),
+            AccountMeta::new(self.hook_bin_array_key[0], false),
+            AccountMeta::new(self.hook_bin_array_key[1], false),
         ];
 
-        todo!("Implement Swap::SarosDlmm for SarosSwap");
+        unimplemented!();
 
-        // Ok({
-        //     SwapAndAccountMetas {
-        //         swap: Swap::SarosDlmm,
-        //         account_metas,
-        //     }
-        // });
+        // Ok(SwapAndAccountMetas {
+        //     swap: Swap::SarosDlmm, // TODO : Add SarosDlmm to Swap enum
+        //     account_metas,
+        // })
     }
 
     fn clone_amm(&self) -> Box<dyn Amm + Send + Sync> {

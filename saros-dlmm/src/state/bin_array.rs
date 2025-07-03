@@ -107,6 +107,15 @@ pub struct BinArrayPair {
     pub bin_array_upper: BinArray,
 }
 
+impl Clone for BinArrayPair {
+    fn clone(&self) -> Self {
+        Self {
+            bin_array_lower: self.bin_array_lower.clone(),
+            bin_array_upper: self.bin_array_upper.clone(),
+        }
+    }
+}
+
 impl BinArrayPair {
     pub fn merge(bin_array_lower: BinArray, bin_array_upper: BinArray) -> Result<Self> {
         if bin_array_upper.index != bin_array_lower.index + 1 {

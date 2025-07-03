@@ -7,12 +7,13 @@ use jupiter_amm_interface::SwapMode;
 
 pub fn get_swap_result(
     pair: &mut Pair,
-    bin_array: &mut BinArrayPair,
+    bin_array: BinArrayPair,
     amount: u64,
     swap_for_y: bool,
     swap_type: SwapMode,
     block_timestamp: u64,
 ) -> Result<(u64, u64)> {
+    let mut bin_array = bin_array.clone();
     pair.update_references(block_timestamp)?;
 
     match swap_type {

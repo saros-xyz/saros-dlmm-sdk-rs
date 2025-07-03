@@ -5,7 +5,6 @@ use anyhow::{Ok, Result};
 use solana_sdk::instruction::Instruction;
 
 use jupiter_amm_interface::SwapMode;
-use saros::{self};
 
 /// All necessary parts to build a `VersionedTransaction`
 #[derive(Clone)]
@@ -42,10 +41,10 @@ impl From<SwapInstructions> for Vec<Instruction> {
 }
 
 pub struct BuildSwapInstructionDataParams {
-    amount: u64,
-    other_amount_threshold: u64,
-    swap_for_y: bool,
-    swap_mode: SwapMode,
+    pub amount: u64,
+    pub other_amount_threshold: u64,
+    pub swap_for_y: bool,
+    pub swap_mode: SwapMode,
 }
 
 pub fn build_swap_instruction_data(
@@ -75,62 +74,23 @@ pub fn build_swap_instruction_data(
 }
 
 pub struct BuildSwapAccountsParams<'a> {
-    pub swap_program_id: &'a Pubkey,
-    pub source_token_account: &'a Pubkey,
-    pub destination_token_account: &'a Pubkey,
-    pub pair_account: &'a Pubkey,
-    pub bin_array_lower: &'a Pubkey,
-    pub bin_array_upper: &'a Pubkey,
-    pub token_vault_x: &'a Pubkey,
-    pub token_vault_y: &'a Pubkey,
-    pub user_vault_x: &'a Pubkey,
-    pub user_vault_y: &'a Pubkey,
-    pub user: &'a Pubkey,
-    pub token_program_x: &'a Pubkey,
-    pub token_program_y: &'a Pubkey,
-    pub memo_program: &'a Pubkey,
-    pub event_authority: Pubkey,
-    pub program: Pubkey,
+    pub pair: &'a Pubkey,
+    pub token_mint_x: &'a Pubkey,
+    pub token_mint_y: &'a Pubkey,
 }
 
 pub fn build_swap_accounts(
     BuildSwapAccountsParams {
-        swap_program_id,
-        source_token_account,
-        destination_token_account,
-        pair_account,
-        bin_array_lower,
-        bin_array_upper,
-        token_vault_x,
-        token_vault_y,
-        user_vault_x,
-        user_vault_y,
-        user,
-        token_program_x,
-        token_program_y,
-        memo_program,
-        event_authority: _,
-        program: _,
+        pair,
+        token_mint_x,
+        token_mint_y,
     }: BuildSwapAccountsParams<'_>,
-) -> Vec<AccountMeta> {
-    let (event_authority, _) =
-        Pubkey::find_program_address(&[b"__event_authority"], swap_program_id);
-    saros::accounts::Swap {
-        pair: *pair_account,
-        token_mint_x: *source_token_account,
-        token_mint_y: *destination_token_account,
-        bin_array_lower: *bin_array_lower,
-        bin_array_upper: *bin_array_upper,
-        token_vault_x: *token_vault_x,
-        token_vault_y: *token_vault_y,
-        user_vault_x: *user_vault_x,
-        user_vault_y: *user_vault_y,
-        user: *user,
-        token_program_x: *token_program_x,
-        token_program_y: *token_program_y,
-        memo_program: *memo_program,
-        event_authority, // This is not used in the swap instruction
-        program: *swap_program_id,
-    }
-    .to_account_metas(None)
+) -> Result<Vec<AccountMeta>> {
+    let accounts = vec![
+        AccountMeta::new(*pair, false),
+        AccountMeta::new_readonly(*token_mint_x, false),
+        AccountMeta::new_readonly(*token_mint_y, false),
+    ];
+
+    Ok(accounts)
 }

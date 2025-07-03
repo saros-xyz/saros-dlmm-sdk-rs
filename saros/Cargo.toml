@@ -1,0 +1,11 @@
+[package]
+name = "saros"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anchor-gen = { workspace = true }
+anchor-lang = { workspace = true }
+solana-sdk = { workspace = true }
+jupiter-amm-interface = { workspace = true }
+rand = "0.8.5"

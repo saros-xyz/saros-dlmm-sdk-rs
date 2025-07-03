@@ -6,11 +6,13 @@ use crate::state::bin::BIN_ARRAY_SIZE;
 use crate::state::fee::{DynamicFeeParameters, StaticFeeParameters};
 use anyhow::Result;
 use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
+use jupiter_amm_interface::SwapMode;
 use solana_sdk::program_error::ProgramError;
 use solana_sdk::{
     program_pack::{IsInitialized, Pack, Sealed},
     pubkey::Pubkey,
 };
+
 pub struct Pair {
     pub bump: [u8; 1],
 
@@ -43,9 +45,10 @@ impl IsInitialized for Pair {
 impl Sealed for Pair {}
 
 impl Pack for Pair {
-    const LEN: usize = 1 + 32 + 1 + 1 + 32 + 32 + 20 + 4 + 24 + 8 + 8 + 1 + 32;
+    const LEN: usize = 196;
     fn pack_into_slice(&self, output: &mut [u8]) {
         let output = array_mut_ref![output, 0, 196];
+
         let (
             bump,
             liquidity_book_config,
@@ -151,19 +154,31 @@ impl Clone for Pair {
 
 impl Pair {
     pub fn bin_array_index(&self) -> u32 {
-        self.active_id / BIN_ARRAY_SIZE - 1
+        let idx = self.active_id / BIN_ARRAY_SIZE;
+
+        idx
     }
 
-    pub fn resolve_mints(&self, input_mint: Pubkey) -> Result<bool> {
-        let x = self.token_mint_x;
-        let y = self.token_mint_y;
-
-        if input_mint == x {
-            Ok(true)
-        } else if input_mint == y {
-            Ok(false)
-        } else {
-            return Err(ErrorCode::InvalidMint.into());
+    pub fn resolve_mints(&self, input_mint: Pubkey, swap_mode: SwapMode) -> Result<bool> {
+        match swap_mode {
+            SwapMode::ExactIn => {
+                if input_mint == self.token_mint_x {
+                    Ok(true)
+                } else if input_mint == self.token_mint_y {
+                    Ok(false)
+                } else {
+                    Err(ErrorCode::InvalidMint.into())
+                }
+            }
+            SwapMode::ExactOut => {
+                if input_mint == self.token_mint_x {
+                    Ok(false)
+                } else if input_mint == self.token_mint_y {
+                    Ok(true)
+                } else {
+                    Err(ErrorCode::InvalidMint.into())
+                }
+            }
         }
     }
 

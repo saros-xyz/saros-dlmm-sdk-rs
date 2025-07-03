@@ -75,6 +75,9 @@ impl TokenTransferFee {
         epoch_transfer_fee_token_mint: Option<TransferFee>,
         expected_output: u64,
     ) -> Result<(u64, u64)> {
+        if expected_output == 0 {
+            return Ok((0, 0));
+        }
         if let Some(epoch_transfer_fee) = epoch_transfer_fee_token_mint {
             let transfer_fee: u64 = if u16::from(epoch_transfer_fee.transfer_fee_basis_points)
                 == BASIS_POINT_MAX as u16
@@ -109,34 +112,20 @@ impl TokenTransferFee {
 
     pub fn compute_transfer_fee_amount(
         &self,
-        swap_for_y: bool,
+        token_mint_transfer_fee: Option<TransferFee>,
         transfer_amount: u64,
     ) -> Result<(u64, u64)> {
-        match swap_for_y {
-            true => {
-                return self.compute_transfer_fee(self.epoch_transfer_fee_x, transfer_amount);
-            }
-            false => {
-                return self.compute_transfer_fee(self.epoch_transfer_fee_y, transfer_amount);
-            }
-        }
+        return self.compute_transfer_fee(token_mint_transfer_fee, transfer_amount);
     }
 
     pub fn compute_transfer_amount_for_expected_output(
         &self,
-        swap_for_y: bool,
+        token_mint_transfer_fee: Option<TransferFee>,
         expected_output: u64,
     ) -> Result<(u64, u64)> {
         if expected_output == 0 {
             return Ok((0, 0));
         }
-        match swap_for_y {
-            true => {
-                return self.compute_transfer_amount(self.epoch_transfer_fee_y, expected_output);
-            }
-            false => {
-                return self.compute_transfer_amount(self.epoch_transfer_fee_x, expected_output);
-            }
-        }
+        return self.compute_transfer_amount(token_mint_transfer_fee, expected_output);
     }
 }
