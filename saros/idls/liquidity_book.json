@@ -1,0 +1,4352 @@
+{
+    "address": "1qbkdrr3z4ryLA7pZykqxvxWPoeifcVKo6ZG9CfkvVE",
+    "metadata": {
+        "name": "liquidity_book",
+        "version": "0.1.0",
+        "spec": "0.1.0",
+        "description": "Created with Anchor"
+    },
+    "instructions": [
+        {
+            "name": "accept_config_ownership",
+            "discriminator": [
+                6,
+                212,
+                14,
+                48,
+                229,
+                38,
+                62,
+                241
+            ],
+            "accounts": [
+                {
+                    "name": "liquidity_book_config",
+                    "writable": true
+                },
+                {
+                    "name": "pending_preset_authority",
+                    "signer": true
+                },
+                {
+                    "name": "event_authority",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "program"
+                }
+            ],
+            "args": []
+        },
+        {
+            "name": "close_position",
+            "discriminator": [
+                123,
+                134,
+                81,
+                0,
+                49,
+                68,
+                98,
+                98
+            ],
+            "accounts": [
+                {
+                    "name": "pair",
+                    "writable": true,
+                    "relations": [
+                        "position",
+                        "bin_array_lower",
+                        "bin_array_upper"
+                    ]
+                },
+                {
+                    "name": "position",
+                    "writable": true
+                },
+                {
+                    "name": "position_mint",
+                    "writable": true
+                },
+                {
+                    "name": "position_token_account",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "position_token_program"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "position_mint"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "bin_array_lower",
+                    "writable": true
+                },
+                {
+                    "name": "bin_array_upper",
+                    "writable": true
+                },
+                {
+                    "name": "token_mint_x",
+                    "relations": [
+                        "pair"
+                    ]
+                },
+                {
+                    "name": "token_mint_y",
+                    "relations": [
+                        "pair"
+                    ]
+                },
+                {
+                    "name": "token_vault_x",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "pair"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program_x"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "pair.token_mint_x",
+                                "account": "Pair"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "token_vault_y",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "pair"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program_y"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "pair.token_mint_y",
+                                "account": "Pair"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "user_vault_x",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program_x"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "pair.token_mint_x",
+                                "account": "Pair"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "user_vault_y",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program_y"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "pair.token_mint_y",
+                                "account": "Pair"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "user",
+                    "signer": true
+                },
+                {
+                    "name": "token_program_x"
+                },
+                {
+                    "name": "token_program_y"
+                },
+                {
+                    "name": "position_token_program",
+                    "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                },
+                {
+                    "name": "memo_program",
+                    "address": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+                },
+                {
+                    "name": "hook",
+                    "writable": true,
+                    "optional": true
+                },
+                {
+                    "name": "hooks_program",
+                    "optional": true
+                },
+                {
+                    "name": "event_authority",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "program"
+                }
+            ],
+            "args": []
+        },
+        {
+            "name": "create_position",
+            "discriminator": [
+                48,
+                215,
+                197,
+                153,
+                96,
+                203,
+                180,
+                133
+            ],
+            "accounts": [
+                {
+                    "name": "pair"
+                },
+                {
+                    "name": "position",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    112,
+                                    111,
+                                    115,
+                                    105,
+                                    116,
+                                    105,
+                                    111,
+                                    110
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "position_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "position_mint",
+                    "writable": true,
+                    "signer": true
+                },
+                {
+                    "name": "position_token_account",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "position_mint"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "user",
+                    "writable": true,
+                    "signer": true
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                },
+                {
+                    "name": "token_program",
+                    "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+                },
+                {
+                    "name": "associated_token_program",
+                    "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+                },
+                {
+                    "name": "event_authority",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "program"
+                }
+            ],
+            "args": [
+                {
+                    "name": "relative_bin_id_left",
+                    "type": "i32"
+                },
+                {
+                    "name": "relative_bin_in_right",
+                    "type": "i32"
+                }
+            ]
+        },
+        {
+            "name": "decrease_position",
+            "discriminator": [
+                57,
+                125,
+                21,
+                59,
+                200,
+                137,
+                179,
+                108
+            ],
+            "accounts": [
+                {
+                    "name": "pair",
+                    "writable": true,
+                    "relations": [
+                        "position",
+                        "bin_array_lower",
+                        "bin_array_upper"
+                    ]
+                },
+                {
+                    "name": "position",
+                    "writable": true
+                },
+                {
+                    "name": "position_mint",
+                    "writable": true
+                },
+                {
+                    "name": "position_token_account",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "position_token_program"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "position_mint"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "bin_array_lower",
+                    "writable": true
+                },
+                {
+                    "name": "bin_array_upper",
+                    "writable": true
+                },
+                {
+                    "name": "token_mint_x",
+                    "relations": [
+                        "pair"
+                    ]
+                },
+                {
+                    "name": "token_mint_y",
+                    "relations": [
+                        "pair"
+                    ]
+                },
+                {
+                    "name": "token_vault_x",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "pair"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program_x"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "pair.token_mint_x",
+                                "account": "Pair"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "token_vault_y",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "pair"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program_y"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "pair.token_mint_y",
+                                "account": "Pair"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "user_vault_x",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program_x"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "pair.token_mint_x",
+                                "account": "Pair"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "user_vault_y",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program_y"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "pair.token_mint_y",
+                                "account": "Pair"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "user",
+                    "signer": true
+                },
+                {
+                    "name": "token_program_x"
+                },
+                {
+                    "name": "token_program_y"
+                },
+                {
+                    "name": "position_token_program",
+                    "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                },
+                {
+                    "name": "memo_program",
+                    "address": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+                },
+                {
+                    "name": "hook",
+                    "writable": true,
+                    "optional": true
+                },
+                {
+                    "name": "hooks_program",
+                    "optional": true
+                },
+                {
+                    "name": "event_authority",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "program"
+                }
+            ],
+            "args": [
+                {
+                    "name": "shares",
+                    "type": {
+                        "vec": "u128"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "increase_position",
+            "discriminator": [
+                253,
+                234,
+                128,
+                104,
+                192,
+                188,
+                45,
+                91
+            ],
+            "accounts": [
+                {
+                    "name": "pair",
+                    "writable": true,
+                    "relations": [
+                        "position",
+                        "bin_array_lower",
+                        "bin_array_upper"
+                    ]
+                },
+                {
+                    "name": "position",
+                    "writable": true
+                },
+                {
+                    "name": "position_mint",
+                    "writable": true
+                },
+                {
+                    "name": "position_token_account",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "position_token_program"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "position_mint"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "bin_array_lower",
+                    "writable": true
+                },
+                {
+                    "name": "bin_array_upper",
+                    "writable": true
+                },
+                {
+                    "name": "token_mint_x",
+                    "relations": [
+                        "pair"
+                    ]
+                },
+                {
+                    "name": "token_mint_y",
+                    "relations": [
+                        "pair"
+                    ]
+                },
+                {
+                    "name": "token_vault_x",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "pair"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program_x"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "pair.token_mint_x",
+                                "account": "Pair"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "token_vault_y",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "pair"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program_y"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "pair.token_mint_y",
+                                "account": "Pair"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "user_vault_x",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program_x"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "pair.token_mint_x",
+                                "account": "Pair"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "user_vault_y",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program_y"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "pair.token_mint_y",
+                                "account": "Pair"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "user",
+                    "signer": true
+                },
+                {
+                    "name": "token_program_x"
+                },
+                {
+                    "name": "token_program_y"
+                },
+                {
+                    "name": "position_token_program",
+                    "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                },
+                {
+                    "name": "memo_program",
+                    "address": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+                },
+                {
+                    "name": "hook",
+                    "writable": true,
+                    "optional": true
+                },
+                {
+                    "name": "hooks_program",
+                    "optional": true
+                },
+                {
+                    "name": "event_authority",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "program"
+                }
+            ],
+            "args": [
+                {
+                    "name": "amount_x",
+                    "type": "u64"
+                },
+                {
+                    "name": "amount_y",
+                    "type": "u64"
+                },
+                {
+                    "name": "liquidity_distribution",
+                    "type": {
+                        "vec": {
+                            "defined": {
+                                "name": "BinLiquidityDistribution"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "initialize_bin_array",
+            "discriminator": [
+                35,
+                86,
+                19,
+                185,
+                78,
+                212,
+                75,
+                211
+            ],
+            "accounts": [
+                {
+                    "name": "pair"
+                },
+                {
+                    "name": "bin_array",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    98,
+                                    105,
+                                    110,
+                                    95,
+                                    97,
+                                    114,
+                                    114,
+                                    97,
+                                    121
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "pair"
+                            },
+                            {
+                                "kind": "arg",
+                                "path": "index"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "user",
+                    "writable": true,
+                    "signer": true
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                },
+                {
+                    "name": "event_authority",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "program"
+                }
+            ],
+            "args": [
+                {
+                    "name": "id",
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "name": "initialize_bin_step_config",
+            "discriminator": [
+                2,
+                168,
+                136,
+                251,
+                163,
+                9,
+                132,
+                255
+            ],
+            "accounts": [
+                {
+                    "name": "liquidity_book_config"
+                },
+                {
+                    "name": "bin_step_config",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    98,
+                                    105,
+                                    110,
+                                    95,
+                                    115,
+                                    116,
+                                    101,
+                                    112,
+                                    95,
+                                    99,
+                                    111,
+                                    110,
+                                    102,
+                                    105,
+                                    103
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "liquidity_book_config"
+                            },
+                            {
+                                "kind": "arg",
+                                "path": "bin_step"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "preset_authority",
+                    "writable": true,
+                    "signer": true,
+                    "relations": [
+                        "liquidity_book_config"
+                    ]
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                },
+                {
+                    "name": "event_authority",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "program"
+                }
+            ],
+            "args": [
+                {
+                    "name": "bin_step",
+                    "type": "u8"
+                },
+                {
+                    "name": "availability",
+                    "type": {
+                        "defined": {
+                            "name": "ConfigAvailability"
+                        }
+                    }
+                },
+                {
+                    "name": "fee_parameters",
+                    "type": {
+                        "defined": {
+                            "name": "StaticFeeParameters"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "initialize_config",
+            "discriminator": [
+                208,
+                127,
+                21,
+                1,
+                194,
+                190,
+                196,
+                70
+            ],
+            "accounts": [
+                {
+                    "name": "config",
+                    "writable": true,
+                    "signer": true
+                },
+                {
+                    "name": "payer",
+                    "writable": true,
+                    "signer": true
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                },
+                {
+                    "name": "event_authority",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "program"
+                }
+            ],
+            "args": [
+                {
+                    "name": "fee_authority",
+                    "type": "pubkey"
+                }
+            ]
+        },
+        {
+            "name": "initialize_pair",
+            "discriminator": [
+                177,
+                114,
+                226,
+                34,
+                186,
+                150,
+                5,
+                245
+            ],
+            "accounts": [
+                {
+                    "name": "liquidity_book_config"
+                },
+                {
+                    "name": "token_mint_x"
+                },
+                {
+                    "name": "token_mint_y"
+                },
+                {
+                    "name": "bin_step_config",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    98,
+                                    105,
+                                    110,
+                                    95,
+                                    115,
+                                    116,
+                                    101,
+                                    112,
+                                    95,
+                                    99,
+                                    111,
+                                    110,
+                                    102,
+                                    105,
+                                    103
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "liquidity_book_config"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "bin_step_config.bin_step",
+                                "account": "BinStepConfig"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "quote_asset_badge",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    113,
+                                    117,
+                                    111,
+                                    116,
+                                    101,
+                                    95,
+                                    97,
+                                    115,
+                                    115,
+                                    101,
+                                    116,
+                                    95,
+                                    98,
+                                    97,
+                                    100,
+                                    103,
+                                    101
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "liquidity_book_config"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint_y"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "pair",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    112,
+                                    97,
+                                    105,
+                                    114
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "liquidity_book_config"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint_x"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint_y"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "bin_step_config.bin_step",
+                                "account": "BinStepConfig"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "user",
+                    "writable": true,
+                    "signer": true
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                },
+                {
+                    "name": "event_authority",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "program"
+                }
+            ],
+            "args": [
+                {
+                    "name": "active_id",
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "name": "initialize_quote_asset_badge",
+            "discriminator": [
+                115,
+                174,
+                34,
+                42,
+                176,
+                5,
+                229,
+                207
+            ],
+            "accounts": [
+                {
+                    "name": "liquidity_book_config"
+                },
+                {
+                    "name": "quote_asset_badge",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    113,
+                                    117,
+                                    111,
+                                    116,
+                                    101,
+                                    95,
+                                    97,
+                                    115,
+                                    115,
+                                    101,
+                                    116,
+                                    95,
+                                    98,
+                                    97,
+                                    100,
+                                    103,
+                                    101
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "liquidity_book_config"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "token_mint"
+                },
+                {
+                    "name": "preset_authority",
+                    "writable": true,
+                    "signer": true,
+                    "relations": [
+                        "liquidity_book_config"
+                    ]
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                },
+                {
+                    "name": "event_authority",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "program"
+                }
+            ],
+            "args": []
+        },
+        {
+            "name": "set_hook",
+            "discriminator": [
+                175,
+                16,
+                187,
+                252,
+                19,
+                54,
+                111,
+                221
+            ],
+            "accounts": [
+                {
+                    "name": "liquidity_book_config",
+                    "relations": [
+                        "pair"
+                    ]
+                },
+                {
+                    "name": "pair",
+                    "writable": true
+                },
+                {
+                    "name": "preset_authority",
+                    "signer": true,
+                    "relations": [
+                        "liquidity_book_config"
+                    ]
+                },
+                {
+                    "name": "hook",
+                    "writable": true
+                },
+                {
+                    "name": "hooks_program"
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                }
+            ],
+            "args": []
+        },
+        {
+            "name": "swap",
+            "discriminator": [
+                248,
+                198,
+                158,
+                145,
+                225,
+                117,
+                135,
+                200
+            ],
+            "accounts": [
+                {
+                    "name": "pair",
+                    "writable": true,
+                    "relations": [
+                        "bin_array_lower",
+                        "bin_array_upper"
+                    ]
+                },
+                {
+                    "name": "token_mint_x",
+                    "relations": [
+                        "pair"
+                    ]
+                },
+                {
+                    "name": "token_mint_y",
+                    "relations": [
+                        "pair"
+                    ]
+                },
+                {
+                    "name": "bin_array_lower",
+                    "writable": true
+                },
+                {
+                    "name": "bin_array_upper",
+                    "writable": true
+                },
+                {
+                    "name": "token_vault_x",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "pair"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program_x"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "pair.token_mint_x",
+                                "account": "Pair"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "token_vault_y",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "pair"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program_y"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "pair.token_mint_y",
+                                "account": "Pair"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "user_vault_x",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program_x"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "pair.token_mint_x",
+                                "account": "Pair"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "user_vault_y",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "user"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program_y"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "pair.token_mint_y",
+                                "account": "Pair"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "user",
+                    "signer": true
+                },
+                {
+                    "name": "token_program_x"
+                },
+                {
+                    "name": "token_program_y"
+                },
+                {
+                    "name": "memo_program",
+                    "address": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+                },
+                {
+                    "name": "event_authority",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "program"
+                }
+            ],
+            "args": [
+                {
+                    "name": "amount",
+                    "type": "u64"
+                },
+                {
+                    "name": "other_amount_threshold",
+                    "type": "u64"
+                },
+                {
+                    "name": "swap_for_y",
+                    "type": "bool"
+                },
+                {
+                    "name": "swap_type",
+                    "type": {
+                        "defined": {
+                            "name": "SwapType"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "transfer_config_ownership",
+            "discriminator": [
+                53,
+                124,
+                67,
+                226,
+                108,
+                130,
+                19,
+                12
+            ],
+            "accounts": [
+                {
+                    "name": "liquidity_book_config",
+                    "writable": true
+                },
+                {
+                    "name": "preset_authority",
+                    "signer": true,
+                    "relations": [
+                        "liquidity_book_config"
+                    ]
+                },
+                {
+                    "name": "event_authority",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "program"
+                }
+            ],
+            "args": [
+                {
+                    "name": "new_authority",
+                    "type": {
+                        "option": "pubkey"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "update_bin_step_config",
+            "discriminator": [
+                205,
+                204,
+                206,
+                220,
+                251,
+                239,
+                19,
+                238
+            ],
+            "accounts": [
+                {
+                    "name": "liquidity_book_config",
+                    "relations": [
+                        "bin_step_config"
+                    ]
+                },
+                {
+                    "name": "bin_step_config",
+                    "writable": true
+                },
+                {
+                    "name": "preset_authority",
+                    "signer": true,
+                    "relations": [
+                        "liquidity_book_config"
+                    ]
+                },
+                {
+                    "name": "event_authority",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "program"
+                }
+            ],
+            "args": [
+                {
+                    "name": "status",
+                    "type": {
+                        "defined": {
+                            "name": "ConfigStatus"
+                        }
+                    }
+                },
+                {
+                    "name": "availability",
+                    "type": {
+                        "defined": {
+                            "name": "ConfigAvailability"
+                        }
+                    }
+                },
+                {
+                    "name": "fee_parameters",
+                    "type": {
+                        "defined": {
+                            "name": "StaticFeeParameters"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "update_pair_static_fee_parameters",
+            "discriminator": [
+                20,
+                223,
+                186,
+                73,
+                199,
+                65,
+                45,
+                80
+            ],
+            "accounts": [
+                {
+                    "name": "liquidity_book_config",
+                    "relations": [
+                        "pair"
+                    ]
+                },
+                {
+                    "name": "pair",
+                    "writable": true
+                },
+                {
+                    "name": "preset_authority",
+                    "signer": true,
+                    "relations": [
+                        "liquidity_book_config"
+                    ]
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                },
+                {
+                    "name": "event_authority",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "program"
+                }
+            ],
+            "args": [
+                {
+                    "name": "fee_parameters",
+                    "type": {
+                        "defined": {
+                            "name": "StaticFeeParameters"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "update_quote_asset_badge",
+            "discriminator": [
+                42,
+                12,
+                208,
+                17,
+                29,
+                174,
+                196,
+                103
+            ],
+            "accounts": [
+                {
+                    "name": "liquidity_book_config"
+                },
+                {
+                    "name": "quote_asset_badge",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    113,
+                                    117,
+                                    111,
+                                    116,
+                                    101,
+                                    95,
+                                    97,
+                                    115,
+                                    115,
+                                    101,
+                                    116,
+                                    95,
+                                    98,
+                                    97,
+                                    100,
+                                    103,
+                                    101
+                                ]
+                            },
+                            {
+                                "kind": "account",
+                                "path": "liquidity_book_config"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_mint"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "token_mint"
+                },
+                {
+                    "name": "preset_authority",
+                    "signer": true,
+                    "relations": [
+                        "liquidity_book_config"
+                    ]
+                },
+                {
+                    "name": "event_authority",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "program"
+                }
+            ],
+            "args": [
+                {
+                    "name": "status",
+                    "type": {
+                        "defined": {
+                            "name": "QuoteAssetBadgeStatus"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "withdraw_protocol_fees",
+            "discriminator": [
+                11,
+                68,
+                165,
+                98,
+                18,
+                208,
+                134,
+                73
+            ],
+            "accounts": [
+                {
+                    "name": "liquidity_book_config",
+                    "relations": [
+                        "pair"
+                    ]
+                },
+                {
+                    "name": "pair",
+                    "writable": true
+                },
+                {
+                    "name": "token_mint_x",
+                    "relations": [
+                        "pair"
+                    ]
+                },
+                {
+                    "name": "token_mint_y",
+                    "relations": [
+                        "pair"
+                    ]
+                },
+                {
+                    "name": "token_vault_x",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "pair"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program_x"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "pair.token_mint_x",
+                                "account": "Pair"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "token_vault_y",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "pair"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program_y"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "pair.token_mint_y",
+                                "account": "Pair"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "protocol_vault_x",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "preset_authority"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program_x"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "pair.token_mint_x",
+                                "account": "Pair"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "protocol_vault_y",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "preset_authority"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "token_program_y"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "pair.token_mint_y",
+                                "account": "Pair"
+                            }
+                        ],
+                        "program": {
+                            "kind": "const",
+                            "value": [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "token_program_x"
+                },
+                {
+                    "name": "token_program_y"
+                },
+                {
+                    "name": "preset_authority",
+                    "signer": true,
+                    "relations": [
+                        "liquidity_book_config"
+                    ]
+                },
+                {
+                    "name": "memo_program",
+                    "address": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+                },
+                {
+                    "name": "event_authority",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const",
+                                "value": [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "program"
+                }
+            ],
+            "args": []
+        }
+    ],
+    "accounts": [
+        {
+            "name": "BinArray",
+            "discriminator": [
+                92,
+                142,
+                92,
+                220,
+                5,
+                148,
+                70,
+                181
+            ]
+        },
+        {
+            "name": "BinStepConfig",
+            "discriminator": [
+                44,
+                12,
+                82,
+                45,
+                127,
+                124,
+                191,
+                199
+            ]
+        },
+        {
+            "name": "LiquidityBookConfig",
+            "discriminator": [
+                173,
+                36,
+                130,
+                129,
+                45,
+                178,
+                44,
+                86
+            ]
+        },
+        {
+            "name": "Pair",
+            "discriminator": [
+                85,
+                72,
+                49,
+                176,
+                182,
+                228,
+                141,
+                82
+            ]
+        },
+        {
+            "name": "Position",
+            "discriminator": [
+                170,
+                188,
+                143,
+                228,
+                122,
+                64,
+                247,
+                208
+            ]
+        },
+        {
+            "name": "QuoteAssetBadge",
+            "discriminator": [
+                183,
+                124,
+                99,
+                219,
+                110,
+                119,
+                157,
+                221
+            ]
+        }
+    ],
+    "events": [
+        {
+            "name": "BinArrayInitializationEvent",
+            "discriminator": [
+                237,
+                158,
+                3,
+                184,
+                253,
+                238,
+                102,
+                71
+            ]
+        },
+        {
+            "name": "BinStepConfigInitializationEvent",
+            "discriminator": [
+                2,
+                138,
+                209,
+                132,
+                61,
+                232,
+                124,
+                57
+            ]
+        },
+        {
+            "name": "BinStepConfigUpdateEvent",
+            "discriminator": [
+                241,
+                69,
+                172,
+                53,
+                135,
+                27,
+                238,
+                248
+            ]
+        },
+        {
+            "name": "BinSwapEvent",
+            "discriminator": [
+                55,
+                42,
+                192,
+                194,
+                230,
+                243,
+                9,
+                72
+            ]
+        },
+        {
+            "name": "CompositionFeesEvent",
+            "discriminator": [
+                83,
+                234,
+                249,
+                47,
+                88,
+                125,
+                2,
+                86
+            ]
+        },
+        {
+            "name": "LiquidityBookConfigInitializationEvent",
+            "discriminator": [
+                90,
+                99,
+                66,
+                116,
+                24,
+                72,
+                145,
+                146
+            ]
+        },
+        {
+            "name": "LiquidityBookConfigTransferOwnershipEvent",
+            "discriminator": [
+                181,
+                131,
+                103,
+                224,
+                188,
+                170,
+                226,
+                65
+            ]
+        },
+        {
+            "name": "LiquidityBookConfigTransferOwnershipInitEvent",
+            "discriminator": [
+                69,
+                165,
+                109,
+                99,
+                223,
+                38,
+                229,
+                100
+            ]
+        },
+        {
+            "name": "PairInitializationEvent",
+            "discriminator": [
+                132,
+                133,
+                209,
+                222,
+                229,
+                215,
+                206,
+                245
+            ]
+        },
+        {
+            "name": "PairStaticFeeParametersUpdateEvent",
+            "discriminator": [
+                57,
+                109,
+                202,
+                252,
+                154,
+                9,
+                121,
+                131
+            ]
+        },
+        {
+            "name": "PositionCreationEvent",
+            "discriminator": [
+                97,
+                21,
+                205,
+                201,
+                62,
+                41,
+                111,
+                164
+            ]
+        },
+        {
+            "name": "PositionDecreaseEvent",
+            "discriminator": [
+                200,
+                116,
+                151,
+                126,
+                182,
+                237,
+                245,
+                254
+            ]
+        },
+        {
+            "name": "PositionIncreaseEvent",
+            "discriminator": [
+                247,
+                40,
+                58,
+                113,
+                28,
+                175,
+                60,
+                174
+            ]
+        },
+        {
+            "name": "ProtocolFeesCollectionEvent",
+            "discriminator": [
+                196,
+                36,
+                190,
+                66,
+                172,
+                52,
+                142,
+                15
+            ]
+        },
+        {
+            "name": "QuoteAssetBadgeInitializationEvent",
+            "discriminator": [
+                202,
+                110,
+                93,
+                186,
+                165,
+                96,
+                200,
+                27
+            ]
+        },
+        {
+            "name": "QuoteAssetBadgeUpdateEvent",
+            "discriminator": [
+                102,
+                149,
+                171,
+                236,
+                123,
+                73,
+                205,
+                194
+            ]
+        }
+    ],
+    "errors": [
+        {
+            "code": 6000,
+            "name": "BinNotFound",
+            "msg": "Bin not found within bin array"
+        },
+        {
+            "code": 6001,
+            "name": "InvalidAuthority",
+            "msg": "Invalid authority"
+        },
+        {
+            "code": 6002,
+            "name": "InvalidAmounts",
+            "msg": "Invalid amounts length"
+        },
+        {
+            "code": 6003,
+            "name": "BinArrayIndexMismatch",
+            "msg": "Bin array index mismatch"
+        },
+        {
+            "code": 6004,
+            "name": "InvalidAmountOut",
+            "msg": "Invalid amount out"
+        },
+        {
+            "code": 6005,
+            "name": "InvalidAmountIn",
+            "msg": "Invalid amount in"
+        },
+        {
+            "code": 6006,
+            "name": "InvalidDistribution",
+            "msg": "Invalid distribution"
+        },
+        {
+            "code": 6007,
+            "name": "LiquidityOverflow",
+            "msg": "Liquidity overflow"
+        },
+        {
+            "code": 6008,
+            "name": "LiquidityUnderflow",
+            "msg": "Liquidity underflow"
+        },
+        {
+            "code": 6009,
+            "name": "ZeroShares",
+            "msg": "Zero shares"
+        },
+        {
+            "code": 6010,
+            "name": "NotPositionOwner",
+            "msg": "Not the owner of the position"
+        },
+        {
+            "code": 6011,
+            "name": "InvalidStaticFeeParameters",
+            "msg": "Invalid static fee parameters"
+        },
+        {
+            "code": 6012,
+            "name": "InvalidConfig",
+            "msg": "Invalid LB config provided"
+        },
+        {
+            "code": 6013,
+            "name": "PairPositionMismatch",
+            "msg": "Pair and position mismatch"
+        },
+        {
+            "code": 6014,
+            "name": "PairLowerBinArrayMismatch",
+            "msg": "Pair and lower bin array mismatch"
+        },
+        {
+            "code": 6015,
+            "name": "PairUpperBinArrayMismatch",
+            "msg": "Pair and upper bin array mismatch"
+        },
+        {
+            "code": 6016,
+            "name": "InactiveBinStepConfig",
+            "msg": "Inactive bin step config"
+        },
+        {
+            "code": 6017,
+            "name": "ClosedBinStepConfig",
+            "msg": "Closed bin step config"
+        },
+        {
+            "code": 6018,
+            "name": "InvalidQuoteAssetBadge",
+            "msg": "Invalid quote asset badge provided"
+        },
+        {
+            "code": 6019,
+            "name": "TransferFeeCalculationError",
+            "msg": "Transfer fee calculation error"
+        },
+        {
+            "code": 6020,
+            "name": "GetAmountOverflow",
+            "msg": "Get amount overflow error"
+        },
+        {
+            "code": 6021,
+            "name": "AmountOverflow",
+            "msg": "Amount overflow error"
+        },
+        {
+            "code": 6022,
+            "name": "AmountUnderflow",
+            "msg": "Amount underflow error"
+        },
+        {
+            "code": 6023,
+            "name": "ActiveIdOverflow",
+            "msg": "Active id overflow error"
+        },
+        {
+            "code": 6024,
+            "name": "ActiveIdUnderflow",
+            "msg": "Active id overflow error"
+        },
+        {
+            "code": 6025,
+            "name": "InvalidBinRange",
+            "msg": "Invalid bin range"
+        },
+        {
+            "code": 6026,
+            "name": "PairTokenMismatch",
+            "msg": "Pair Token Mismatch"
+        },
+        {
+            "code": 6027,
+            "name": "InvalidHook",
+            "msg": "Invalid Hook Provided"
+        }
+    ],
+    "types": [
+        {
+            "name": "Bin",
+            "serialization": "bytemuck",
+            "repr": {
+                "kind": "c"
+            },
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "total_supply",
+                        "type": "u128"
+                    },
+                    {
+                        "name": "reserve_x",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "reserve_y",
+                        "type": "u64"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "BinArray",
+            "serialization": "bytemuck",
+            "repr": {
+                "kind": "c"
+            },
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "pair",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "bins",
+                        "type": {
+                            "array": [
+                                {
+                                    "defined": {
+                                        "name": "Bin"
+                                    }
+                                },
+                                256
+                            ]
+                        }
+                    },
+                    {
+                        "name": "index",
+                        "type": "u32"
+                    },
+                    {
+                        "name": "_space",
+                        "type": {
+                            "array": [
+                                "u8",
+                                12
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "BinArrayInitializationEvent",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "pair",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "index",
+                        "type": "u32"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "BinLiquidityDistribution",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "relative_bin_id",
+                        "type": "i32"
+                    },
+                    {
+                        "name": "distribution_x",
+                        "type": "u16"
+                    },
+                    {
+                        "name": "distribution_y",
+                        "type": "u16"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "BinStepConfig",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "bump",
+                        "type": "u8"
+                    },
+                    {
+                        "name": "liquidity_book_config",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "bin_step",
+                        "type": "u8"
+                    },
+                    {
+                        "name": "status",
+                        "type": {
+                            "defined": {
+                                "name": "ConfigStatus"
+                            }
+                        }
+                    },
+                    {
+                        "name": "availability",
+                        "type": {
+                            "defined": {
+                                "name": "ConfigAvailability"
+                            }
+                        }
+                    },
+                    {
+                        "name": "fee_parameters",
+                        "type": {
+                            "defined": {
+                                "name": "StaticFeeParameters"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "BinStepConfigInitializationEvent",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "liquidity_book_config",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "bin_step_config",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "bin_step",
+                        "type": "u8"
+                    },
+                    {
+                        "name": "fee_parameters",
+                        "type": {
+                            "defined": {
+                                "name": "StaticFeeParameters"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "BinStepConfigUpdateEvent",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "bin_step_config",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "status",
+                        "type": {
+                            "defined": {
+                                "name": "ConfigStatus"
+                            }
+                        }
+                    },
+                    {
+                        "name": "availability",
+                        "type": {
+                            "defined": {
+                                "name": "ConfigAvailability"
+                            }
+                        }
+                    },
+                    {
+                        "name": "fee_parameters",
+                        "type": {
+                            "defined": {
+                                "name": "StaticFeeParameters"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "BinSwapEvent",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "pair",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "swap_for_y",
+                        "type": "bool"
+                    },
+                    {
+                        "name": "protocol_fee",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "bin_id",
+                        "type": "u32"
+                    },
+                    {
+                        "name": "amount_in",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "amount_out",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "volatility_accumulator",
+                        "type": "u32"
+                    },
+                    {
+                        "name": "fee",
+                        "type": "u64"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "CompositionFeesEvent",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "pair",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "active_id",
+                        "type": "u32"
+                    },
+                    {
+                        "name": "composition_fees_x",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "composition_fees_y",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "protocol_fees_x",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "protocol_fees_y",
+                        "type": "u64"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "ConfigAvailability",
+            "type": {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "Closed"
+                    },
+                    {
+                        "name": "Open"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "ConfigStatus",
+            "type": {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "Inactive"
+                    },
+                    {
+                        "name": "Active"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "DynamicFeeParameters",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "time_last_updated",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "volatility_accumulator",
+                        "type": "u32"
+                    },
+                    {
+                        "name": "volatility_reference",
+                        "type": "u32"
+                    },
+                    {
+                        "name": "id_reference",
+                        "type": "u32"
+                    },
+                    {
+                        "name": "_space",
+                        "type": {
+                            "array": [
+                                "u8",
+                                4
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "LiquidityBookConfig",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "preset_authority",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "pending_preset_authority",
+                        "type": {
+                            "option": "pubkey"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "LiquidityBookConfigInitializationEvent",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "config",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "preset_authority",
+                        "type": "pubkey"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "LiquidityBookConfigTransferOwnershipEvent",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "new_authority",
+                        "type": "pubkey"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "LiquidityBookConfigTransferOwnershipInitEvent",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "new_pending_authority",
+                        "type": {
+                            "option": "pubkey"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "Pair",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "bump",
+                        "type": {
+                            "array": [
+                                "u8",
+                                1
+                            ]
+                        }
+                    },
+                    {
+                        "name": "liquidity_book_config",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "bin_step",
+                        "type": "u8"
+                    },
+                    {
+                        "name": "bin_step_seed",
+                        "type": {
+                            "array": [
+                                "u8",
+                                1
+                            ]
+                        }
+                    },
+                    {
+                        "name": "token_mint_x",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "token_mint_y",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "static_fee_parameters",
+                        "type": {
+                            "defined": {
+                                "name": "StaticFeeParameters"
+                            }
+                        }
+                    },
+                    {
+                        "name": "active_id",
+                        "type": "u32"
+                    },
+                    {
+                        "name": "dynamic_fee_parameters",
+                        "type": {
+                            "defined": {
+                                "name": "DynamicFeeParameters"
+                            }
+                        }
+                    },
+                    {
+                        "name": "protocol_fees_x",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "protocol_fees_y",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "hook",
+                        "type": {
+                            "option": "pubkey"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "PairInitializationEvent",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "pair",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "token_mint_x",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "token_mint_y",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "bin_step_config",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "active_id",
+                        "type": "u32"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "PairStaticFeeParametersUpdateEvent",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "pair",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "fee_parameters",
+                        "type": {
+                            "defined": {
+                                "name": "StaticFeeParameters"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "Position",
+            "serialization": "bytemuck",
+            "repr": {
+                "kind": "c"
+            },
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "pair",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "position_mint",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "liquidity_shares",
+                        "type": {
+                            "array": [
+                                "u128",
+                                64
+                            ]
+                        }
+                    },
+                    {
+                        "name": "lower_bin_id",
+                        "type": "u32"
+                    },
+                    {
+                        "name": "upper_bin_id",
+                        "type": "u32"
+                    },
+                    {
+                        "name": "_space",
+                        "type": {
+                            "array": [
+                                "u8",
+                                8
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "PositionCreationEvent",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "pair",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "position",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "position_mint",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "lower_bin_id",
+                        "type": "u32"
+                    },
+                    {
+                        "name": "upper_bin_id",
+                        "type": "u32"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "PositionDecreaseEvent",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "pair",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "position",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "bin_ids",
+                        "type": {
+                            "vec": "u32"
+                        }
+                    },
+                    {
+                        "name": "amounts_x",
+                        "type": {
+                            "vec": "u64"
+                        }
+                    },
+                    {
+                        "name": "amounts_y",
+                        "type": {
+                            "vec": "u64"
+                        }
+                    },
+                    {
+                        "name": "liquidity_burned",
+                        "type": {
+                            "vec": "u128"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "PositionIncreaseEvent",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "pair",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "position",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "bin_ids",
+                        "type": {
+                            "vec": "u32"
+                        }
+                    },
+                    {
+                        "name": "amounts_x",
+                        "type": {
+                            "vec": "u64"
+                        }
+                    },
+                    {
+                        "name": "amounts_y",
+                        "type": {
+                            "vec": "u64"
+                        }
+                    },
+                    {
+                        "name": "liquidity_minted",
+                        "type": {
+                            "vec": "u128"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "ProtocolFeesCollectionEvent",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "pair",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "protocol_fees_x",
+                        "type": "u64"
+                    },
+                    {
+                        "name": "protocol_fees_y",
+                        "type": "u64"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "QuoteAssetBadge",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "bump",
+                        "type": "u8"
+                    },
+                    {
+                        "name": "status",
+                        "type": {
+                            "defined": {
+                                "name": "QuoteAssetBadgeStatus"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "QuoteAssetBadgeInitializationEvent",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "liquidity_book_config",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "quote_asset_badge",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "token_mint",
+                        "type": "pubkey"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "QuoteAssetBadgeStatus",
+            "type": {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "Disabled"
+                    },
+                    {
+                        "name": "Enabled"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "QuoteAssetBadgeUpdateEvent",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "quote_asset_badge",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "status",
+                        "type": {
+                            "defined": {
+                                "name": "QuoteAssetBadgeStatus"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "StaticFeeParameters",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "base_factor",
+                        "type": "u16"
+                    },
+                    {
+                        "name": "filter_period",
+                        "type": "u16"
+                    },
+                    {
+                        "name": "decay_period",
+                        "type": "u16"
+                    },
+                    {
+                        "name": "reduction_factor",
+                        "type": "u16"
+                    },
+                    {
+                        "name": "variable_fee_control",
+                        "type": "u32"
+                    },
+                    {
+                        "name": "max_volatility_accumulator",
+                        "type": "u32"
+                    },
+                    {
+                        "name": "protocol_share",
+                        "type": "u16"
+                    },
+                    {
+                        "name": "_space",
+                        "type": {
+                            "array": [
+                                "u8",
+                                2
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "SwapType",
+            "type": {
+                "kind": "enum",
+                "variants": [
+                    {
+                        "name": "ExactInput"
+                    },
+                    {
+                        "name": "ExactOutput"
+                    }
+                ]
+            }
+        }
+    ]
+}

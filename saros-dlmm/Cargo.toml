@@ -1,0 +1,43 @@
+[package]
+name = "saros-dlmm-sdk"
+version = "0.1.0"
+description = ""
+edition = { workspace = true }
+
+[dependencies]
+arrayref = { workspace = true }
+jupiter-amm-interface = { workspace = true }
+anchor-lang = { workspace = true }
+solana-sdk = { workspace = true }
+solana-client = { workspace = true }
+solana-account-decoder = { workspace = true }
+solana-program = { workspace = true }
+anyhow = { workspace = true }
+bytemuck = { workspace = true }
+thiserror = { workspace = true }
+rust_decimal = { workspace = true }
+spl-token-2022 = { workspace = true }
+spl-token = { workspace = true }
+ruint = { workspace = true }
+itertools = { workspace = true }
+
+saros = { path = "../saros" }
+
+assert_matches = { workspace = true }
+async-trait = { workspace = true }
+glob = { workspace = true }
+lazy_static = { workspace = true }
+serde_json = { workspace = true }
+solana-program-test = { workspace = true }
+ahash = { workspace = true }
+bincode = { workspace = true }
+paste = "1.0.13"
+tokio = { workspace = true, features = ["full"] }
+clap = { version = "4.5.2", features = ["derive"] }
+
+spl-associated-token-account = { workspace = true, features = [
+    "no-entrypoint",
+] }
+anchor-spl = { version = "0.31.1", features = ["memo"] }
+[dev-dependencies]
+proptest = { workspace = true }
