@@ -122,31 +122,14 @@ impl Amm for SarosDlmm {
 
     fn get_accounts_to_update(&self) -> Vec<Pubkey> {
         return vec![
-            self.key,
             self.bin_array_key[0],
             self.bin_array_key[1],
             self.pair.token_mint_x,
             self.pair.token_mint_y,
-            self.hook_bin_array_key[0],
-            self.hook_bin_array_key[1],
-            self.token_vault[0],
-            self.token_vault[1],
         ];
     }
 
     fn update(&mut self, account_map: &AccountMap) -> Result<()> {
-        println!("start update:");
-        let pair_data = try_get_account_data(account_map, &self.key())?;
-
-        self.pair = Pair::unpack(&pair_data[8..])?;
-
-        let bin_array_index = self.pair.bin_array_index();
-        let (bin_array_lower_key, _) =
-            get_bin_array_lower(bin_array_index, &self.key, &self.program_id());
-
-        let (bin_array_upper_key, _) =
-            get_bin_array_upper(bin_array_index, &self.key, &self.program_id());
-
         let bin_array_lower_data = try_get_account_data(account_map, &self.bin_array_key[0])?;
         let bin_array_lower = &BinArray::unpack(&bin_array_lower_data[8..])?;
 
@@ -187,12 +170,7 @@ impl Amm for SarosDlmm {
             &SarosDlmm::ASSOCIATED_TOKEN_PROGRAM_ADDRESS,
         );
 
-        let (hook_bin_array_lower_key, hook_bin_array_upper_key) =
-            get_hook_bin_array(bin_array_index, &self.key);
-
-        self.bin_array_key = [bin_array_lower_key, bin_array_upper_key];
         self.token_program = [*mint_x_owner, *mint_y_owner];
-        self.hook_bin_array_key = [hook_bin_array_lower_key, hook_bin_array_upper_key];
 
         Ok(())
     }
@@ -325,6 +303,14 @@ impl Amm for SarosDlmm {
         //     swap: Swap::SarosDlmm, // TODO : Add SarosDlmm to Swap enum
         //     account_metas,
         // })
+    }
+
+    fn supports_exact_out(&self) -> bool {
+        true
+    }
+
+    fn is_active(&self) -> bool {
+        true
     }
 
     fn clone_amm(&self) -> Box<dyn Amm + Send + Sync> {

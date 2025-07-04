@@ -72,25 +72,3 @@ pub fn build_swap_instruction_data(
         .data(),
     })
 }
-
-pub struct BuildSwapAccountsParams<'a> {
-    pub pair: &'a Pubkey,
-    pub token_mint_x: &'a Pubkey,
-    pub token_mint_y: &'a Pubkey,
-}
-
-pub fn build_swap_accounts(
-    BuildSwapAccountsParams {
-        pair,
-        token_mint_x,
-        token_mint_y,
-    }: BuildSwapAccountsParams<'_>,
-) -> Result<Vec<AccountMeta>> {
-    let accounts = vec![
-        AccountMeta::new(*pair, false),
-        AccountMeta::new_readonly(*token_mint_x, false),
-        AccountMeta::new_readonly(*token_mint_y, false),
-    ];
-
-    Ok(accounts)
-}

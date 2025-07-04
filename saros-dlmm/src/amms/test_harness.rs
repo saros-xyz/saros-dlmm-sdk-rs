@@ -31,10 +31,8 @@ use super::amm::{Amm, KeyedAccount};
 use crate::{
     amms::loader::amm_factory,
     route::get_token_mints_permutations,
-    utils::{
-        helper::is_swap_for_y,
-    },
     swap_instruction::{BuildSwapInstructionDataParams, build_swap_instruction_data},
+    utils::helper::is_swap_for_y,
 };
 use ahash::RandomState;
 use solana_sdk::pubkey;
