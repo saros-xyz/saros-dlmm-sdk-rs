@@ -9,10 +9,13 @@ use solana_sdk::{
 pub const BIN_ARRAY_SIZE: u32 = 256;
 pub const BIN_ARRAY_SIZE_USIZE: usize = 256;
 
+const BIN_ARRAY_DISCRIMINATOR: [u8; 8] = [92, 142, 92, 220, 5, 148, 70, 181];
+
 use crate::{errors::ErrorCode, state::bin::Bin};
 
 #[derive(Clone, Copy)]
 pub struct BinArray {
+    _discriminator: [u8; 8],
     pub pair: Pubkey,
     pub bins: [Bin; BIN_ARRAY_SIZE_USIZE],
     pub index: u32,
@@ -53,6 +56,7 @@ impl BinArray {
 impl Default for BinArray {
     fn default() -> Self {
         Self {
+            _discriminator: BIN_ARRAY_DISCRIMINATOR,
             pair: Pubkey::default(),
             bins: [Bin::default(); BIN_ARRAY_SIZE_USIZE],
             index: 0,
@@ -70,12 +74,14 @@ impl IsInitialized for BinArray {
 impl Sealed for BinArray {}
 
 impl Pack for BinArray {
-    const LEN: usize = 32 + BIN_ARRAY_SIZE_USIZE * 32 + 4 + 12;
+    const LEN: usize = 8 + 32 + BIN_ARRAY_SIZE_USIZE * 32 + 4 + 12;
 
     fn pack_into_slice(&self, output: &mut [u8]) {
-        let output = array_mut_ref![output, 0, 8240];
-        let (pair_dst, bins_dst, index_dst, _space_dst) = mut_array_refs![output, 32, 8192, 4, 12];
+        let output = array_mut_ref![output, 0, BinArray::LEN];
+        let (discriminator_dst, pair_dst, bins_dst, index_dst, _space_dst) =
+            mut_array_refs![output, 8, 32, 8192, 4, 12];
 
+        discriminator_dst.copy_from_slice(&BIN_ARRAY_DISCRIMINATOR);
         pair_dst.copy_from_slice(self.pair.as_ref());
         for (i, bin) in self.bins.iter().enumerate() {
             bin.pack_into_slice(&mut bins_dst[i * Bin::LEN..]);
@@ -84,9 +90,10 @@ impl Pack for BinArray {
     }
 
     fn unpack_from_slice(input: &[u8]) -> Result<Self, ProgramError> {
-        let input = array_ref![input, 0, 8240];
-        let (pair_src, bins_src, index_src, _space_src) =
-            array_refs![input, 32, BIN_ARRAY_SIZE_USIZE * 32, 4, 12];
+        let input = array_ref![input, 0, BinArray::LEN];
+        #[allow(clippy::ptr_offset_with_cast)]
+        let (discriminator_src, pair_src, bins_src, index_src, _space_src) =
+            array_refs![input, 8, 32, BIN_ARRAY_SIZE_USIZE * 32, 4, 12];
 
         let mut bins = [Bin::default(); BIN_ARRAY_SIZE_USIZE];
         for (i, bin) in bins.iter_mut().enumerate() {
@@ -94,6 +101,7 @@ impl Pack for BinArray {
         }
 
         Ok(Self {
+            _discriminator: *discriminator_src,
             pair: Pubkey::new_from_array(*pair_src),
             bins,
             index: u32::from_le_bytes(*index_src),
@@ -110,8 +118,8 @@ pub struct BinArrayPair {
 impl Clone for BinArrayPair {
     fn clone(&self) -> Self {
         Self {
-            bin_array_lower: self.bin_array_lower.clone(),
-            bin_array_upper: self.bin_array_upper.clone(),
+            bin_array_lower: self.bin_array_lower,
+            bin_array_upper: self.bin_array_upper,
         }
     }
 }

@@ -11,14 +11,15 @@ pub struct StaticFeeParameters {
     pub variable_fee_control: u32,
     pub max_volatility_accumulator: u32,
     pub protocol_share: u16,
-    pub _space: [u8; 2],
+    _space: [u8; 2],
 }
 
 impl Sealed for StaticFeeParameters {}
 impl Pack for StaticFeeParameters {
     const LEN: usize = 20;
+
     fn pack_into_slice(&self, output: &mut [u8]) {
-        let output = array_mut_ref![output, 0, 20];
+        let output = array_mut_ref![output, 0, StaticFeeParameters::LEN];
         let (
             base_factor,
             filter_period,
@@ -41,7 +42,8 @@ impl Pack for StaticFeeParameters {
     }
 
     fn unpack_from_slice(input: &[u8]) -> Result<StaticFeeParameters, ProgramError> {
-        let input = array_ref![input, 0, 20];
+        let input = array_ref![input, 0, StaticFeeParameters::LEN];
+
         #[allow(clippy::ptr_offset_with_cast)]
         let (
             base_factor,
@@ -99,8 +101,9 @@ impl IsInitialized for DynamicFeeParameters {
 impl Sealed for DynamicFeeParameters {}
 impl Pack for DynamicFeeParameters {
     const LEN: usize = 24;
+
     fn pack_into_slice(&self, output: &mut [u8]) {
-        let output = array_mut_ref![output, 0, 24];
+        let output = array_mut_ref![output, 0, DynamicFeeParameters::LEN];
         let (time_last_updated, volatility_accumulator, volatility_reference, id_reference, _space) =
             mut_array_refs![output, 8, 4, 4, 4, 4];
         time_last_updated.copy_from_slice(&self.time_last_updated.to_le_bytes());
@@ -111,7 +114,7 @@ impl Pack for DynamicFeeParameters {
     }
 
     fn unpack_from_slice(input: &[u8]) -> Result<DynamicFeeParameters, ProgramError> {
-        let input = array_ref![input, 0, 24];
+        let input = array_ref![input, 0, DynamicFeeParameters::LEN];
         #[allow(clippy::ptr_offset_with_cast)]
         let (time_last_updated, volatility_accumulator, volatility_reference, id_reference, _space) =
             array_refs![input, 8, 4, 4, 4, 4];

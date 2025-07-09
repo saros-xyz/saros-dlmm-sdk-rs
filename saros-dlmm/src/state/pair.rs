@@ -14,6 +14,7 @@ use solana_sdk::{
 };
 
 pub struct Pair {
+    _discriminator: [u8; 8],
     pub bump: [u8; 1],
 
     pub liquidity_book_config: Pubkey,
@@ -45,11 +46,13 @@ impl IsInitialized for Pair {
 impl Sealed for Pair {}
 
 impl Pack for Pair {
-    const LEN: usize = 196;
+    const LEN: usize = 204;
+
     fn pack_into_slice(&self, output: &mut [u8]) {
-        let output = array_mut_ref![output, 0, 196];
+        let output = array_mut_ref![output, 0, Pair::LEN];
 
         let (
+            discriminator,
             bump,
             liquidity_book_config,
             bin_step,
@@ -63,8 +66,9 @@ impl Pack for Pair {
             protocol_fees_y,
             hook_flag_dst,
             hook_pubkey_dst,
-        ) = mut_array_refs![output, 1, 32, 1, 1, 32, 32, 20, 4, 24, 8, 8, 1, 32];
+        ) = mut_array_refs![output, 8, 1, 32, 1, 1, 32, 32, 20, 4, 24, 8, 8, 1, 32];
 
+        discriminator.copy_from_slice(&[85, 72, 49, 176, 182, 228, 141, 82]);
         bump.copy_from_slice(&self.bump);
         liquidity_book_config.copy_from_slice(self.liquidity_book_config.as_ref());
         bin_step.copy_from_slice(&self.bin_step.to_le_bytes());
@@ -92,9 +96,10 @@ impl Pack for Pair {
     }
 
     fn unpack_from_slice(input: &[u8]) -> Result<Self, ProgramError> {
-        let input = array_ref![input, 0, 196];
+        let input = array_ref![input, 0, Pair::LEN];
         #[allow(clippy::ptr_offset_with_cast)]
         let (
+            discriminator,
             bump,
             liquidity_book_config,
             bin_step,
@@ -108,9 +113,10 @@ impl Pack for Pair {
             protocol_fees_y,
             hook_flag_dst,
             hook_pubkey_dst,
-        ) = array_refs![input, 1, 32, 1, 1, 32, 32, 20, 4, 24, 8, 8, 1, 32];
+        ) = array_refs![input, 8, 1, 32, 1, 1, 32, 32, 20, 4, 24, 8, 8, 1, 32];
 
         Ok(Self {
+            _discriminator: *discriminator,
             bump: *bump,
             liquidity_book_config: Pubkey::new_from_array(*liquidity_book_config),
             bin_step: u8::from_le_bytes(*bin_step),
@@ -136,6 +142,7 @@ impl Pack for Pair {
 impl Clone for Pair {
     fn clone(&self) -> Self {
         Self {
+            _discriminator: self._discriminator,
             bump: self.bump,
             liquidity_book_config: self.liquidity_book_config,
             bin_step: self.bin_step,
@@ -147,7 +154,7 @@ impl Clone for Pair {
             dynamic_fee_parameters: self.dynamic_fee_parameters.clone(),
             protocol_fees_x: self.protocol_fees_x,
             protocol_fees_y: self.protocol_fees_y,
-            hook: self.hook.clone(),
+            hook: self.hook,
         }
     }
 }
