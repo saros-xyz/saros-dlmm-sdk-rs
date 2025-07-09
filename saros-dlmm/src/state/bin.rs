@@ -36,7 +36,7 @@ impl Sealed for Bin {}
 impl Pack for Bin {
     const LEN: usize = 16 + 8 + 8;
     fn pack_into_slice(&self, output: &mut [u8]) {
-        let output = array_mut_ref![output, 0, 32];
+        let output = array_mut_ref![output, 0, Bin::LEN];
         let (total_supply_dst, reserve_x_dst, reserve_y_dst) = mut_array_refs![output, 16, 8, 8];
 
         total_supply_dst.copy_from_slice(&self.total_supply.to_le_bytes());
@@ -45,7 +45,7 @@ impl Pack for Bin {
     }
 
     fn unpack_from_slice(input: &[u8]) -> Result<Self, ProgramError> {
-        let input = array_ref![input, 0, 32];
+        let input = array_ref![input, 0, Bin::LEN];
         #[allow(clippy::ptr_offset_with_cast)]
         let (total_supply_src, reserve_x_src, reserve_y_src) = array_refs![input, 16, 8, 8];
         Ok(Self {
