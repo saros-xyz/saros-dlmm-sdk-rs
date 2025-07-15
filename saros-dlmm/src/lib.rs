@@ -77,7 +77,7 @@ impl Amm for SarosDlmm {
     where
         Self: Sized,
     {
-        let account_data = &keyed_account.account.data[8..];
+        let account_data = &keyed_account.account.data[..];
         let pair = Pair::unpack(&account_data)?;
 
         let bin_array_index = pair.bin_array_index();
@@ -101,7 +101,7 @@ impl Amm for SarosDlmm {
         Ok(Self {
             program_id: keyed_account.account.owner,
             key: keyed_account.key,
-            label: "saros_dlmm"[..].to_string(),
+            label: "saros_dlmm".into(),
             pair,
             token_transfer_fee: TokenTransferFee::default(),
             bin_array_lower: BinArray::default(),
@@ -131,10 +131,10 @@ impl Amm for SarosDlmm {
 
     fn update(&mut self, account_map: &AccountMap) -> Result<()> {
         let bin_array_lower_data = try_get_account_data(account_map, &self.bin_array_key[0])?;
-        let bin_array_lower = &BinArray::unpack(&bin_array_lower_data[8..])?;
+        let bin_array_lower = &BinArray::unpack(&bin_array_lower_data[..])?;
 
         let bin_array_upper_data = try_get_account_data(account_map, &self.bin_array_key[1])?;
-        let bin_array_upper = &BinArray::unpack(&bin_array_upper_data[8..])?;
+        let bin_array_upper = &BinArray::unpack(&bin_array_upper_data[..])?;
 
         let (mint_x_data, mint_x_owner) =
             try_get_account_data_and_owner(account_map, &self.pair.token_mint_x)?;
