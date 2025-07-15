@@ -53,7 +53,7 @@ pub const MASHA_MINT: Pubkey = pubkey!("mae8vJGf8Wju8Ron1oDTQVaTGGBpcpWDwoRQJALM
 lazy_static! {
     // For SwapMode::ExactIn
     pub static ref TOKEN_MINT_AND_IN_AMOUNT: [(Pubkey, u64); 5] = [
-        (spl_token::native_mint::ID, 25_000_000_000),
+        (spl_token::native_mint::ID, 2_500_000_000),
         (SAROS_MINT, 1_000_000_000),
         (MASHA_MINT, 1_000_000_000),
         (USDC_MINT, 1_110_000_000),
