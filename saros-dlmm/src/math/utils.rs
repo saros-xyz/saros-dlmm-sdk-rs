@@ -46,3 +46,8 @@ pub fn get_fee_for_amount(amount: u64, fee: u64) -> Result<u64> {
 
     Ok(fee_for_amount)
 }
+
+pub fn convert_math_result(opt: Option<u128>, err: ErrorCode) -> Result<u64, ErrorCode> {
+    let value = opt.ok_or(err)?;
+    u64::try_from(value).map_err(|_| ErrorCode::U64ConversionOverflow)
+}

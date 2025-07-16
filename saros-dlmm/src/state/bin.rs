@@ -1,6 +1,6 @@
 use crate::{
     errors::ErrorCode,
-    math::utils::{get_fee_amount, get_protocol_fee},
+    math::utils::{convert_math_result, get_fee_amount, get_protocol_fee},
 };
 use anyhow::Result;
 use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
@@ -79,27 +79,25 @@ impl Bin {
         }
 
         let mut max_amount_in = if swap_for_y {
-            u64::try_from(
+            convert_math_result(
                 shl_div(
                     u128::from(bin_reserve_out),
                     price,
                     SCALE_OFFSET,
                     Rounding::Up,
-                )
-                .unwrap(),
-            )
-            .unwrap()
+                ),
+                ErrorCode::ShlDivMathError,
+            )?
         } else {
-            u64::try_from(
+            convert_math_result(
                 mul_shr(
                     u128::from(bin_reserve_out),
                     price,
                     SCALE_OFFSET,
                     Rounding::Up,
-                )
-                .unwrap(),
-            )
-            .unwrap()
+                ),
+                ErrorCode::MulShrMathError,
+            )?
         };
 
         let max_fee_amount = get_fee_for_amount(max_amount_in, fee)?;
@@ -128,15 +126,15 @@ impl Bin {
                 .ok_or(ErrorCode::AmountUnderflow)?;
 
             amount_out = if swap_for_y {
-                u64::try_from(
-                    mul_shr(u128::from(amount_in), price, SCALE_OFFSET, Rounding::Down).unwrap(),
-                )
-                .unwrap()
+                convert_math_result(
+                    mul_shr(u128::from(amount_in), price, SCALE_OFFSET, Rounding::Down),
+                    ErrorCode::MulShrMathError,
+                )?
             } else {
-                u64::try_from(
-                    shl_div(u128::from(amount_in), price, SCALE_OFFSET, Rounding::Down).unwrap(),
-                )
-                .unwrap()
+                convert_math_result(
+                    shl_div(u128::from(amount_in), price, SCALE_OFFSET, Rounding::Down),
+                    ErrorCode::ShlDivMathError,
+                )?
             };
 
             if amount_out > bin_reserve_out {
@@ -216,11 +214,15 @@ impl Bin {
         };
 
         let amount_in_without_fee = if swap_for_y {
-            u64::try_from(shl_div(amount_out as u128, price, SCALE_OFFSET, Rounding::Up).unwrap())
-                .unwrap()
+            convert_math_result(
+                shl_div(amount_out as u128, price, SCALE_OFFSET, Rounding::Up),
+                ErrorCode::ShlDivMathError,
+            )?
         } else {
-            u64::try_from(mul_shr(amount_out as u128, price, SCALE_OFFSET, Rounding::Up).unwrap())
-                .unwrap()
+            convert_math_result(
+                mul_shr(amount_out as u128, price, SCALE_OFFSET, Rounding::Up),
+                ErrorCode::MulShrMathError,
+            )?
         };
 
         let fee_amount = get_fee_for_amount(amount_in_without_fee, fee)?;

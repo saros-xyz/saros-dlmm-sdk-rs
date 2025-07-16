@@ -38,6 +38,15 @@ pub enum ErrorCode {
 
     #[error("Invalid amount out")]
     InvalidAmountOut, // 0x177b
+
+    #[error("MulShr Math Error")]
+    MulShrMathError, // 0x177c
+
+    #[error("ShlDiv Math Error")]
+    ShlDivMathError, // 0x177d
+
+    #[error("U64 conversion overflow")]
+    U64ConversionOverflow, // 0x177e
 }
 
 impl From<TryFromIntError> for ErrorCode {

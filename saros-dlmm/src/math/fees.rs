@@ -62,8 +62,12 @@ impl TokenTransferFee {
         amount: u64,
     ) -> Result<(u64, u64)> {
         if let Some(epoch_transfer_fee) = epoch_transfer_fee_token_mint {
-            let transfer_fee = epoch_transfer_fee.calculate_fee(amount).unwrap();
-            let transfer_output_amount = amount.checked_sub(transfer_fee).unwrap();
+            let transfer_fee = epoch_transfer_fee
+                .calculate_fee(amount)
+                .ok_or(ErrorCode::TransferFeeCalculationError)?;
+            let transfer_output_amount = amount
+                .checked_sub(transfer_fee)
+                .ok_or(ErrorCode::TransferFeeCalculationError)?;
             return Ok((transfer_output_amount, transfer_fee));
         }
 
@@ -100,7 +104,7 @@ impl TokenTransferFee {
             // verify transfer fee calculation for safety
             let transfer_fee_verification = epoch_transfer_fee
                 .calculate_fee(transfer_fee_include_amount)
-                .unwrap();
+                .ok_or(ErrorCode::TransferFeeCalculationError)?;
 
             if transfer_fee_verification != transfer_fee {
                 return Err(ErrorCode::TransferFeeCalculationError.into());
