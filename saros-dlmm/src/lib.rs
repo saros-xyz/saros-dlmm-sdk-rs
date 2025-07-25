@@ -35,18 +35,14 @@ pub struct SarosDlmm {
     pub key: Pubkey,
     pub label: String,
     pub pair: Pair,
-
     pub token_transfer_fee: TokenTransferFee,
-
     pub bin_array_lower: BinArray,
     pub bin_array_upper: BinArray,
-
     pub bin_array_key: [Pubkey; 2],
     pub hook_bin_array_key: [Pubkey; 2],
     pub token_vault: [Pubkey; 2],
     pub token_program: [Pubkey; 2],
-
-    pub event_authority: Pubkey,
+    pub event_authority: Pubkey,    
     pub epoch: Arc<AtomicU64>,
     pub timestamp: Arc<AtomicI64>,
 }
