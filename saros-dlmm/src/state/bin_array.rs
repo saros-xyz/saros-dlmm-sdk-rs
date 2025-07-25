@@ -24,8 +24,7 @@ pub enum BinArrayKind {
 #[derive(Clone, Copy)]
 pub struct BinArrayAccount {
     pub pubkey: Pubkey,
-    pub kind: BinArrayKind,
-    pub bin_array: BinArray,
+    pub bin_array: Option<BinArray>,
 }
 
 #[derive(Clone, Copy)]
