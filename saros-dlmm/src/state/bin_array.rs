@@ -13,6 +13,21 @@ const BIN_ARRAY_DISCRIMINATOR: [u8; 8] = [92, 142, 92, 220, 5, 148, 70, 181];
 
 use crate::{errors::ErrorCode, state::bin::Bin};
 
+#[derive(Hash, Eq, PartialEq, Clone, Copy, Debug)]
+pub enum BinArrayKind {
+    MainLower,
+    MainUpper,
+    HookLower,
+    HookUpper,
+}
+
+#[derive(Clone, Copy)]
+pub struct BinArrayAccount {
+    pub pubkey: Pubkey,
+    pub kind: BinArrayKind,
+    pub bin_array: BinArray,
+}
+
 #[derive(Clone, Copy)]
 pub struct BinArray {
     _discriminator: [u8; 8],
