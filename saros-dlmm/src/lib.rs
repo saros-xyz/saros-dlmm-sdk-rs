@@ -20,7 +20,7 @@ use crate::{
 };
 pub use amms::amm;
 use anchor_lang::prelude::AccountMeta;
-use anyhow::Result;
+use anyhow::{Context, Result};
 use jupiter_amm_interface::{
     AccountMap, Amm, AmmContext, KeyedAccount, Quote, QuoteParams, Swap, SwapAndAccountMetas,
     SwapMode, SwapParams, try_get_account_data, try_get_account_data_and_owner,
@@ -127,16 +127,42 @@ impl Amm for SarosDlmm {
     }
 
     fn update(&mut self, account_map: &AccountMap) -> Result<()> {
-        let bin_array_lower_data = try_get_account_data(account_map, &self.bin_array_key[0])?;
+        let bin_array_lower_data = try_get_account_data(account_map, &self.bin_array_key[0])
+            .with_context(|| {
+                format!(
+                    "Bin array lower account does not exist or has not been initialized: {}",
+                    self.bin_array_key[0]
+                )
+            })?;
         let bin_array_lower = &BinArray::unpack(&bin_array_lower_data[..])?;
 
-        let bin_array_upper_data = try_get_account_data(account_map, &self.bin_array_key[1])?;
+        let bin_array_upper_data = try_get_account_data(account_map, &self.bin_array_key[1])
+            .with_context(|| {
+                format!(
+                    "Bin array upper account does not exist or has not been initialized: {}",
+                    self.bin_array_key[1]
+                )
+            })?;
         let bin_array_upper = &BinArray::unpack(&bin_array_upper_data[..])?;
 
         let (mint_x_data, mint_x_owner) =
-            try_get_account_data_and_owner(account_map, &self.pair.token_mint_x)?;
+            try_get_account_data_and_owner(account_map, &self.pair.token_mint_x).with_context(
+                || {
+                    format!(
+                        "Token mint X not found or invalid: {}",
+                        self.pair.token_mint_x
+                    )
+                },
+            )?;
         let (mint_y_data, mint_y_owner) =
-            try_get_account_data_and_owner(account_map, &self.pair.token_mint_y)?;
+            try_get_account_data_and_owner(account_map, &self.pair.token_mint_y).with_context(
+                || {
+                    format!(
+                        "Token mint Y not found or invalid: {}",
+                        self.pair.token_mint_y
+                    )
+                },
+            )?;
 
         self.token_transfer_fee = TokenTransferFee::new(
             &mut self.token_transfer_fee,
