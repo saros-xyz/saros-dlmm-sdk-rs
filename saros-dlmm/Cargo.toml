@@ -33,7 +33,7 @@ ahash = { workspace = true }
 bincode = { workspace = true }
 paste = "1.0.13"
 tokio = { workspace = true, features = ["full"] }
-clap = { version = "4.5.2", features = ["derive"] }
+clap = { version = "~4.1", features = ["derive"] }
 
 spl-associated-token-account = { workspace = true, features = [
     "no-entrypoint",

@@ -7,6 +7,7 @@ pub mod state;
 pub mod swap_instruction;
 pub mod utils;
 
+use crate::math::fees::{compute_transfer_amount_for_expected_output, compute_transfer_fee};
 use crate::math::swap_manager::get_swap_result;
 use crate::utils::helper::{find_event_authority, get_hook_bin_array, is_swap_for_y};
 use crate::{
@@ -35,17 +36,13 @@ pub struct SarosDlmm {
     pub key: Pubkey,
     pub label: String,
     pub pair: Pair,
-
     pub token_transfer_fee: TokenTransferFee,
-
     pub bin_array_lower: BinArray,
     pub bin_array_upper: BinArray,
-
     pub bin_array_key: [Pubkey; 2],
     pub hook_bin_array_key: [Pubkey; 2],
     pub token_vault: [Pubkey; 2],
     pub token_program: [Pubkey; 2],
-
     pub event_authority: Pubkey,
     pub epoch: Arc<AtomicU64>,
     pub timestamp: Arc<AtomicI64>,
@@ -207,10 +204,8 @@ impl Amm for SarosDlmm {
 
         let (amount_in, amount_out, fee_amount) = match swap_mode {
             SwapMode::ExactIn => {
-                let (amount_in_after_transfer_fee, _) = self
-                    .token_transfer_fee
-                    .compute_transfer_fee_amount(epoch_transfer_fee_in, amount)
-                    .unwrap();
+                let (amount_in_after_transfer_fee, _) =
+                    compute_transfer_fee(epoch_transfer_fee_in, amount).unwrap();
 
                 let (amount_out, fee_amount) = get_swap_result(
                     &mut pair,
@@ -224,10 +219,8 @@ impl Amm for SarosDlmm {
                 (amount, amount_out, fee_amount)
             }
             SwapMode::ExactOut => {
-                let (amount_out_before_transfer_fee, _) = self
-                    .token_transfer_fee
-                    .compute_transfer_fee_amount(epoch_transfer_fee_out, amount)
-                    .unwrap();
+                let (amount_out_before_transfer_fee, _) =
+                    compute_transfer_fee(epoch_transfer_fee_out, amount).unwrap();
 
                 let (amount_in, fee_amount) = get_swap_result(
                     &mut pair,
@@ -238,12 +231,8 @@ impl Amm for SarosDlmm {
                     block_timestamp,
                 )?;
 
-                let (amount_in_before_transfer_fee, _) = self
-                    .token_transfer_fee
-                    .compute_transfer_amount_for_expected_output(
-                        epoch_transfer_fee_in,
-                        amount_in,
-                    )?;
+                let (amount_in_before_transfer_fee, _) =
+                    compute_transfer_amount_for_expected_output(epoch_transfer_fee_in, amount_in)?;
 
                 (amount_in_before_transfer_fee, amount, fee_amount)
             }

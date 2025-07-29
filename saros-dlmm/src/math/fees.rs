@@ -55,37 +55,35 @@ impl TokenTransferFee {
             epoch_transfer_fee_y: self.epoch_transfer_fee_y,
         })
     }
+}
 
-    fn compute_transfer_fee(
-        &self,
-        epoch_transfer_fee_token_mint: Option<TransferFee>,
-        amount: u64,
-    ) -> Result<(u64, u64)> {
-        if let Some(epoch_transfer_fee) = epoch_transfer_fee_token_mint {
-            let transfer_fee = epoch_transfer_fee
-                .calculate_fee(amount)
-                .ok_or(ErrorCode::TransferFeeCalculationError)?;
-            let transfer_output_amount = amount
-                .checked_sub(transfer_fee)
-                .ok_or(ErrorCode::TransferFeeCalculationError)?;
-            return Ok((transfer_output_amount, transfer_fee));
-        }
-
-        Ok((amount, 0))
+pub fn compute_transfer_fee(
+    epoch_transfer_fee_token_mint: Option<TransferFee>,
+    amount: u64,
+) -> Result<(u64, u64)> {
+    if let Some(epoch_transfer_fee) = epoch_transfer_fee_token_mint {
+        let transfer_fee = epoch_transfer_fee
+            .calculate_fee(amount)
+            .ok_or(ErrorCode::TransferFeeCalculationError)?;
+        let transfer_output_amount = amount
+            .checked_sub(transfer_fee)
+            .ok_or(ErrorCode::TransferFeeCalculationError)?;
+        return Ok((transfer_output_amount, transfer_fee));
     }
 
-    fn compute_transfer_amount(
-        &self,
-        epoch_transfer_fee_token_mint: Option<TransferFee>,
-        expected_output: u64,
-    ) -> Result<(u64, u64)> {
-        if expected_output == 0 {
-            return Ok((0, 0));
-        }
-        if let Some(epoch_transfer_fee) = epoch_transfer_fee_token_mint {
-            let transfer_fee: u64 = if u16::from(epoch_transfer_fee.transfer_fee_basis_points)
-                == BASIS_POINT_MAX as u16
-            {
+    Ok((amount, 0))
+}
+
+pub fn compute_transfer_amount(
+    epoch_transfer_fee_token_mint: Option<TransferFee>,
+    expected_output: u64,
+) -> Result<(u64, u64)> {
+    if expected_output == 0 {
+        return Ok((0, 0));
+    }
+    if let Some(epoch_transfer_fee) = epoch_transfer_fee_token_mint {
+        let transfer_fee: u64 =
+            if u16::from(epoch_transfer_fee.transfer_fee_basis_points) == BASIS_POINT_MAX as u16 {
                 // edge-case: if transfer fee rate is 100%, current SPL implementation returns 0 as inverse fee.
                 // https://github.com/solana-labs/solana-program-library/blob/fe1ac9a2c4e5d85962b78c3fc6aaf028461e9026/token/program-2022/src/extension/transfer_fee/mod.rs#L95
 
@@ -97,39 +95,36 @@ impl TokenTransferFee {
                     .calculate_inverse_fee(expected_output)
                     .ok_or(ErrorCode::TransferFeeCalculationError)?
             };
-            let transfer_fee_include_amount = expected_output
-                .checked_add(transfer_fee)
-                .ok_or(ErrorCode::TransferFeeCalculationError)?;
+        let transfer_fee_include_amount = expected_output
+            .checked_add(transfer_fee)
+            .ok_or(ErrorCode::TransferFeeCalculationError)?;
 
-            // verify transfer fee calculation for safety
-            let transfer_fee_verification = epoch_transfer_fee
-                .calculate_fee(transfer_fee_include_amount)
-                .ok_or(ErrorCode::TransferFeeCalculationError)?;
+        // verify transfer fee calculation for safety
+        let transfer_fee_verification = epoch_transfer_fee
+            .calculate_fee(transfer_fee_include_amount)
+            .ok_or(ErrorCode::TransferFeeCalculationError)?;
 
-            if transfer_fee_verification != transfer_fee {
-                return Err(ErrorCode::TransferFeeCalculationError.into());
-            }
-            return Ok((transfer_fee_include_amount, transfer_fee));
+        if transfer_fee_verification != transfer_fee {
+            return Err(ErrorCode::TransferFeeCalculationError.into());
         }
-        Ok((expected_output, 0))
+        return Ok((transfer_fee_include_amount, transfer_fee));
     }
+    Ok((expected_output, 0))
+}
 
-    pub fn compute_transfer_fee_amount(
-        &self,
-        token_mint_transfer_fee: Option<TransferFee>,
-        transfer_amount: u64,
-    ) -> Result<(u64, u64)> {
-        return self.compute_transfer_fee(token_mint_transfer_fee, transfer_amount);
-    }
+pub fn compute_transfer_fee_amount(
+    token_mint_transfer_fee: Option<TransferFee>,
+    transfer_amount: u64,
+) -> Result<(u64, u64)> {
+    return compute_transfer_fee(token_mint_transfer_fee, transfer_amount);
+}
 
-    pub fn compute_transfer_amount_for_expected_output(
-        &self,
-        token_mint_transfer_fee: Option<TransferFee>,
-        expected_output: u64,
-    ) -> Result<(u64, u64)> {
-        if expected_output == 0 {
-            return Ok((0, 0));
-        }
-        return self.compute_transfer_amount(token_mint_transfer_fee, expected_output);
+pub fn compute_transfer_amount_for_expected_output(
+    token_mint_transfer_fee: Option<TransferFee>,
+    expected_output: u64,
+) -> Result<(u64, u64)> {
+    if expected_output == 0 {
+        return Ok((0, 0));
     }
+    return compute_transfer_amount(token_mint_transfer_fee, expected_output);
 }
