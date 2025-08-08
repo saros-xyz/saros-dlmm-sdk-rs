@@ -1,6 +1,7 @@
 use crate::{
     errors::ErrorCode,
     state::{bin_array::BinArrayPair, pair::Pair},
+    constants::MAX_BIN_CROSSING,
 };
 use anyhow::Result;
 use jupiter_amm_interface::SwapMode;
@@ -22,8 +23,12 @@ pub fn get_swap_result(
             let mut amount_out: u64 = 0;
             let mut total_protocol_fee: u64 = 0;
             let mut total_fee_amount: u64 = 0;
+            let mut total_bin_used: u32 = 0;
 
             while amount_in_left > 0 {
+                if total_bin_used >= MAX_BIN_CROSSING {
+                    return Err(ErrorCode::SwapCrossesTooManyBins.into());
+                }
                 pair.update_volatility_accumulator()?;
 
                 let bin = bin_array.get_bin_mut(pair.active_id)?;
@@ -61,6 +66,8 @@ pub fn get_swap_result(
                 } else {
                     pair.move_active_id(swap_for_y)?;
                 }
+
+                total_bin_used += 1;
             }
 
             Ok((amount_out, total_fee_amount))
@@ -71,8 +78,12 @@ pub fn get_swap_result(
             let mut amount_in: u64 = 0;
             let mut total_protocol_fee: u64 = 0;
             let mut total_fee_amount: u64 = 0;
+            let mut total_bin_used: u32 = 0;
 
             while amount_out_left > 0 {
+                if total_bin_used >= MAX_BIN_CROSSING {
+                    return Err(ErrorCode::SwapCrossesTooManyBins.into());
+                }
                 pair.update_volatility_accumulator()?;
 
                 let bin = bin_array.get_bin_mut(pair.active_id)?;
@@ -110,6 +121,7 @@ pub fn get_swap_result(
                 } else {
                     pair.move_active_id(swap_for_y)?;
                 }
+                total_bin_used += 1;
             }
 
             Ok((amount_in, total_fee_amount))

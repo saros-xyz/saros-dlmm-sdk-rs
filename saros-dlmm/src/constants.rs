@@ -5,3 +5,4 @@ pub const PRECISION: u64 = 1_000_000_000;
 pub const SQUARED_PRECISION: u128 = 1_000_000_000_000_000_000;
 pub const MAX_ACTIVE_ID: u32 = 16_777_215; // 2^24 - 1
 pub const MIDDLE_BIN_ID: i32 = 8_388_608; // 2^23
+pub const MAX_BIN_CROSSING: u32 = 30; // Maximum number of bins that can be crossed in a swap

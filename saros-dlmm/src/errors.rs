@@ -47,6 +47,9 @@ pub enum ErrorCode {
 
     #[error("U64 conversion overflow")]
     U64ConversionOverflow, // 0x177e
+
+    #[error("Swap crosses too many bins – quote aborted")]
+    SwapCrossesTooManyBins,
 }
 
 impl From<TryFromIntError> for ErrorCode {
