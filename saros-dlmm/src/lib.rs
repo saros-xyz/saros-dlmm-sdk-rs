@@ -292,7 +292,7 @@ impl Amm for SarosDlmm {
 
         let user = *token_transfer_authority;
 
-        let account_metas = vec![
+        let _account_metas = vec![
             AccountMeta::new(self.key, false),
             AccountMeta::new_readonly(self.pair.token_mint_x, false),
             AccountMeta::new_readonly(self.pair.token_mint_y, false),
@@ -312,12 +312,12 @@ impl Amm for SarosDlmm {
             AccountMeta::new(self.hook_bin_array_key[1], false),
         ];
 
-        unimplemented!();
-
-        // Ok(SwapAndAccountMetas {
-        //     swap: Swap::SarosDlmm, // TODO : Add SarosDlmm to Swap enum
-        //     account_metas,
-        // })
+        // Use MeteoraDlmm as a temporary solution since SarosDlmm is not yet in the Swap enum
+        // TODO: Add SarosDlmm variant to jupiter-amm-interface Swap enum
+        Ok(SwapAndAccountMetas {
+            swap: Swap::MeteoraDlmm, // Temporary: using MeteoraDlmm as closest match
+            account_metas: _account_metas,
+        })
     }
 
     fn supports_exact_out(&self) -> bool {

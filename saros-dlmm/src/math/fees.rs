@@ -88,8 +88,12 @@ pub fn compute_transfer_amount(
                 // https://github.com/solana-labs/solana-program-library/blob/fe1ac9a2c4e5d85962b78c3fc6aaf028461e9026/token/program-2022/src/extension/transfer_fee/mod.rs#L95
 
                 // But even if transfer fee is 100%, we can use maximum_fee as transfer fee.
-                // if transfer_fee_excluded_amount + maximum_fee > u64 max, the following checked_add should fail.
-                u64::from(epoch_transfer_fee.maximum_fee)
+                // Add explicit overflow check for the 100% fee case
+                let max_fee = u64::from(epoch_transfer_fee.maximum_fee);
+                if expected_output.checked_add(max_fee).is_none() {
+                    return Err(ErrorCode::TransferFeeCalculationError.into());
+                }
+                max_fee
             } else {
                 epoch_transfer_fee
                     .calculate_inverse_fee(expected_output)
