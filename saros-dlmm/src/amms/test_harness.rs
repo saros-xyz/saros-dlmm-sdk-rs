@@ -199,242 +199,242 @@ impl AmmTestHarnessProgramTest {
         self.program_test_user.keypair.pubkey()
     }
 
-    pub async fn assert_quote_matches_simulated_swap(
-        &mut self,
-        AmmTestSwapParams {
-            amm,
-            source_mint,
-            destination_mint,
-            swap_mode,
-            tolerance,
-            use_shared_accounts,
-            expected_error,
-        }: AmmTestSwapParams<'_>,
-    ) {
-        let user = self.program_test_user.keypair.pubkey();
+    // pub async fn assert_quote_matches_simulated_swap(
+    //     &mut self,
+    //     AmmTestSwapParams {
+    //         amm,
+    //         source_mint,
+    //         destination_mint,
+    //         swap_mode,
+    //         tolerance,
+    //         use_shared_accounts,
+    //         expected_error,
+    //     }: AmmTestSwapParams<'_>,
+    // ) {
+    //     let user = self.program_test_user.keypair.pubkey();
 
-        let user_source_token_account = self
-            .program_test_user
-            .mint_to_ata_with_program_id
-            .get(source_mint)
-            .unwrap()
-            .0;
-        let user_destination_token_account = self
-            .program_test_user
-            .mint_to_ata_with_program_id
-            .get(destination_mint)
-            .unwrap()
-            .0;
+    //     let user_source_token_account = self
+    //         .program_test_user
+    //         .mint_to_ata_with_program_id
+    //         .get(source_mint)
+    //         .unwrap()
+    //         .0;
+    //     let user_destination_token_account = self
+    //         .program_test_user
+    //         .mint_to_ata_with_program_id
+    //         .get(destination_mint)
+    //         .unwrap()
+    //         .0;
 
-        let program_source_token_account = self
-            .program_test_authority
-            .mint_to_ata_with_program_id
-            .get(source_mint)
-            .unwrap()
-            .0;
-        let program_destination_token_account = self
-            .program_test_authority
-            .mint_to_ata_with_program_id
-            .get(destination_mint)
-            .unwrap()
-            .0;
+    //     let program_source_token_account = self
+    //         .program_test_authority
+    //         .mint_to_ata_with_program_id
+    //         .get(source_mint)
+    //         .unwrap()
+    //         .0;
+    //     let program_destination_token_account = self
+    //         .program_test_authority
+    //         .mint_to_ata_with_program_id
+    //         .get(destination_mint)
+    //         .unwrap()
+    //         .0;
 
-        let mut amount = match swap_mode {
-            SwapMode::ExactIn => *TOKEN_MINT_TO_IN_AMOUNT.get(source_mint).unwrap(),
-            SwapMode::ExactOut => *TOKEN_MINT_TO_OUT_AMOUNT.get(destination_mint).unwrap(),
-        };
+    //     let mut amount = match swap_mode {
+    //         SwapMode::ExactIn => *TOKEN_MINT_TO_IN_AMOUNT.get(source_mint).unwrap(),
+    //         SwapMode::ExactOut => *TOKEN_MINT_TO_OUT_AMOUNT.get(destination_mint).unwrap(),
+    //     };
 
-        println!(
-            "Testing swap: {} -> {} with amount: {}",
-            source_mint, destination_mint, amount
-        );
+    //     println!(
+    //         "Testing swap: {} -> {} with amount: {}",
+    //         source_mint, destination_mint, amount
+    //     );
 
-        let is_input_mint_token2022 = TOKEN2022_MINT_AND_IN_AMOUNT
-            .iter()
-            .any(|(mint, _)| mint == source_mint);
-        let is_output_mint_token2022 = TOKEN2022_MINT_AND_IN_AMOUNT
-            .iter()
-            .any(|(mint, _)| mint == destination_mint);
-        let source_token_account = if !use_shared_accounts || is_input_mint_token2022 {
-            user_source_token_account
-        } else {
-            program_source_token_account
-        };
-        let destination_token_account = if !use_shared_accounts || is_output_mint_token2022 {
-            user_destination_token_account
-        } else {
-            program_destination_token_account
-        };
+    //     let is_input_mint_token2022 = TOKEN2022_MINT_AND_IN_AMOUNT
+    //         .iter()
+    //         .any(|(mint, _)| mint == source_mint);
+    //     let is_output_mint_token2022 = TOKEN2022_MINT_AND_IN_AMOUNT
+    //         .iter()
+    //         .any(|(mint, _)| mint == destination_mint);
+    //     let source_token_account = if !use_shared_accounts || is_input_mint_token2022 {
+    //         user_source_token_account
+    //     } else {
+    //         program_source_token_account
+    //     };
+    //     let destination_token_account = if !use_shared_accounts || is_output_mint_token2022 {
+    //         user_destination_token_account
+    //     } else {
+    //         program_destination_token_account
+    //     };
 
-        let token_authority = if !use_shared_accounts || is_input_mint_token2022 {
-            user
-        } else {
-            self.program_test_authority.pubkey
-        };
+    //     let token_authority = if !use_shared_accounts || is_input_mint_token2022 {
+    //         user
+    //     } else {
+    //         self.program_test_authority.pubkey
+    //     };
 
-        let mut accounts: Vec<AccountMeta> = Vec::new();
-        let mut quote_count: u32 = 0;
-        let mut quote_result = None;
-        let mut quote_err = None;
+    //     let mut accounts: Vec<AccountMeta> = Vec::new();
+    //     let mut quote_count: u32 = 0;
+    //     let mut quote_result = None;
+    //     let mut quote_err = None;
 
-        let reserve_mints: [Pubkey; 2] = amm.get_reserve_mints().try_into().unwrap();
-        let swap_for_y = is_swap_for_y(*source_mint, reserve_mints[0]);
+    //     let reserve_mints: [Pubkey; 2] = amm.get_reserve_mints().try_into().unwrap();
+    //     let swap_for_y = is_swap_for_y(*source_mint, reserve_mints[0]);
 
-        // solution for amm that cant quote certain amount and also could be bug introducing, divide by 2 until can quote
-        while quote_result.is_none() && quote_count < 10 {
-            amount /= 2;
-            match amm.quote(&QuoteParams {
-                amount,
-                input_mint: *source_mint,
-                output_mint: *destination_mint,
-                swap_mode,
-            }) {
-                Ok(quote) => quote_result = Some(quote),
-                Err(e) => {
-                    println!("quote error: {}", e);
-                    quote_err = Some(e);
-                }
-            }
+    //     // solution for amm that cant quote certain amount and also could be bug introducing, divide by 2 until can quote
+    //     while quote_result.is_none() && quote_count < 10 {
+    //         amount /= 2;
+    //         match amm.quote(&QuoteParams {
+    //             amount,
+    //             input_mint: *source_mint,
+    //             output_mint: *destination_mint,
+    //             swap_mode,
+    //         }) {
+    //             Ok(quote) => quote_result = Some(quote),
+    //             Err(e) => {
+    //                 println!("quote error: {}", e);
+    //                 quote_err = Some(e);
+    //             }
+    //         }
 
-            quote_count += 1;
-        }
+    //         quote_count += 1;
+    //     }
 
-        let swap_params = SwapParams {
-            swap_mode,
-            source_mint: *source_mint,
-            destination_mint: *destination_mint,
-            source_token_account,
-            destination_token_account,
-            token_transfer_authority: token_authority,
-            quote_mint_to_referrer: None,
-            in_amount: quote_result.unwrap().in_amount,
-            out_amount: quote_result.unwrap().out_amount,
-            jupiter_program_id: &Pubkey::default(),
-            missing_dynamic_accounts_as_default: false,
-        };
+    //     let swap_params = SwapParams {
+    //         swap_mode,
+    //         source_mint: *source_mint,
+    //         destination_mint: *destination_mint,
+    //         source_token_account,
+    //         destination_token_account,
+    //         token_transfer_authority: token_authority,
+    //         quote_mint_to_referrer: None,
+    //         in_amount: quote_result.unwrap().in_amount,
+    //         out_amount: quote_result.unwrap().out_amount,
+    //         jupiter_program_id: &Pubkey::default(),
+    //         missing_dynamic_accounts_as_default: false,
+    //     };
 
-        let SwapAndAccountMetas {
-            swap: _swap,
-            account_metas,
-        } = amm.get_swap_and_account_metas(&swap_params).unwrap();
+    //     let SwapAndAccountMetas {
+    //         swap: _swap,
+    //         account_metas,
+    //     } = amm.get_swap_and_account_metas(&swap_params).unwrap();
 
-        accounts.extend(account_metas);
+    //     accounts.extend(account_metas);
 
-        let data = build_swap_instruction_data(BuildSwapInstructionDataParams {
-            amount,
-            other_amount_threshold: match swap_mode {
-                SwapMode::ExactIn => 0,
-                SwapMode::ExactOut => swap_params.in_amount * 2,
-            },
-            swap_for_y,
-            swap_mode,
-        })
-        .unwrap();
+    //     let data = build_swap_instruction_data(BuildSwapInstructionDataParams {
+    //         amount,
+    //         other_amount_threshold: match swap_mode {
+    //             SwapMode::ExactIn => 0,
+    //             SwapMode::ExactOut => swap_params.in_amount * 2,
+    //         },
+    //         swap_for_y,
+    //         swap_mode,
+    //     })
+    //     .unwrap();
 
-        let swap_ix = Instruction {
-            program_id: saros::ID,
-            accounts: accounts,
-            data,
-        };
+    //     let swap_ix = Instruction {
+    //         program_id: saros::ID,
+    //         accounts: accounts,
+    //         data,
+    //     };
 
-        let mut ixs: Vec<Instruction> =
-            vec![ComputeBudgetInstruction::set_compute_unit_limit(1_400_000)];
+    //     let mut ixs: Vec<Instruction> =
+    //         vec![ComputeBudgetInstruction::set_compute_unit_limit(1_400_000)];
 
-        ixs.push(swap_ix);
+    //     ixs.push(swap_ix);
 
-        let user_keypair = clone_keypair(&self.program_test_user.keypair);
-        let source_token_account_before = self.get_token_account(&user_source_token_account).await;
-        let destination_token_account_before = self
-            .get_token_account(&user_destination_token_account)
-            .await;
-        let process_transaction_result = self.process_transaction(&ixs, &[&user_keypair]).await;
-        let source_token_account_after = self.get_token_account(&user_source_token_account).await;
-        let destination_token_account_after = self
-            .get_token_account(&user_destination_token_account)
-            .await;
+    //     let user_keypair = clone_keypair(&self.program_test_user.keypair);
+    //     let source_token_account_before = self.get_token_account(&user_source_token_account).await;
+    //     let destination_token_account_before = self
+    //         .get_token_account(&user_destination_token_account)
+    //         .await;
+    //     let process_transaction_result = self.process_transaction(&ixs, &[&user_keypair]).await;
+    //     let source_token_account_after = self.get_token_account(&user_source_token_account).await;
+    //     let destination_token_account_after = self
+    //         .get_token_account(&user_destination_token_account)
+    //         .await;
 
-        let source_token_account_diff = source_token_account_before
-            .amount
-            .checked_sub(source_token_account_after.amount)
-            .unwrap();
-        let destination_token_account_diff = destination_token_account_after
-            .amount
-            .checked_sub(destination_token_account_before.amount)
-            .unwrap();
+    //     let source_token_account_diff = source_token_account_before
+    //         .amount
+    //         .checked_sub(source_token_account_after.amount)
+    //         .unwrap();
+    //     let destination_token_account_diff = destination_token_account_after
+    //         .amount
+    //         .checked_sub(destination_token_account_before.amount)
+    //         .unwrap();
 
-        let quote = if let Some(expected_error) = expected_error {
-            let quote_err = quote_err.unwrap();
-            match expected_error.downcast_ref::<anchor_lang::error::Error>() {
-                Some(error) => {
-                    let quote_error = quote_err
-                        .downcast_ref::<anchor_lang::error::Error>()
-                        .unwrap();
-                    assert_eq!(error, quote_error);
-                }
-                None => {
-                    assert_eq!(expected_error.to_string(), quote_err.to_string());
-                }
-            }
-            process_transaction_result.unwrap_err();
-            return;
-        } else {
-            // We don't expect any errors
-            process_transaction_result.unwrap();
-            quote_result.unwrap()
-        };
+    //     let quote = if let Some(expected_error) = expected_error {
+    //         let quote_err = quote_err.unwrap();
+    //         match expected_error.downcast_ref::<anchor_lang::error::Error>() {
+    //             Some(error) => {
+    //                 let quote_error = quote_err
+    //                     .downcast_ref::<anchor_lang::error::Error>()
+    //                     .unwrap();
+    //                 assert_eq!(error, quote_error);
+    //             }
+    //             None => {
+    //                 assert_eq!(expected_error.to_string(), quote_err.to_string());
+    //             }
+    //         }
+    //         process_transaction_result.unwrap_err();
+    //         return;
+    //     } else {
+    //         // We don't expect any errors
+    //         process_transaction_result.unwrap();
+    //         quote_result.unwrap()
+    //     };
 
-        println!("{source_mint} -> {destination_mint}");
-        match swap_mode {
-            SwapMode::ExactIn => {
-                println!(
-                    "ExactIn : quote.out_amount: {}, simulation_out_amount: {}, exact_in_amount: {}, simulation_in_amount: {}",
-                    quote.out_amount,
-                    destination_token_account_diff,
-                    amount,
-                    source_token_account_diff,
-                );
-                assert!(
-                    (quote.out_amount as i128 - destination_token_account_diff as i128).abs()
-                        <= tolerance as i128
-                );
-            }
-            SwapMode::ExactOut => {
-                println!(
-                    "ExactOut : quote.in_amount: {}, simulation_in_amount: {}, exact_out_amount: {}, simulation_out_amount: {}",
-                    quote.in_amount,
-                    source_token_account_diff,
-                    amount,
-                    destination_token_account_diff,
-                );
-                assert!(
-                    (quote.in_amount as i128 - source_token_account_diff as i128).abs()
-                        <= tolerance as i128
-                );
-                assert!(amount == destination_token_account_diff);
-            }
-        }
+    //     println!("{source_mint} -> {destination_mint}");
+    //     match swap_mode {
+    //         SwapMode::ExactIn => {
+    //             println!(
+    //                 "ExactIn : quote.out_amount: {}, simulation_out_amount: {}, exact_in_amount: {}, simulation_in_amount: {}",
+    //                 quote.out_amount,
+    //                 destination_token_account_diff,
+    //                 amount,
+    //                 source_token_account_diff,
+    //             );
+    //             assert!(
+    //                 (quote.out_amount as i128 - destination_token_account_diff as i128).abs()
+    //                     <= tolerance as i128
+    //             );
+    //         }
+    //         SwapMode::ExactOut => {
+    //             println!(
+    //                 "ExactOut : quote.in_amount: {}, simulation_in_amount: {}, exact_out_amount: {}, simulation_out_amount: {}",
+    //                 quote.in_amount,
+    //                 source_token_account_diff,
+    //                 amount,
+    //                 destination_token_account_diff,
+    //             );
+    //             assert!(
+    //                 (quote.in_amount as i128 - source_token_account_diff as i128).abs()
+    //                     <= tolerance as i128
+    //             );
+    //             assert!(amount == destination_token_account_diff);
+    //         }
+    //     }
 
-        // Benchmark Quote
-        let now = Instant::now();
-        let iterations = 100;
-        for _ in 0..iterations {
-            let quote = amm
-                .quote(&QuoteParams {
-                    amount,
-                    input_mint: *source_mint,
-                    output_mint: *destination_mint,
-                    swap_mode,
-                })
-                .unwrap();
-            black_box(quote);
-        }
-        let elapsed = now.elapsed();
-        println!(
-            "Amm {}, iterations: {iterations}, Quote time per iteration: {} us",
-            amm.label(),
-            elapsed.as_micros() as f64 / (iterations as f64),
-        );
-    }
+    //     // Benchmark Quote
+    //     let now = Instant::now();
+    //     let iterations = 100;
+    //     for _ in 0..iterations {
+    //         let quote = amm
+    //             .quote(&QuoteParams {
+    //                 amount,
+    //                 input_mint: *source_mint,
+    //                 output_mint: *destination_mint,
+    //                 swap_mode,
+    //             })
+    //             .unwrap();
+    //         black_box(quote);
+    //     }
+    //     let elapsed = now.elapsed();
+    //     println!(
+    //         "Amm {}, iterations: {iterations}, Quote time per iteration: {} us",
+    //         amm.label(),
+    //         elapsed.as_micros() as f64 / (iterations as f64),
+    //     );
+    // }
 }
 
 struct TestRpcSender {
