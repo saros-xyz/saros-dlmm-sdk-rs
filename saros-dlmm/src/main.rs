@@ -1,5 +1,4 @@
 use clap::Parser;
-use saros_dlmm_sdk::amms::test_harness::take_snapshot;
 
 #[derive(Parser, Debug)]
 pub struct ConfigOverride {
@@ -37,13 +36,13 @@ async fn main() {
         command,
     } = Cli::parse();
 
-    match command {
-        Command::SnapshotAmm {
-            amm_id,
-            option,
-            force,
-        } => take_snapshot(config_override.rpc_url, amm_id, option, force)
-            .await
-            .unwrap(),
-    }
+    // match command {
+    //     Command::SnapshotAmm {
+    //         amm_id,
+    //         option,
+    //         force,
+    //     } => take_snapshot(config_override.rpc_url, amm_id, option, force)
+    //         .await
+    //         .unwrap(),
+    // }
 }
