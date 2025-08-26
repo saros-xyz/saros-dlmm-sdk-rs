@@ -1,3 +1,4 @@
+#![cfg(feature = "integration")]
 use std::collections::HashMap;
 
 use ahash::RandomState;
