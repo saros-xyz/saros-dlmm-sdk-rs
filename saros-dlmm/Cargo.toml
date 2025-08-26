@@ -41,3 +41,9 @@ spl-associated-token-account = { workspace = true, features = [
 anchor-spl = { version = "0.31.1", features = ["memo"] }
 [dev-dependencies]
 proptest = { workspace = true }
+
+[features]
+# Add an opt-in feature for network/integration tests.
+# Run integration tests with:
+#   cargo test --features integration
+integration = []
