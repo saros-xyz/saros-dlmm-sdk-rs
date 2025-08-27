@@ -3,6 +3,9 @@ name = "saros"
 version.workspace = true
 edition.workspace = true
 
+[lints]
+workspace = true
+
 [dependencies]
 anchor-gen = { workspace = true }
 anchor-lang = { workspace = true }

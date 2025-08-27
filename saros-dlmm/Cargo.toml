@@ -4,6 +4,9 @@ version = "0.1.0"
 description = ""
 edition = { workspace = true }
 
+[lints]
+workspace = true
+
 [dependencies]
 arrayref = { workspace = true }
 jupiter-amm-interface = { workspace = true }
