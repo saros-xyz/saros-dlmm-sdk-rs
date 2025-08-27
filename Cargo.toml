@@ -6,6 +6,12 @@ members = ["saros-dlmm"]
 version = "0.1.0"
 edition = "2024"
 
+[workspace.lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = [
+  'cfg(feature, values("no-entrypoint", "cpi", "custom-heap", "custom-panic", "anchor-debug", "no-idl", "no-log-ix-name"))',
+  'cfg(target_os, values("solana"))'
+] }
+
 [workspace.dependencies]
 anchor-lang = "0.31.0"
 anchor-syn = "0.31.0"
