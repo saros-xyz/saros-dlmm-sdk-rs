@@ -124,7 +124,7 @@ mod fuzz_tests {
         fn test_most_significant_bit(x: u128) {
             let msb = most_significant_bit(x);
 
-            assert!(1 << msb < x);
+            assert!(1 << msb <= x);
 
             if msb < 127 {
                 assert!(1 << (msb + 1) > x);
