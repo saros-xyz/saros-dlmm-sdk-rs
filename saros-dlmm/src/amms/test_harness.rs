@@ -557,7 +557,7 @@ impl AmmTestHarness {
         );
 
         let file =
-            File::open(&file_path).unwrap_or_else(|_| panic!("Snapshot file {file_path} exists"));
+            File::open(&file_path).unwrap_or_else(|_| panic!("Snapshot file {file_path} does not exist"));
         let keyed_account: RpcKeyedAccount = serde_json::from_reader(file).unwrap();
         let account: Account = UiAccount::decode(&keyed_account.account).unwrap();
         let params_file_path = format!("tests/fixtures/accounts/{0}/params.json", directory_name);
