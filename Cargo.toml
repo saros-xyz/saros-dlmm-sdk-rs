@@ -4,23 +4,23 @@ members = ["saros-dlmm"]
 
 [workspace.package]
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [workspace.dependencies]
 anchor-lang = "0.31.0"
 anchor-syn = "0.31.0"
 anchor-gen = "0.4.1"
-solana-sdk = ">=2.2"
-solana-program = ">=2.2"
-solana-client = ">=2.2"
-solana-account-decoder = ">=2.2"
-solana-program-test = ">=2.2"
-tokio = { version = "1", features = ["full"] }
+solana-sdk = "2.2.0"
+solana-program = "2.2.0"
+solana-client = "2.2.0"
+solana-account-decoder = "2.2.0"
+solana-program-test = "2.2.0"
+tokio = { version = "1.37.0", features = ["full"] }
 bytemuck = { version = "1.16.1", features = ["derive"] }
-jupiter-amm-interface = "0.6"
+jupiter-amm-interface = "0.6.0"
 arrayref = "0.3.9"
-anyhow = "1.0"
-thiserror = "2.0.12"
+anyhow = "1.0.81"
+thiserror = "1.0.58"
 ruint = "1.9.0"
 rust_decimal = { version = "1.36.0", features = ["maths", "c-repr"] }
 itertools = "0.14.0"
