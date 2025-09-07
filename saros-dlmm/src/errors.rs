@@ -50,6 +50,9 @@ pub enum ErrorCode {
 
     #[error("Swap crosses too many bins – quote aborted")]
     SwapCrossesTooManyBins,
+
+    #[error("Invalid bin step")]
+    InvalidBinStep,
 }
 
 impl From<TryFromIntError> for ErrorCode {

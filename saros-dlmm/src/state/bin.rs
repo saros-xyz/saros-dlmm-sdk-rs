@@ -66,7 +66,7 @@ impl Bin {
         protocol_share: u64,
         swap_for_y: bool,
     ) -> Result<(u64, u64, u64, u64)> {
-        let price = get_price_from_id(bin_step, bin_id);
+        let price = get_price_from_id(bin_step, bin_id)?;
 
         let bin_reserve_out = if swap_for_y {
             self.reserve_y
@@ -145,7 +145,7 @@ impl Bin {
         let mut protocol_fee_amount = 0;
 
         if protocol_share > 0 {
-            protocol_fee_amount = get_protocol_fee(fee_amount, protocol_share);
+            protocol_fee_amount = get_protocol_fee(fee_amount, protocol_share)?;
         }
 
         let amount_in_with_fees = amount_in
@@ -195,7 +195,7 @@ impl Bin {
         protocol_share: u64,
         swap_for_y: bool,
     ) -> Result<(u64, u64, u64, u64)> {
-        let price = get_price_from_id(bin_step, bin_id);
+        let price = get_price_from_id(bin_step, bin_id)?;
 
         let bin_reserve_out = if swap_for_y {
             self.reserve_y
@@ -231,7 +231,7 @@ impl Bin {
             .checked_add(fee_amount)
             .ok_or(ErrorCode::AmountOverflow)?;
 
-        let protocol_fee_amount = get_protocol_fee(fee_amount, protocol_share);
+        let protocol_fee_amount = get_protocol_fee(fee_amount, protocol_share)?;
 
         if swap_for_y {
             self.reserve_x = self

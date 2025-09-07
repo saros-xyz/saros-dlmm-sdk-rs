@@ -231,7 +231,7 @@ impl Amm for SarosDlmm {
         let (amount_in, amount_out, fee_amount) = match swap_mode {
             SwapMode::ExactIn => {
                 let (amount_in_after_transfer_fee, _) =
-                    compute_transfer_fee(epoch_transfer_fee_in, amount).unwrap();
+                    compute_transfer_fee(epoch_transfer_fee_in, amount)?;
 
                 let (amount_out, fee_amount) = get_swap_result(
                     &mut pair,
@@ -246,7 +246,7 @@ impl Amm for SarosDlmm {
             }
             SwapMode::ExactOut => {
                 let (amount_out_before_transfer_fee, _) =
-                    compute_transfer_fee(epoch_transfer_fee_out, amount).unwrap();
+                    compute_transfer_fee(epoch_transfer_fee_out, amount)?;
 
                 let (amount_in, fee_amount) = get_swap_result(
                     &mut pair,
@@ -312,12 +312,10 @@ impl Amm for SarosDlmm {
             AccountMeta::new(self.hook_bin_array_key[1], false),
         ];
 
-        unimplemented!();
-
-        // Ok(SwapAndAccountMetas {
-        //     swap: Swap::SarosDlmm, // TODO : Add SarosDlmm to Swap enum
-        //     account_metas,
-        // })
+        Ok(SwapAndAccountMetas {
+            swap: Swap::SarosDlmm, // TODO : Add SarosDlmm to Swap enum
+            account_metas,
+        })
     }
 
     fn supports_exact_out(&self) -> bool {
