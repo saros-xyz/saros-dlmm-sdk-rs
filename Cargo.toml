@@ -17,7 +17,7 @@ solana-account-decoder = ">=2.2"
 solana-program-test = ">=2.2"
 tokio = { version = "1", features = ["full"] }
 bytemuck = { version = "1.16.1", features = ["derive"] }
-jupiter-amm-interface = "0.6"
+jupiter-amm-interface = "0.6.0"
 arrayref = "0.3.9"
 anyhow = "1.0"
 thiserror = "2.0.12"
