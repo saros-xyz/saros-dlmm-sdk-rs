@@ -40,7 +40,7 @@ pub fn get_bin_array_upper(
     (bin_array_upper_pubkey, bump)
 }
 
-pub fn get_hook_bin_array(bin_array_index: u32, pair: &Pubkey) -> (Pubkey, Pubkey) {
+pub fn get_hook_bin_array(bin_array_index: u32, pair: &Pubkey) -> (Pubkey, Pubkey, Pubkey) {
     let hook = Pubkey::find_program_address(
         &[
             b"hook".as_ref(),
@@ -68,7 +68,7 @@ pub fn get_hook_bin_array(bin_array_index: u32, pair: &Pubkey) -> (Pubkey, Pubke
         &SarosDlmm::HOOK_PROGRAM_ID.key(),
     );
 
-    (hook_bin_array_lower, hook_bin_array_upper)
+    (hook, hook_bin_array_lower, hook_bin_array_upper)
 }
 
 pub fn is_swap_for_y(source_mint: Pubkey, token_x: Pubkey) -> bool {

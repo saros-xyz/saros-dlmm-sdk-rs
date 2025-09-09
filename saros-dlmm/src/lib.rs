@@ -40,10 +40,13 @@ pub struct SarosDlmm {
     pub bin_array_lower: BinArray,
     pub bin_array_upper: BinArray,
     pub bin_array_key: [Pubkey; 2],
-    pub hook_bin_array_key: [Pubkey; 2],
     pub token_vault: [Pubkey; 2],
     pub token_program: [Pubkey; 2],
     pub event_authority: Pubkey,
+    pub hook: Pubkey,
+    // Remaining accounts of the LB program call
+    pub active_bin_hook_bin_array_key: [Pubkey; 2],
+    // Amm context
     pub epoch: Arc<AtomicU64>,
     pub timestamp: Arc<AtomicI64>,
 }
@@ -90,7 +93,7 @@ impl Amm for SarosDlmm {
             &keyed_account.account.owner,
         );
 
-        let (hook_bin_array_lower_key, hook_bin_array_upper_key) =
+        let (hook, active_bin_hook_bin_array_lower_key, active_bin_hook_bin_array_upper_key) =
             get_hook_bin_array(bin_array_index, &keyed_account.key);
 
         let event_authority = find_event_authority(keyed_account.account.owner);
@@ -104,7 +107,11 @@ impl Amm for SarosDlmm {
             bin_array_lower: BinArray::default(),
             bin_array_upper: BinArray::default(),
             bin_array_key: [bin_array_lower_key, bin_array_upper_key],
-            hook_bin_array_key: [hook_bin_array_lower_key, hook_bin_array_upper_key],
+            active_bin_hook_bin_array_key: [
+                active_bin_hook_bin_array_lower_key,
+                active_bin_hook_bin_array_upper_key,
+            ],
+            hook,
             token_vault: [Pubkey::default(), Pubkey::default()],
             token_program: [Pubkey::default(), Pubkey::default()],
             event_authority,
@@ -306,10 +313,12 @@ impl Amm for SarosDlmm {
             AccountMeta::new_readonly(self.token_program[0], false),
             AccountMeta::new_readonly(self.token_program[1], false),
             AccountMeta::new_readonly(SarosDlmm::MEMO_TOKEN_PROGRAM, false),
+            AccountMeta::new(self.hook, false),
+            AccountMeta::new_readonly(SarosDlmm::HOOK_PROGRAM_ID, false),
             AccountMeta::new_readonly(self.event_authority, false),
             AccountMeta::new_readonly(self.program_id, false),
-            AccountMeta::new(self.hook_bin_array_key[0], false),
-            AccountMeta::new(self.hook_bin_array_key[1], false),
+            AccountMeta::new(self.active_bin_hook_bin_array_key[0], false),
+            AccountMeta::new(self.active_bin_hook_bin_array_key[1], false),
         ];
 
         unimplemented!();
