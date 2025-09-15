@@ -34,7 +34,7 @@ pub fn amm_factory(
     let saros_dlmm = SarosDlmm::from_keyed_account(keyed_account, amm_context)?;
 
     // Add your AMM here
-    if SPL_TOKEN_SWAP_PROGRAMS.contains_key(&owner) {
+    if SPL_TOKEN_SWAP_PROGRAMS.contains_key(&Pubkey::from_str_const(&owner.to_string())) {
         Ok(Box::new(saros_dlmm))
     } else {
         Err(anyhow!(

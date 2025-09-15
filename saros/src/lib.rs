@@ -1,3 +1,4 @@
+#![allow(unexpected_cfgs, deprecated)]
 anchor_gen::generate_cpi_crate!("idls/liquidity_book.json");
 
 use rand::distributions::{Distribution, Uniform};

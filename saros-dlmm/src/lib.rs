@@ -19,14 +19,13 @@ use crate::{
     utils::helper::{get_bin_array_lower, get_bin_array_upper},
 };
 pub use amms::amm;
-use anchor_lang::prelude::AccountMeta;
 use anyhow::{Context, Result};
 use jupiter_amm_interface::{
     AccountMap, Amm, AmmContext, KeyedAccount, Quote, QuoteParams, Swap, SwapAndAccountMetas,
     SwapMode, SwapParams, try_get_account_data, try_get_account_data_and_owner,
 };
 use solana_sdk::program_pack::Pack;
-use solana_sdk::{pubkey, pubkey::Pubkey};
+use solana_sdk::{pubkey::Pubkey, instruction::AccountMeta};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicI64, AtomicU64};
 
@@ -53,11 +52,14 @@ pub struct SarosDlmm {
 
 impl SarosDlmm {
     const ASSOCIATED_TOKEN_PROGRAM_ADDRESS: Pubkey =
-        pubkey!("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
+        Pubkey::from_str_const("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
 
-    const MEMO_TOKEN_PROGRAM: Pubkey = pubkey!("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
-    const HOOK_PROGRAM_ID: Pubkey = pubkey!("mdmavMvJpF4ZcLJNg6VSjuKVMiBo5uKwERTg1ZB9yUH");
-    const HOOK_CONFIG: Pubkey = pubkey!("DgW5ARD9sU3W6SJqtyJSH3QPivxWt7EMvjER9hfFKWXF");
+    const MEMO_TOKEN_PROGRAM: Pubkey =
+        Pubkey::from_str_const("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+    const HOOK_PROGRAM_ID: Pubkey =
+        Pubkey::from_str_const("mdmavMvJpF4ZcLJNg6VSjuKVMiBo5uKwERTg1ZB9yUH");
+    const HOOK_CONFIG: Pubkey =
+        Pubkey::from_str_const("DgW5ARD9sU3W6SJqtyJSH3QPivxWt7EMvjER9hfFKWXF");
 }
 
 impl Amm for SarosDlmm {

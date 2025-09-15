@@ -1,11 +1,9 @@
 use itertools::Itertools;
 
-use anchor_lang::{InstructionData, prelude::*};
+use anchor_lang::InstructionData;
 use anyhow::{Ok, Result};
-use solana_sdk::instruction::Instruction;
-
 use jupiter_amm_interface::SwapMode;
-
+use solana_sdk::{instruction::Instruction, pubkey::Pubkey};
 /// All necessary parts to build a `VersionedTransaction`
 #[derive(Clone)]
 pub struct SwapInstructions {
