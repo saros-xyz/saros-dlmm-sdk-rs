@@ -80,7 +80,7 @@ impl Amm for SarosDlmm {
         Self: Sized,
     {
         let account_data = &keyed_account.account.data[..];
-        let pair = Pair::unpack(&account_data)?;
+        let pair = Pair::unpack(account_data)?;
 
         let bin_array_index = pair.bin_array_index();
 
@@ -127,12 +127,12 @@ impl Amm for SarosDlmm {
     }
 
     fn get_accounts_to_update(&self) -> Vec<Pubkey> {
-        return vec![
+        vec![
             self.bin_array_key[0],
             self.bin_array_key[1],
             self.pair.token_mint_x,
             self.pair.token_mint_y,
-        ];
+        ]
     }
 
     fn update(&mut self, account_map: &AccountMap) -> Result<()> {
@@ -143,7 +143,7 @@ impl Amm for SarosDlmm {
                     self.bin_array_key[0]
                 )
             })?;
-        let bin_array_lower = &BinArray::unpack(&bin_array_lower_data[..])?;
+        let bin_array_lower = &BinArray::unpack(bin_array_lower_data)?;
 
         let bin_array_upper_data = try_get_account_data(account_map, &self.bin_array_key[1])
             .with_context(|| {
@@ -152,7 +152,7 @@ impl Amm for SarosDlmm {
                     self.bin_array_key[1]
                 )
             })?;
-        let bin_array_upper = &BinArray::unpack(&bin_array_upper_data[..])?;
+        let bin_array_upper = &BinArray::unpack(bin_array_upper_data)?;
 
         let (mint_x_data, mint_x_owner) =
             try_get_account_data_and_owner(account_map, &self.pair.token_mint_x).with_context(
@@ -176,13 +176,13 @@ impl Amm for SarosDlmm {
         self.token_transfer_fee = TokenTransferFee::new(
             &mut self.token_transfer_fee,
             mint_x_data,
-            &mint_x_owner,
+            mint_x_owner,
             mint_y_data,
-            &mint_y_owner,
+            mint_y_owner,
         )?;
 
-        self.bin_array_lower = bin_array_lower.clone();
-        self.bin_array_upper = bin_array_upper.clone();
+        self.bin_array_lower = *bin_array_lower;
+        self.bin_array_upper = *bin_array_upper;
 
         (self.token_vault[0], _) = Pubkey::find_program_address(
             &[
@@ -216,8 +216,7 @@ impl Amm for SarosDlmm {
         } = *quote_params;
         let mut pair = self.pair.clone();
 
-        let bin_array =
-            BinArrayPair::merge(self.bin_array_lower.clone(), self.bin_array_upper.clone())?;
+        let bin_array = BinArrayPair::merge(self.bin_array_lower, self.bin_array_upper)?;
 
         let block_timestamp = self.timestamp.load(std::sync::atomic::Ordering::Relaxed) as u64;
 

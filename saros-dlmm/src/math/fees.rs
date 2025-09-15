@@ -26,7 +26,7 @@ impl TokenTransferFee {
             self.epoch_transfer_fee_x = None;
         } else {
             let token_mint_unpacked =
-                StateWithExtensions::<spl_token_2022::state::Mint>::unpack(&mint_x_data)?;
+                StateWithExtensions::<spl_token_2022::state::Mint>::unpack(mint_x_data)?;
 
             if let Ok(transfer_fee_config) =
                 token_mint_unpacked.get_extension::<extension::transfer_fee::TransferFeeConfig>()
@@ -40,7 +40,7 @@ impl TokenTransferFee {
             self.epoch_transfer_fee_y = None;
         } else {
             let token_mint_unpacked =
-                StateWithExtensions::<spl_token_2022::state::Mint>::unpack(&mint_y_data)?;
+                StateWithExtensions::<spl_token_2022::state::Mint>::unpack(mint_y_data)?;
 
             if let Ok(transfer_fee_config) =
                 token_mint_unpacked.get_extension::<extension::transfer_fee::TransferFeeConfig>()
@@ -116,7 +116,7 @@ pub fn compute_transfer_fee_amount(
     token_mint_transfer_fee: Option<TransferFee>,
     transfer_amount: u64,
 ) -> Result<(u64, u64)> {
-    return compute_transfer_fee(token_mint_transfer_fee, transfer_amount);
+    compute_transfer_fee(token_mint_transfer_fee, transfer_amount)
 }
 
 pub fn compute_transfer_amount_for_expected_output(
@@ -126,5 +126,5 @@ pub fn compute_transfer_amount_for_expected_output(
     if expected_output == 0 {
         return Ok((0, 0));
     }
-    return compute_transfer_amount(token_mint_transfer_fee, expected_output);
+    compute_transfer_amount(token_mint_transfer_fee, expected_output)
 }

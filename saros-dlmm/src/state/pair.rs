@@ -161,9 +161,7 @@ impl Clone for Pair {
 
 impl Pair {
     pub fn bin_array_index(&self) -> u32 {
-        let idx = self.active_id / BIN_ARRAY_SIZE;
-
-        idx
+        self.active_id / BIN_ARRAY_SIZE
     }
 
     pub fn resolve_mints(&self, input_mint: Pubkey, swap_mode: SwapMode) -> Result<bool> {
