@@ -1,1 +1,7 @@
-<h1 className="italic">Bounty Granted</h1>
+<h1 className="italic">
+  <i>
+  Bounty Granted
+  
+  </i>
+  
+  </h1>
