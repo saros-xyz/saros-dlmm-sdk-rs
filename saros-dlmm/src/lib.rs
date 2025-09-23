@@ -222,7 +222,7 @@ impl Amm for SarosDlmm {
         let (amount_in, amount_out, fee_amount) = match swap_mode {
             SwapMode::ExactIn => {
                 let (amount_in_after_transfer_fee, _) =
-                    compute_transfer_fee(epoch_transfer_fee_in, amount).unwrap();
+                    compute_transfer_fee(epoch_transfer_fee_in, amount)?;
 
                 let (amount_out, fee_amount) = get_swap_result(
                     &mut pair,
@@ -237,7 +237,7 @@ impl Amm for SarosDlmm {
             }
             SwapMode::ExactOut => {
                 let (amount_out_before_transfer_fee, _) =
-                    compute_transfer_fee(epoch_transfer_fee_out, amount).unwrap();
+                    compute_transfer_fee(epoch_transfer_fee_out, amount)?;
 
                 let (amount_in, fee_amount) = get_swap_result(
                     &mut pair,
@@ -283,7 +283,7 @@ impl Amm for SarosDlmm {
 
         let user = *token_transfer_authority;
 
-        let account_metas = vec![
+        let _account_metas = vec![
             AccountMeta::new(self.key, false),
             AccountMeta::new_readonly(self.pair.token_mint_x, false),
             AccountMeta::new_readonly(self.pair.token_mint_y, false),

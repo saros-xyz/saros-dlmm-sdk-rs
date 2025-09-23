@@ -2,9 +2,9 @@ use crate::constants::{BASIS_POINT_MAX, PRECISION};
 use crate::errors::ErrorCode;
 use anyhow::Result;
 
-pub fn get_protocol_fee(fee: u64, protocol_share: u64) -> u64 {
-    u64::try_from(u128::from(fee) * u128::from(protocol_share) / u128::from(BASIS_POINT_MAX))
-        .unwrap()
+pub fn get_protocol_fee(fee: u64, protocol_share: u64) -> Result<u64> {
+    let value = u128::from(fee) * u128::from(protocol_share) / u128::from(BASIS_POINT_MAX);
+    Ok(u64::try_from(value)?)
 }
 
 /// Calculate the fee amount taken from the input amount
