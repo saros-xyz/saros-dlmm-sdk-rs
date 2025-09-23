@@ -4354,7 +4354,6 @@ dependencies = [
  "anchor-lang",
  "anchor-spl",
  "anyhow",
- "arrayref",
  "assert_matches",
  "async-trait",
  "bincode",
@@ -4369,6 +4368,7 @@ dependencies = [
  "ruint",
  "rust_decimal",
  "saros",
+ "saros-sdk",
  "serde_json",
  "solana-account-decoder",
  "solana-client",
@@ -4376,10 +4376,25 @@ dependencies = [
  "solana-program-test",
  "solana-sdk",
  "spl-associated-token-account 7.0.0",
+ "spl-memo",
+ "spl-token 8.0.0",
+ "spl-token-2022 9.0.0",
+ "tokio",
+]
+
+[[package]]
+name = "saros-sdk"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "arrayref",
+ "jupiter-amm-interface",
+ "proptest",
+ "ruint",
+ "solana-sdk",
  "spl-token 8.0.0",
  "spl-token-2022 9.0.0",
  "thiserror 2.0.12",
- "tokio",
 ]
 
 [[package]]

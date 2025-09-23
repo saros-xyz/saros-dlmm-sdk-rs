@@ -1,0 +1,17 @@
+[package]
+name = "saros-sdk"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+solana-sdk = { workspace = true }
+thiserror = { workspace = true }
+arrayref = { workspace = true }
+anyhow = { workspace = true }
+spl-token-2022 = { workspace = true }
+spl-token = { workspace = true }
+ruint = { workspace = true }
+jupiter-amm-interface = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }

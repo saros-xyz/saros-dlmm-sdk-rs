@@ -5,7 +5,6 @@ description = ""
 edition = { workspace = true }
 
 [dependencies]
-arrayref = { workspace = true }
 jupiter-amm-interface = { workspace = true }
 anchor-lang = { workspace = true }
 solana-sdk = { workspace = true }
@@ -14,14 +13,15 @@ solana-account-decoder = { workspace = true }
 solana-program = { workspace = true }
 anyhow = { workspace = true }
 bytemuck = { workspace = true }
-thiserror = { workspace = true }
 rust_decimal = { workspace = true }
 spl-token-2022 = { workspace = true }
 spl-token = { workspace = true }
+spl-memo = { workspace = true }
 ruint = { workspace = true }
 itertools = { workspace = true }
 
 saros = { path = "../saros" }
+saros-sdk = { path = "../saros-sdk" }
 
 assert_matches = { workspace = true }
 async-trait = { workspace = true }
@@ -39,5 +39,6 @@ spl-associated-token-account = { workspace = true, features = [
     "no-entrypoint",
 ] }
 anchor-spl = { version = "0.31.1", features = ["memo"] }
+
 [dev-dependencies]
 proptest = { workspace = true }
