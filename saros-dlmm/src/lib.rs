@@ -1,29 +1,24 @@
 pub mod amms;
-pub mod constants;
-pub mod errors;
-pub mod math;
 pub mod route;
-pub mod state;
 pub mod swap_instruction;
-pub mod utils;
 
-use crate::math::fees::{compute_transfer_amount_for_expected_output, compute_transfer_fee};
-use crate::math::swap_manager::get_swap_result;
-use crate::utils::helper::{find_event_authority, get_hook_bin_array, is_swap_for_y};
-use crate::{
+pub use amms::amm;
+use anchor_lang::prelude::AccountMeta;
+use anyhow::{Context, Result};
+use jupiter_amm_interface::{
+    AccountMap, Amm, AmmContext, KeyedAccount, Quote, QuoteParams, SwapAndAccountMetas, SwapMode,
+    SwapParams, try_get_account_data, try_get_account_data_and_owner,
+};
+use saros_sdk::math::fees::{compute_transfer_amount_for_expected_output, compute_transfer_fee};
+use saros_sdk::math::swap_manager::get_swap_result;
+use saros_sdk::utils::helper::{find_event_authority, get_hook_bin_array, is_swap_for_y};
+use saros_sdk::{
     math::fees::TokenTransferFee,
     state::{
         bin_array::{BinArray, BinArrayPair},
         pair::Pair,
     },
     utils::helper::{get_bin_array_lower, get_bin_array_upper},
-};
-pub use amms::amm;
-use anchor_lang::prelude::AccountMeta;
-use anyhow::{Context, Result};
-use jupiter_amm_interface::{
-    AccountMap, Amm, AmmContext, KeyedAccount, Quote, QuoteParams, Swap, SwapAndAccountMetas,
-    SwapMode, SwapParams, try_get_account_data, try_get_account_data_and_owner,
 };
 use solana_sdk::program_pack::Pack;
 use solana_sdk::{pubkey, pubkey::Pubkey};
@@ -51,10 +46,6 @@ pub struct SarosDlmm {
 impl SarosDlmm {
     const ASSOCIATED_TOKEN_PROGRAM_ADDRESS: Pubkey =
         pubkey!("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
-
-    const MEMO_TOKEN_PROGRAM: Pubkey = pubkey!("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
-    const HOOK_PROGRAM_ID: Pubkey = pubkey!("mdmavMvJpF4ZcLJNg6VSjuKVMiBo5uKwERTg1ZB9yUH");
-    const HOOK_CONFIG: Pubkey = pubkey!("DgW5ARD9sU3W6SJqtyJSH3QPivxWt7EMvjER9hfFKWXF");
 }
 
 impl Amm for SarosDlmm {
@@ -305,7 +296,7 @@ impl Amm for SarosDlmm {
             AccountMeta::new_readonly(user, true),
             AccountMeta::new_readonly(self.token_program[0], false),
             AccountMeta::new_readonly(self.token_program[1], false),
-            AccountMeta::new_readonly(SarosDlmm::MEMO_TOKEN_PROGRAM, false),
+            AccountMeta::new_readonly(spl_memo::ID, false),
             AccountMeta::new_readonly(self.event_authority, false),
             AccountMeta::new_readonly(self.program_id, false),
             AccountMeta::new(self.hook_bin_array_key[0], false),

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["saros-dlmm"]
+members = ["saros-dlmm", "saros-sdk", "saros"]
 
 [workspace.package]
 version = "0.1.0"
@@ -43,5 +43,6 @@ spl-token-2022 = { version = "9", features = ["no-entrypoint"] }
 spl-associated-token-account = { version = "7.0.0", features = [
     "no-entrypoint",
 ] }
+spl-memo = { version = "6.0.0" }
 
 proptest = "1.4.0"
