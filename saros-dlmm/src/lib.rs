@@ -122,6 +122,7 @@ impl Amm for SarosDlmm {
 
     fn get_accounts_to_update(&self) -> Vec<Pubkey> {
         return vec![
+            self.key,
             self.bin_array_key[0],
             self.bin_array_key[1],
             self.pair.token_mint_x,
@@ -130,23 +131,50 @@ impl Amm for SarosDlmm {
     }
 
     fn update(&mut self, account_map: &AccountMap) -> Result<()> {
-        let bin_array_lower_data = try_get_account_data(account_map, &self.bin_array_key[0])
-            .with_context(|| {
-                format!(
-                    "Bin array lower account does not exist or has not been initialized: {}",
-                    self.bin_array_key[0]
-                )
-            })?;
-        let bin_array_lower = &BinArray::unpack(&bin_array_lower_data[..])?;
+        let pair_data = try_get_account_data(account_map, &self.key).with_context(|| {
+            format!(
+                "Pair account does not exist or has not been initialized: {}",
+                self.key
+            )
+        })?;
 
-        let bin_array_upper_data = try_get_account_data(account_map, &self.bin_array_key[1])
-            .with_context(|| {
-                format!(
-                    "Bin array upper account does not exist or has not been initialized: {}",
-                    self.bin_array_key[1]
-                )
-            })?;
-        let bin_array_upper = &BinArray::unpack(&bin_array_upper_data[..])?;
+        self.pair = Pair::unpack(&pair_data[..])?;
+        let bin_array_index = self.pair.bin_array_index();
+
+        let (bin_array_lower_key, _) =
+            get_bin_array_lower(bin_array_index, &self.key, &self.program_id);
+
+        let (bin_array_upper_key, _) =
+            get_bin_array_upper(bin_array_index, &self.key, &self.program_id);
+
+        if self.bin_array_key[0] != bin_array_lower_key
+            || self.bin_array_key[1] != bin_array_upper_key
+        {
+            self.bin_array_key = [bin_array_lower_key, bin_array_upper_key];
+            let (hook_bin_array_lower_key, hook_bin_array_upper_key) =
+                get_hook_bin_array(bin_array_index, &self.key);
+            self.hook_bin_array_key = [hook_bin_array_lower_key, hook_bin_array_upper_key];
+        } else {
+            let bin_array_lower_data = try_get_account_data(account_map, &bin_array_lower_key)
+                .with_context(|| {
+                    format!(
+                        "Bin array lower account does not exist or has not been initialized: {}",
+                        self.bin_array_key[0]
+                    )
+                })?;
+
+            self.bin_array_lower = BinArray::unpack(&bin_array_lower_data[..])?;
+
+            let bin_array_upper_data = try_get_account_data(account_map, &bin_array_upper_key)
+                .with_context(|| {
+                    format!(
+                        "Bin array upper account does not exist or has not been initialized: {}",
+                        self.bin_array_key[1]
+                    )
+                })?;
+
+            self.bin_array_upper = BinArray::unpack(&bin_array_upper_data[..])?;
+        }
 
         let (mint_x_data, mint_x_owner) =
             try_get_account_data_and_owner(account_map, &self.pair.token_mint_x).with_context(
@@ -174,9 +202,6 @@ impl Amm for SarosDlmm {
             mint_y_data,
             &mint_y_owner,
         )?;
-
-        self.bin_array_lower = bin_array_lower.clone();
-        self.bin_array_upper = bin_array_upper.clone();
 
         (self.token_vault[0], _) = Pubkey::find_program_address(
             &[
