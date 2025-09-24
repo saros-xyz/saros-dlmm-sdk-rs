@@ -340,7 +340,7 @@ impl Amm for SarosDlmm {
 
         let user = *token_transfer_authority;
 
-        let account_metas = vec![
+        let _account_metas = vec![
             AccountMeta::new(self.key, false),
             AccountMeta::new_readonly(self.pair.token_mint_x, false),
             AccountMeta::new_readonly(self.pair.token_mint_y, false),
