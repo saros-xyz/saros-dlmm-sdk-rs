@@ -30,7 +30,7 @@ use solana_sdk::{
     program_pack::Pack,
     pubkey,
     pubkey::Pubkey,
-    sysvar::clock::{Clock, ID as SysvarClockID},
+    sysvar::{clock, clock::Clock},
 };
 use std::sync::{
     Arc,
@@ -127,6 +127,7 @@ impl Amm for SarosDlmm {
             self.bin_array_key[1],
             self.pair.token_mint_x,
             self.pair.token_mint_y,
+            clock::ID,
         ];
     }
 
@@ -195,12 +196,22 @@ impl Amm for SarosDlmm {
                 },
             )?;
 
+        let clock_data = try_get_account_data(account_map, &clock::ID)
+            .with_context(|| format!("Sysvar Clock account does not exist : {}", clock::ID))?;
+
+        let clock: Clock =
+            deserialize(&clock_data).with_context(|| "Failed to deserialize Clock")?;
+
+        self.epoch = Arc::new(AtomicU64::new(clock.epoch));
+        self.timestamp = Arc::new(AtomicI64::new(clock.unix_timestamp));
+
         self.token_transfer_fee = TokenTransferFee::new(
             &mut self.token_transfer_fee,
             mint_x_data,
             &mint_x_owner,
             mint_y_data,
             &mint_y_owner,
+            self.epoch.load(Ordering::Relaxed),
         )?;
 
         (self.token_vault[0], _) = Pubkey::find_program_address(
@@ -238,8 +249,7 @@ impl Amm for SarosDlmm {
         let bin_array =
             BinArrayPair::merge(self.bin_array_lower.clone(), self.bin_array_upper.clone())?;
 
-        let block_timestamp = self.timestamp.load(std::sync::atomic::Ordering::Relaxed) as u64;
-
+        let block_timestamp = self.timestamp.load(Ordering::Relaxed) as u64;
         let swap_for_y = is_swap_for_y(input_mint, self.pair.token_mint_x);
 
         let (mint_in, epoch_transfer_fee_in, epoch_transfer_fee_out) = if swap_for_y {

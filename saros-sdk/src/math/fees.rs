@@ -1,4 +1,4 @@
-use solana_sdk::{clock::Clock, pubkey::Pubkey, sysvar::Sysvar};
+use solana_sdk::{pubkey::Pubkey};
 use spl_token_2022::{
     self,
     extension::{self, BaseStateWithExtensions, StateWithExtensions, transfer_fee::TransferFee},
@@ -21,6 +21,7 @@ impl TokenTransferFee {
         mint_x_owner: &Pubkey,
         mint_y_data: &[u8],
         mint_y_owner: &Pubkey,
+        epoch: u64,
     ) -> Result<Self> {
         if mint_x_owner == &spl_token::ID {
             self.epoch_transfer_fee_x = None;
@@ -31,7 +32,6 @@ impl TokenTransferFee {
             if let Ok(transfer_fee_config) =
                 token_mint_unpacked.get_extension::<extension::transfer_fee::TransferFeeConfig>()
             {
-                let epoch = Clock::get()?.epoch;
                 self.epoch_transfer_fee_x = Some(*transfer_fee_config.get_epoch_fee(epoch));
             }
         }
@@ -45,7 +45,6 @@ impl TokenTransferFee {
             if let Ok(transfer_fee_config) =
                 token_mint_unpacked.get_extension::<extension::transfer_fee::TransferFeeConfig>()
             {
-                let epoch = Clock::get()?.epoch;
                 self.epoch_transfer_fee_y = Some(*transfer_fee_config.get_epoch_fee(epoch));
             }
         }
