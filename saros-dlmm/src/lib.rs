@@ -269,7 +269,7 @@ impl Amm for SarosDlmm {
         let (amount_in, amount_out, fee_amount) = match swap_mode {
             SwapMode::ExactIn => {
                 let (amount_in_after_transfer_fee, _) =
-                    compute_transfer_fee(epoch_transfer_fee_in, amount).unwrap();
+                    compute_transfer_fee(epoch_transfer_fee_in, amount)?;
 
                 let (amount_out, fee_amount) = get_swap_result(
                     &mut pair,
@@ -280,11 +280,14 @@ impl Amm for SarosDlmm {
                     block_timestamp,
                 )?;
 
-                (amount, amount_out, fee_amount)
+                let (amount_out_after_transfer_fee, _) =
+                    compute_transfer_fee(epoch_transfer_fee_out, amount_out)?;
+
+                (amount, amount_out_after_transfer_fee, fee_amount)
             }
             SwapMode::ExactOut => {
                 let (amount_out_before_transfer_fee, _) =
-                    compute_transfer_fee(epoch_transfer_fee_out, amount).unwrap();
+                    compute_transfer_amount_for_expected_output(epoch_transfer_fee_out, amount)?;
 
                 let (amount_in, fee_amount) = get_swap_result(
                     &mut pair,
@@ -298,7 +301,14 @@ impl Amm for SarosDlmm {
                 let (amount_in_before_transfer_fee, _) =
                     compute_transfer_amount_for_expected_output(epoch_transfer_fee_in, amount_in)?;
 
-                (amount_in_before_transfer_fee, amount, fee_amount)
+                let (amount_out_after_transfer_fee, _) =
+                    compute_transfer_fee(epoch_transfer_fee_out, amount)?;
+
+                (
+                    amount_in_before_transfer_fee,
+                    amount_out_after_transfer_fee,
+                    fee_amount,
+                )
             }
         };
 
