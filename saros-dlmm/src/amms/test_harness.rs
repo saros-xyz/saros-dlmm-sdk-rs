@@ -49,6 +49,7 @@ pub const USDC_MINT: Pubkey = pubkey!("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTD
 pub const USDT_MINT: Pubkey = pubkey!("Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB");
 pub const WSOL_MINT: Pubkey = pubkey!("So11111111111111111111111111111111111111112");
 pub const MASHA_MINT: Pubkey = pubkey!("mae8vJGf8Wju8Ron1oDTQVaTGGBpcpWDwoRQJALMMf2");
+pub const LAUNCHCOIN_MINT: Pubkey = pubkey!("Ey59PH7Z4BFU4HjyKnyMdWt5GGN76KazTAwQihoUXRnk");
 
 lazy_static! {
     // For SwapMode::ExactIn
@@ -68,8 +69,13 @@ lazy_static! {
         (USDC_MINT, 50_000_000),
         (USDT_MINT, 50_000_000),
     ];
-    pub static ref TOKEN2022_MINT_AND_IN_AMOUNT: [(Pubkey, u64); 0] = [];
-    pub static ref TOKEN2022_MINT_AND_OUT_AMOUNT: [(Pubkey, u64); 0] = [];
+    pub static ref TOKEN2022_MINT_AND_IN_AMOUNT: [(Pubkey, u64); 1] = [
+        (LAUNCHCOIN_MINT, 100_000_000_000),
+
+    ];
+    pub static ref TOKEN2022_MINT_AND_OUT_AMOUNT: [(Pubkey, u64); 1] = [
+        (LAUNCHCOIN_MINT, 100_000_000_000),
+    ];
 
     // Mapping pubkey → amount
     pub static ref TOKEN_MINT_TO_IN_AMOUNT: HashMap<Pubkey, u64> = {
@@ -799,7 +805,10 @@ impl AmmTestHarness {
         // Some AMMs read the clock sysvar
         addresses_for_snapshot.insert(sysvar::clock::ID);
 
-        let snapshot_path_string = format!("tests/fixtures/accounts/{}", self.directory_name());
+        let snapshot_path_string = format!(
+            "saros-dlmm/tests/fixtures/accounts/{}",
+            self.directory_name()
+        );
         let snapshot_path = Path::new(&snapshot_path_string);
         if force {
             if snapshot_path.exists() && snapshot_path.is_dir() {
