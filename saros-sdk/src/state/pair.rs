@@ -222,7 +222,7 @@ impl Pair {
                 .ok_or(ErrorCode::AmountUnderflow)?)
                 / VARIABLE_FEE_PRECISION;
 
-            Ok(u64::try_from(variable_fee).unwrap())
+            Ok(u64::try_from(variable_fee).map_err(|_| ErrorCode::U64ConversionOverflow)?)
         } else {
             Ok(0)
         }
@@ -241,7 +241,7 @@ impl Pair {
             .ok_or(ErrorCode::AmountOverflow)?
             / SQUARED_PRECISION;
 
-        Ok(u64::try_from(composition_fee).unwrap())
+        Ok(u64::try_from(composition_fee).map_err(|_| ErrorCode::U64ConversionOverflow)?)
     }
 
     pub fn get_protocol_share(&self) -> u64 {
@@ -292,12 +292,13 @@ impl Pair {
 
         let max_volatility_accumulator = self.static_fee_parameters.max_volatility_accumulator;
 
-        self.dynamic_fee_parameters.volatility_accumulator =
-            if volatility_accumulator > u128::from(max_volatility_accumulator) {
-                max_volatility_accumulator
-            } else {
-                u32::try_from(volatility_accumulator).unwrap()
-            };
+        self.dynamic_fee_parameters.volatility_accumulator = if volatility_accumulator
+            > u128::from(max_volatility_accumulator)
+        {
+            max_volatility_accumulator
+        } else {
+            u32::try_from(volatility_accumulator).map_err(|_| ErrorCode::U64ConversionOverflow)?
+        };
 
         Ok(())
     }
