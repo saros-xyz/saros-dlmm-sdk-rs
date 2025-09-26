@@ -9,7 +9,7 @@ use jupiter_amm_interface::{
 };
 use lazy_static::lazy_static;
 
-use saros_sdk::utils::helper::is_swap_for_y;
+use saros_sdk::{constants::HOOK_PROGRAM_ID, utils::helper::is_swap_for_y};
 use serde_json::{Value, json};
 use solana_account_decoder::{UiAccount, UiAccountEncoding, encode_ui_account};
 use solana_client::{
@@ -656,6 +656,7 @@ impl AmmTestHarness {
         pt.deactivate_feature(pubkey!("7Vced912WrRnfjaiKRiNBcbuFw7RrnLv3E3z95Y4GTNc"));
 
         pt.add_program("saros_dlmm", saros::ID, None);
+        pt.add_program("rewarder_hook", HOOK_PROGRAM_ID, None);
 
         // let modified_label = amm.label().to_lowercase().replace(' ', "_");
         pt.add_program(
