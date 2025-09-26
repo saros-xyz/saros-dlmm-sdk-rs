@@ -393,10 +393,12 @@ impl AmmTestHarnessProgramTest {
         match swap_mode {
             SwapMode::ExactIn => {
                 println!(
-                    "ExactIn : quote.out_amount: {}, simulation_out_amount: {}, exact_in_amount: {}, simulation_in_amount: {}",
+                    "ExactIn :
+                    input_amount: {}, quote.out_amount: {}, simulation_out_amount: {}, quote.exact_in_amount: {}, simulation_in_amount: {}",
+                    amount,
                     quote.out_amount,
                     destination_token_account_diff,
-                    amount,
+                    quote.in_amount,
                     source_token_account_diff,
                 );
                 assert!(
@@ -406,10 +408,12 @@ impl AmmTestHarnessProgramTest {
             }
             SwapMode::ExactOut => {
                 println!(
-                    "ExactOut : quote.in_amount: {}, simulation_in_amount: {}, exact_out_amount: {}, simulation_out_amount: {}",
+                    "ExactOut : 
+                    input_amount: {}, quote.in_amount: {}, simulation_in_amount: {}, quote.exact_out_amount: {}, simulation_out_amount: {}",
+                    amount,
                     quote.in_amount,
                     source_token_account_diff,
-                    amount,
+                    quote.out_amount,
                     destination_token_account_diff,
                 );
                 assert!(
