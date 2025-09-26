@@ -11,6 +11,7 @@ use jupiter_amm_interface::{
     SwapMode, SwapParams, try_get_account_data, try_get_account_data_and_owner,
 };
 use saros_sdk::{
+    constants::HOOK_PROGRAM_ID,
     math::{
         fees::{
             TokenTransferFee, compute_transfer_amount_for_expected_output, compute_transfer_fee,
@@ -47,10 +48,12 @@ pub struct SarosDlmm {
     pub bin_array_lower: BinArray,
     pub bin_array_upper: BinArray,
     pub bin_array_key: [Pubkey; 2],
-    pub hook_bin_array_key: [Pubkey; 2],
     pub token_vault: [Pubkey; 2],
     pub token_program: [Pubkey; 2],
     pub event_authority: Pubkey,
+    pub hook: Pubkey,
+    // // Remaining accounts of the LB program cpi call to hooks, will be checked at hook program.
+    pub active_hook_bin_array_key: [Pubkey; 2],
     pub epoch: Arc<AtomicU64>,
     pub timestamp: Arc<AtomicI64>,
 }
@@ -93,8 +96,19 @@ impl Amm for SarosDlmm {
             &keyed_account.account.owner,
         );
 
-        let (hook_bin_array_lower_key, hook_bin_array_upper_key) =
-            get_hook_bin_array(bin_array_index, &keyed_account.key);
+        let (mut active_hook_bin_array_lower_key, mut active_hook_bin_array_upper_key) =
+            (Pubkey::default(), Pubkey::default());
+
+        let mut hook_key = keyed_account.key; // Dummy key if no hook
+
+        if let Some(pair_hook_key) = pair.hook {
+            (
+                active_hook_bin_array_lower_key,
+                active_hook_bin_array_upper_key,
+            ) = get_hook_bin_array(bin_array_index, pair_hook_key);
+
+            hook_key = pair_hook_key;
+        }
 
         let event_authority = find_event_authority(keyed_account.account.owner);
 
@@ -102,15 +116,19 @@ impl Amm for SarosDlmm {
             program_id: keyed_account.account.owner,
             key: keyed_account.key,
             label: "saros_dlmm".into(),
-            pair,
+            pair: pair.clone(),
             token_transfer_fee: TokenTransferFee::default(),
             bin_array_lower: BinArray::default(),
             bin_array_upper: BinArray::default(),
             bin_array_key: [bin_array_lower_key, bin_array_upper_key],
-            hook_bin_array_key: [hook_bin_array_lower_key, hook_bin_array_upper_key],
             token_vault: [Pubkey::default(), Pubkey::default()],
             token_program: [Pubkey::default(), Pubkey::default()],
             event_authority,
+            hook: hook_key,
+            active_hook_bin_array_key: [
+                active_hook_bin_array_lower_key,
+                active_hook_bin_array_upper_key,
+            ],
             epoch: amm_context.clock_ref.epoch.clone(),
             timestamp: amm_context.clock_ref.unix_timestamp.clone(),
         })
@@ -152,9 +170,15 @@ impl Amm for SarosDlmm {
             || self.bin_array_key[1] != bin_array_upper_key
         {
             self.bin_array_key = [bin_array_lower_key, bin_array_upper_key];
-            let (hook_bin_array_lower_key, hook_bin_array_upper_key) =
-                get_hook_bin_array(bin_array_index, &self.key);
-            self.hook_bin_array_key = [hook_bin_array_lower_key, hook_bin_array_upper_key];
+
+            if let Some(hook_key) = self.pair.hook {
+                let (hook_bin_array_lower_key, hook_bin_array_upper_key) =
+                    get_hook_bin_array(bin_array_index, hook_key);
+                self.active_hook_bin_array_key =
+                    [hook_bin_array_lower_key, hook_bin_array_upper_key];
+
+                self.hook = hook_key;
+            }
         } else {
             let bin_array_lower_data = try_get_account_data(account_map, &bin_array_lower_key)
                 .with_context(|| {
@@ -339,26 +363,37 @@ impl Amm for SarosDlmm {
         };
 
         let user = *token_transfer_authority;
+        let mut account_meta = Vec::new();
 
-        let _account_metas = vec![
-            AccountMeta::new(self.key, false),
-            AccountMeta::new_readonly(self.pair.token_mint_x, false),
-            AccountMeta::new_readonly(self.pair.token_mint_y, false),
-            AccountMeta::new(self.bin_array_key[0], false),
-            AccountMeta::new(self.bin_array_key[1], false),
-            AccountMeta::new(self.token_vault[0], false),
-            AccountMeta::new(self.token_vault[1], false),
-            AccountMeta::new(*user_vault_x, false),
-            AccountMeta::new(*user_vault_y, false),
-            AccountMeta::new_readonly(user, true),
-            AccountMeta::new_readonly(self.token_program[0], false),
-            AccountMeta::new_readonly(self.token_program[1], false),
-            AccountMeta::new_readonly(spl_memo::ID, false),
-            AccountMeta::new_readonly(self.event_authority, false),
-            AccountMeta::new_readonly(self.program_id, false),
-            AccountMeta::new(self.hook_bin_array_key[0], false),
-            AccountMeta::new(self.hook_bin_array_key[1], false),
-        ];
+        {
+            account_meta.push(AccountMeta::new(self.key, false));
+            account_meta.push(AccountMeta::new_readonly(self.pair.token_mint_x, false));
+            account_meta.push(AccountMeta::new_readonly(self.pair.token_mint_y, false));
+            account_meta.push(AccountMeta::new(self.bin_array_key[0], false));
+            account_meta.push(AccountMeta::new(self.bin_array_key[1], false));
+            account_meta.push(AccountMeta::new(self.token_vault[0], false));
+            account_meta.push(AccountMeta::new(self.token_vault[1], false));
+            account_meta.push(AccountMeta::new(*user_vault_x, false));
+            account_meta.push(AccountMeta::new(*user_vault_y, false));
+            account_meta.push(AccountMeta::new_readonly(user, true));
+            account_meta.push(AccountMeta::new_readonly(self.token_program[0], false));
+            account_meta.push(AccountMeta::new_readonly(self.token_program[1], false));
+            account_meta.push(AccountMeta::new_readonly(spl_memo::ID, false));
+        }
+
+        // If pair does not have hook, hook should be pair key (dummy)
+        account_meta.push(AccountMeta::new(self.hook, false));
+        account_meta.push(AccountMeta::new_readonly(HOOK_PROGRAM_ID, false));
+        // This expect as the last of swap instruction
+        account_meta.push(AccountMeta::new_readonly(self.event_authority, false));
+        account_meta.push(AccountMeta::new_readonly(self.program_id, false));
+
+        // Hook & hook program accounts ( incoming account reward-hook)
+        if self.hook != self.key {
+            account_meta.push(AccountMeta::new(self.key, true));
+            account_meta.push(AccountMeta::new(self.active_hook_bin_array_key[0], false));
+            account_meta.push(AccountMeta::new(self.active_hook_bin_array_key[1], false));
+        }
 
         unimplemented!();
 
