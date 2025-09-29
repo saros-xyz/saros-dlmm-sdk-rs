@@ -78,7 +78,7 @@ impl Amm for SarosDlmm {
         Self: Sized,
     {
         let account_data = &keyed_account.account.data[..];
-        let pair = Pair::unpack(&account_data)?;
+        let pair = Pair::unpack(account_data)?;
 
         let bin_array_index = pair.bin_array_index();
 
@@ -121,14 +121,14 @@ impl Amm for SarosDlmm {
     }
 
     fn get_accounts_to_update(&self) -> Vec<Pubkey> {
-        return vec![
+        vec![
             self.key,
             self.bin_array_key[0],
             self.bin_array_key[1],
             self.pair.token_mint_x,
             self.pair.token_mint_y,
             clock::ID,
-        ];
+        ]
     }
 
     fn update(&mut self, account_map: &AccountMap) -> Result<()> {
@@ -139,7 +139,7 @@ impl Amm for SarosDlmm {
             )
         })?;
 
-        self.pair = Pair::unpack(&pair_data[..])?;
+        self.pair = Pair::unpack(pair_data)?;
         let bin_array_index = self.pair.bin_array_index();
 
         let (bin_array_lower_key, _) =
@@ -164,7 +164,7 @@ impl Amm for SarosDlmm {
                     )
                 })?;
 
-            self.bin_array_lower = BinArray::unpack(&bin_array_lower_data[..])?;
+            self.bin_array_lower = BinArray::unpack(bin_array_lower_data)?;
 
             let bin_array_upper_data = try_get_account_data(account_map, &bin_array_upper_key)
                 .with_context(|| {
@@ -174,7 +174,7 @@ impl Amm for SarosDlmm {
                     )
                 })?;
 
-            self.bin_array_upper = BinArray::unpack(&bin_array_upper_data[..])?;
+            self.bin_array_upper = BinArray::unpack(bin_array_upper_data)?;
         }
 
         let (mint_x_data, mint_x_owner) =
@@ -200,7 +200,7 @@ impl Amm for SarosDlmm {
             .with_context(|| format!("Sysvar Clock account does not exist : {}", clock::ID))?;
 
         let clock: Clock =
-            deserialize(&clock_data).with_context(|| "Failed to deserialize Clock")?;
+            deserialize(clock_data).with_context(|| "Failed to deserialize Clock")?;
 
         self.epoch = Arc::new(AtomicU64::new(clock.epoch));
         self.timestamp = Arc::new(AtomicI64::new(clock.unix_timestamp));
@@ -208,9 +208,9 @@ impl Amm for SarosDlmm {
         self.token_transfer_fee = TokenTransferFee::new(
             &mut self.token_transfer_fee,
             mint_x_data,
-            &mint_x_owner,
+            mint_x_owner,
             mint_y_data,
-            &mint_y_owner,
+            mint_y_owner,
             self.epoch.load(Ordering::Relaxed),
         )?;
 
@@ -246,10 +246,9 @@ impl Amm for SarosDlmm {
         } = *quote_params;
         let mut pair = self.pair.clone();
 
-        let bin_array =
-            BinArrayPair::merge(self.bin_array_lower.clone(), self.bin_array_upper.clone())?;
+        let bin_array = BinArrayPair::merge(self.bin_array_lower, self.bin_array_upper)?;
 
-        let block_timestamp = self.timestamp.load(Ordering::Relaxed) as u64;
+        let block_timestamp = u64::try_from(self.timestamp.load(Ordering::Relaxed))?;
         let swap_for_y = is_swap_for_y(input_mint, self.pair.token_mint_x);
 
         let (mint_in, epoch_transfer_fee_in, epoch_transfer_fee_out) = if swap_for_y {
