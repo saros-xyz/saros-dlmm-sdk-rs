@@ -1,7 +1,7 @@
 use crate::{
+    constants::MAX_BIN_CROSSING,
     errors::ErrorCode,
     state::{bin_array::BinArrayPair, pair::Pair},
-    constants::MAX_BIN_CROSSING,
 };
 use anyhow::Result;
 use jupiter_amm_interface::SwapMode;
@@ -63,9 +63,8 @@ pub fn get_swap_result(
 
                 if amount_in_left == 0 {
                     break;
-                } else {
-                    pair.move_active_id(swap_for_y)?;
                 }
+                pair.move_active_id(swap_for_y)?;
 
                 total_bin_used += 1;
             }
@@ -118,9 +117,9 @@ pub fn get_swap_result(
 
                 if amount_out_left == 0 {
                     break;
-                } else {
-                    pair.move_active_id(swap_for_y)?;
                 }
+                pair.move_active_id(swap_for_y)?;
+
                 total_bin_used += 1;
             }
 

@@ -161,9 +161,7 @@ impl Clone for Pair {
 
 impl Pair {
     pub fn bin_array_index(&self) -> u32 {
-        let idx = self.active_id / BIN_ARRAY_SIZE;
-
-        idx
+        self.active_id / BIN_ARRAY_SIZE
     }
 
     pub fn resolve_mints(&self, input_mint: Pubkey, swap_mode: SwapMode) -> Result<bool> {
@@ -245,16 +243,16 @@ impl Pair {
     }
 
     pub fn get_protocol_share(&self) -> u64 {
-        self.static_fee_parameters.protocol_share as u64
+        u64::from(self.static_fee_parameters.protocol_share)
     }
 
     pub fn update_references(&mut self, block_timestamp: u64) -> Result<()> {
         let time_delta = block_timestamp - self.dynamic_fee_parameters.time_last_updated;
 
-        if time_delta >= self.static_fee_parameters.filter_period as u64 {
+        if time_delta >= u64::from(self.static_fee_parameters.filter_period) {
             self.dynamic_fee_parameters.id_reference = self.active_id;
 
-            if time_delta >= self.static_fee_parameters.decay_period as u64 {
+            if time_delta >= u64::from(self.static_fee_parameters.decay_period) {
                 self.dynamic_fee_parameters.volatility_reference = 0;
             } else {
                 self.update_volatility_reference()?;
@@ -273,7 +271,7 @@ impl Pair {
             volatility_accumulator
                 .checked_mul(self.static_fee_parameters.reduction_factor.into())
                 .ok_or(ErrorCode::AmountOverflow)?
-                / BASIS_POINT_MAX as u64,
+                / BASIS_POINT_MAX,
         )?;
 
         Ok(())
@@ -321,7 +319,6 @@ impl Pair {
     }
 
     fn move_active_id_right(&mut self) -> Result<()> {
-        // require!(self.active_id < MAX_ACTIVE_ID, ErrorCode::ActiveIdOverflow);
         if self.active_id >= MAX_ACTIVE_ID {
             Err(ErrorCode::ActiveIdOverflow)?;
         }
