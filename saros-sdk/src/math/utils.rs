@@ -31,7 +31,10 @@ pub fn get_fee_for_amount(amount: u64, fee: u64) -> Result<u64> {
     let amount = u128::from(amount);
     let fee = u128::from(fee);
 
-    let denominator = u128::from(PRECISION) - fee;
+    let denominator = match u128::from(PRECISION).checked_sub(fee) {
+        Some(denom) if denom > 0 => denom,
+        _ => return Err(ErrorCode::AmountUnderflow.into()),
+    };
 
     let fee_for_amount = amount
         .checked_mul(fee)
