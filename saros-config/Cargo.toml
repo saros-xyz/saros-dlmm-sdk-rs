@@ -1,0 +1,12 @@
+[package]
+name = "saros-config"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = []
+devnet = []
+mainnet = []
+
+[dependencies]
+solana-sdk = { workspace = true }

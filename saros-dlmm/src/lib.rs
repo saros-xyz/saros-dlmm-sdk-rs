@@ -10,8 +10,8 @@ use jupiter_amm_interface::{
     AccountMap, Amm, AmmContext, KeyedAccount, Quote, QuoteParams, Swap, SwapAndAccountMetas,
     SwapMode, SwapParams, try_get_account_data, try_get_account_data_and_owner,
 };
+use saros_config::HOOK_PROGRAM_ID;
 use saros_sdk::{
-    constants::HOOK_PROGRAM_ID,
     math::{
         fees::{
             TokenTransferFee, compute_transfer_amount_for_expected_output, compute_transfer_fee,
@@ -224,7 +224,7 @@ impl Amm for SarosDlmm {
             .with_context(|| format!("Sysvar Clock account does not exist : {}", clock::ID))?;
 
         let clock: Clock =
-            deserialize(&clock_data).with_context(|| "Failed to deserialize Clock")?;
+            deserialize::<Clock>(&clock_data).with_context(|| "Failed to deserialize Clock")?;
 
         self.epoch = Arc::new(AtomicU64::new(clock.epoch));
         self.timestamp = Arc::new(AtomicI64::new(clock.unix_timestamp));
@@ -363,36 +363,41 @@ impl Amm for SarosDlmm {
         };
 
         let user = *token_transfer_authority;
-        let mut account_meta = Vec::new();
+        let mut account_metas = Vec::new();
 
         {
-            account_meta.push(AccountMeta::new(self.key, false));
-            account_meta.push(AccountMeta::new_readonly(self.pair.token_mint_x, false));
-            account_meta.push(AccountMeta::new_readonly(self.pair.token_mint_y, false));
-            account_meta.push(AccountMeta::new(self.bin_array_key[0], false));
-            account_meta.push(AccountMeta::new(self.bin_array_key[1], false));
-            account_meta.push(AccountMeta::new(self.token_vault[0], false));
-            account_meta.push(AccountMeta::new(self.token_vault[1], false));
-            account_meta.push(AccountMeta::new(*user_vault_x, false));
-            account_meta.push(AccountMeta::new(*user_vault_y, false));
-            account_meta.push(AccountMeta::new_readonly(user, true));
-            account_meta.push(AccountMeta::new_readonly(self.token_program[0], false));
-            account_meta.push(AccountMeta::new_readonly(self.token_program[1], false));
-            account_meta.push(AccountMeta::new_readonly(spl_memo::ID, false));
+            account_metas.push(AccountMeta::new(self.key, false));
+            account_metas.push(AccountMeta::new_readonly(self.pair.token_mint_x, false));
+            account_metas.push(AccountMeta::new_readonly(self.pair.token_mint_y, false));
+            account_metas.push(AccountMeta::new(self.bin_array_key[0], false));
+            account_metas.push(AccountMeta::new(self.bin_array_key[1], false));
+            account_metas.push(AccountMeta::new(self.token_vault[0], false));
+            account_metas.push(AccountMeta::new(self.token_vault[1], false));
+            account_metas.push(AccountMeta::new(*user_vault_x, false));
+            account_metas.push(AccountMeta::new(*user_vault_y, false));
+            account_metas.push(AccountMeta::new_readonly(user, true));
+            account_metas.push(AccountMeta::new_readonly(self.token_program[0], false));
+            account_metas.push(AccountMeta::new_readonly(self.token_program[1], false));
+            account_metas.push(AccountMeta::new_readonly(spl_memo::ID, false));
         }
 
         // If pair does not have hook, hook should be pair key (dummy)
-        account_meta.push(AccountMeta::new(self.hook, false));
-        account_meta.push(AccountMeta::new_readonly(HOOK_PROGRAM_ID, false));
+        account_metas.push(AccountMeta::new(self.hook, false));
+        account_metas.push(AccountMeta::new_readonly(HOOK_PROGRAM_ID, false));
         // This expect as the last of swap instruction
-        account_meta.push(AccountMeta::new_readonly(self.event_authority, false));
-        account_meta.push(AccountMeta::new_readonly(self.program_id, false));
+        account_metas.push(AccountMeta::new_readonly(self.event_authority, false));
+        account_metas.push(AccountMeta::new_readonly(self.program_id, false));
 
         // Hook & hook program accounts ( incoming account reward-hook)
         if self.hook != self.key {
-            account_meta.push(AccountMeta::new(self.key, true));
-            account_meta.push(AccountMeta::new(self.active_hook_bin_array_key[0], false));
-            account_meta.push(AccountMeta::new(self.active_hook_bin_array_key[1], false));
+            account_metas.push(AccountMeta::new(self.active_hook_bin_array_key[0], false));
+            account_metas.push(AccountMeta::new(self.active_hook_bin_array_key[1], false));
+        }
+        for (i, meta) in account_metas.iter().enumerate() {
+            println!(
+                "🔸 Account {}: pubkey = {}, is_signer = {}, is_writable = {}",
+                i, meta.pubkey, meta.is_signer, meta.is_writable
+            );
         }
 
         unimplemented!();

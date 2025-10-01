@@ -22,6 +22,7 @@ itertools = { workspace = true }
 
 saros = { path = "../saros" }
 saros-sdk = { path = "../saros-sdk" }
+saros-config = { path = "../saros-config", default-features = false }
 
 assert_matches = { workspace = true }
 async-trait = { workspace = true }
@@ -42,3 +43,8 @@ anchor-spl = { version = "0.31.1", features = ["memo"] }
 
 [dev-dependencies]
 proptest = { workspace = true }
+
+[features]
+default = []
+devnet = []
+mainnet = []

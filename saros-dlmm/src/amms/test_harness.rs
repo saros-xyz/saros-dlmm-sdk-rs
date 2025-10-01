@@ -9,7 +9,8 @@ use jupiter_amm_interface::{
 };
 use lazy_static::lazy_static;
 
-use saros_sdk::{constants::HOOK_PROGRAM_ID, utils::helper::is_swap_for_y};
+use saros_config::{HOOK_PROGRAM_ID, SAROS_DLMM_SO_PATH, SAROS_HOOK_SO_PATH};
+use saros_sdk::utils::helper::is_swap_for_y;
 use serde_json::{Value, json};
 use solana_account_decoder::{UiAccount, UiAccountEncoding, encode_ui_account};
 use solana_client::{
@@ -51,6 +52,12 @@ pub const WSOL_MINT: Pubkey = pubkey!("So111111111111111111111111111111111111111
 pub const MASHA_MINT: Pubkey = pubkey!("mae8vJGf8Wju8Ron1oDTQVaTGGBpcpWDwoRQJALMMf2");
 pub const LAUNCHCOIN_MINT: Pubkey = pubkey!("Ey59PH7Z4BFU4HjyKnyMdWt5GGN76KazTAwQihoUXRnk");
 
+// Devnet key
+pub const ME_MINT: Pubkey = pubkey!("mntC2RhmYyooDcX6HeTpLmd4v673ak9Cn7J31FG41d6");
+pub const DEX_V3_USDC: Pubkey = pubkey!("mntLe6A4SELrDDiSsdp1wNe64EZ5TsM9gtyFzGPouTr");
+pub const DEX_V3_USDT: Pubkey = pubkey!("mnt3Mc5iK8UNZheyPmS9UQKrM6Rz5s4d8x63BUv22F9");
+pub const DEX_V3_SAROS: Pubkey = pubkey!("mntCAkd76nKSVTYxwu8qwQnhPcEE9JyEbgW6eEpwr1N");
+
 lazy_static! {
     // For SwapMode::ExactIn
     pub static ref TOKEN_MINT_AND_IN_AMOUNT: [(Pubkey, u64); 5] = [
@@ -59,6 +66,7 @@ lazy_static! {
         (MASHA_MINT, 1_000_000_000),
         (USDC_MINT, 1_110_000_000),
         (USDT_MINT, 1_110_000_000),
+
     ];
 
     // For SwapMode::ExactOut
@@ -69,12 +77,21 @@ lazy_static! {
         (USDC_MINT, 50_000_000),
         (USDT_MINT, 50_000_000),
     ];
-    pub static ref TOKEN2022_MINT_AND_IN_AMOUNT: [(Pubkey, u64); 1] = [
+
+    pub static ref TOKEN2022_MINT_AND_IN_AMOUNT: [(Pubkey, u64); 5] = [
         (LAUNCHCOIN_MINT, 100_000_000_000),
+        (DEX_V3_USDC, 100_000_0),
+        (ME_MINT, 1_000_000),
+        (DEX_V3_SAROS, 1_000_000),
+        (DEX_V3_USDT, 1_000_000)
 
     ];
-    pub static ref TOKEN2022_MINT_AND_OUT_AMOUNT: [(Pubkey, u64); 1] = [
+    pub static ref TOKEN2022_MINT_AND_OUT_AMOUNT: [(Pubkey, u64); 5] = [
         (LAUNCHCOIN_MINT, 100_000_000_000),
+        (DEX_V3_USDC, 100_000_0),
+        (ME_MINT, 1_000_000),
+        (DEX_V3_SAROS, 1_000_000),
+        (DEX_V3_USDT, 1_000_000)
     ];
 
     // Mapping pubkey → amount
@@ -597,6 +614,16 @@ impl AmmTestHarness {
     pub fn update_amm(&self, amm: &mut dyn Amm) {
         let accounts_to_update = amm.get_accounts_to_update();
 
+        println!(
+            "AMM {} requests {} accounts to update",
+            amm.label(),
+            accounts_to_update.len(),
+        );
+
+        accounts_to_update.iter().for_each(|address| {
+            println!("  - {}", address);
+        });
+
         let account_map: HashMap<Pubkey, Account, RandomState> = self
             .client
             .get_multiple_accounts(&accounts_to_update)
@@ -609,6 +636,12 @@ impl AmmTestHarness {
                 }
                 m
             });
+
+        println!(
+            "Updating AMM {} with {} accounts",
+            amm.label(),
+            account_map.len()
+        );
 
         amm.update(&account_map).unwrap();
     }
@@ -655,15 +688,24 @@ impl AmmTestHarness {
         // Some programs such as Raydium AMM are not functional once this feature gate is enabled
         pt.deactivate_feature(pubkey!("7Vced912WrRnfjaiKRiNBcbuFw7RrnLv3E3z95Y4GTNc"));
 
-        pt.add_program("saros_dlmm", saros::ID, None);
-        pt.add_program("rewarder_hook", HOOK_PROGRAM_ID, None);
+        let suffix = if cfg!(feature = "devnet") { "_dev" } else { "" };
 
-        // let modified_label = amm.label().to_lowercase().replace(' ', "_");
-        pt.add_program(
-            Box::leak(amm.label().into_boxed_str()),
-            amm.program_id(),
-            None,
-        );
+        let program_name = Box::leak(format!("saros_dlmm{}", suffix).into_boxed_str());
+        let hook_name = Box::leak(format!("rewarder_hook{}", suffix).into_boxed_str());
+
+        pt.add_program(program_name, saros::ID, None);
+        pt.add_program(hook_name, HOOK_PROGRAM_ID, None);
+
+        let mut label = amm.label().to_lowercase().replace(' ', "_");
+        if cfg!(feature = "devnet") {
+            label = format!("{label}_dev");
+        } else if cfg!(feature = "mainnet") {
+            // giữ nguyên label
+        } else {
+            panic!("Either 'mainnet' or 'devnet' feature must be enabled");
+        }
+
+        pt.add_program(Box::leak(label.into_boxed_str()), amm.program_id(), None);
 
         for (program_id, program_name) in amm.program_dependencies() {
             // if program_id == spl_stake_pool::ID {

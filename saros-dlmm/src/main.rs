@@ -4,7 +4,7 @@ use saros_dlmm_sdk::amms::test_harness::take_snapshot;
 #[derive(Parser, Debug)]
 pub struct ConfigOverride {
     #[clap(long)]
-    pub rpc_url: String,
+    pub rpc_url: Option<String>,
 }
 
 #[derive(Parser, Debug)]
@@ -12,7 +12,7 @@ pub enum Command {
     /// Snapshot a single amm for test harness testing
     SnapshotAmm {
         #[clap(long)]
-        amm_id: String,
+        amm_id: Option<String>,
         /// Expand an extra option to the snapshot directory (e.g. <amm-id><option>)
         #[clap(long)]
         option: Option<String>,
@@ -37,13 +37,26 @@ async fn main() {
         command,
     } = Cli::parse();
 
+    let pool_list = saros_config::POOL_LISTS;
+    let overrided_rpc_url = saros_config::RPC_URL.to_string();
+
     match command {
-        Command::SnapshotAmm {
-            amm_id,
-            option,
-            force,
-        } => take_snapshot(config_override.rpc_url, amm_id, option, force)
-            .await
-            .unwrap(),
+        Command::SnapshotAmm { option, force, .. } => {
+            for (i, pool) in pool_list.iter().enumerate() {
+                let amm_id = pool.to_string();
+
+                println!("📸 Snapshotting amm {amm_id} ...");
+
+                // take_snapshot(rpc_url: String, amm_id: String, option: Option<String>, force: bool)
+                take_snapshot(
+                    overrided_rpc_url.clone(),
+                    amm_id.clone(),
+                    option.clone(),
+                    force,
+                )
+                .await
+                .unwrap();
+            }
+        }
     }
 }

@@ -3,12 +3,12 @@ use std::collections::HashMap;
 use ahash::RandomState;
 use anyhow::Error;
 use jupiter_amm_interface::{Amm, AmmContext, ClockRef, KeyedAccount, SwapMode};
+use saros_config::POOL_LISTS;
 use saros_dlmm_sdk::amms::test_harness::AmmTestSwapParams;
 use saros_dlmm_sdk::route::get_token_mints_permutations;
 use saros_dlmm_sdk::{SarosDlmm, amms::test_harness::AmmTestHarness};
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk::{account::Account, pubkey};
-
 /// Loads AMM from snapshot and tests quoting
 async fn test_quoting_for_amm_key<T: Amm + 'static>(
     amm_key: Pubkey,
@@ -87,19 +87,42 @@ macro_rules! test_exact_out_amms {
     };
 }
 
-const SAROS_DLMM_SAROS_USDC_POOL: Pubkey = pubkey!("ADPKeitAZsAeRJfhG2GoDrZENB3xt9eZmggkj7iAXY78");
-const SAROS_DLMM_LAUNCHCOIN_USDT_POOL: Pubkey = pubkey!("Cy75bt7SkreqcEE481HsKChWJPM7kkS3svVWKRPpS9UK");
+macro_rules! test_exact_in_all_pools {
+    ($pool_list:expr, $amm_struct:ty, $tolerance:expr) => {
+        $(
+            paste::item! {
+                #[tokio::test]
+                async fn [<test_quote_ $pool_list _in>] () {
+                    let amm_id = $pool_list.to_string();
+                    let option = Some("default".to_string());
+                    let before_test_setup: Option<fn(&dyn Amm, &mut HashMap<Pubkey, Account, RandomState>)> = None;
+                    test_quoting_for_amm_key::<$amm_struct>($pool_list, SwapMode::ExactIn, false, $tolerance, option, before_test_setup, None, None).await
+                }
+            }
+        )*
+    };
+}
+// const SAROS_DLMM_POOL1: Pubkey = POOL_LISTS[0];
+// const SAROS_DLMM_POOL2: Pubkey = POOL_LISTS[1];
+// const SAROS_DLMM_POOL3: Pubkey = POOL_LISTS[2];
+const SAROS_DLMM_POOL4: Pubkey = POOL_LISTS[0];
 
 // You can run a single test by doing: `cargo test test_quote_<lower_case_constant>_<default | option_name> -- --nocapture`
 
 test_exact_in_amms! {
-    (SAROS_DLMM_SAROS_USDC_POOL, SarosDlmm, 0),
-    (SAROS_DLMM_LAUNCHCOIN_USDT_POOL, SarosDlmm, 0),
+    // (SAROS_DLMM_SAROS_USDC_POOL, SarosDlmm, 0),
+    // (SAROS_DLMM_LAUNCHCOIN_USDT_POOL, SarosDlmm, 0),
+    // (SAROS_DLMM_WSOL_USDC_POOL, SarosDlmm, 0),
+    (SAROS_DLMM_POOL4, SarosDlmm, 0),
+
 }
 
 test_exact_out_amms! {
-    (SAROS_DLMM_SAROS_USDC_POOL, SarosDlmm, 0),
-    (SAROS_DLMM_LAUNCHCOIN_USDT_POOL, SarosDlmm, 0),
+    // (SAROS_DLMM_SAROS_USDC_POOL, SarosDlmm, 0),
+    // (SAROS_DLMM_LAUNCHCOIN_USDT_POOL, SarosDlmm, 0),
+    // (SAROS_DLMM_WSOL_USDC_POOL, SarosDlmm, 0),
+    (SAROS_DLMM_POOL4, SarosDlmm, 0),
+
 }
 
 async fn test_quoting_with_amm(

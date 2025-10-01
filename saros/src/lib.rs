@@ -1,4 +1,8 @@
-anchor_gen::generate_cpi_crate!("idls/liquidity_book.json");
+#[cfg(feature = "devnet")]
+anchor_gen::generate_cpi_crate!("idls/devnet/liquidity_book.json");
+
+#[cfg(feature = "mainnet")]
+anchor_gen::generate_cpi_crate!("idls/mainnet/liquidity_book.json");
 
 use rand::distributions::{Distribution, Uniform};
 use solana_sdk::pubkey::Pubkey;

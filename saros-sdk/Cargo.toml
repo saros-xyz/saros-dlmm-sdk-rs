@@ -13,5 +13,13 @@ spl-token = { workspace = true }
 ruint = { workspace = true }
 jupiter-amm-interface = { workspace = true }
 
+saros-config = { path = "../saros-config", default-features = false }
+
+[features]
+default =[ ]
+devnet = []
+mainnet = []
+
+
 [dev-dependencies]
 proptest = { workspace = true }

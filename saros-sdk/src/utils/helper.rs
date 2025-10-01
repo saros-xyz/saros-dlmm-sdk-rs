@@ -1,4 +1,4 @@
-use crate::constants::HOOK_PROGRAM_ID;
+use saros_config::HOOK_PROGRAM_ID;
 use solana_sdk::pubkey::Pubkey;
 
 pub fn find_event_authority(program_id: Pubkey) -> Pubkey {

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["saros-dlmm", "saros-sdk", "saros"]
+members = ["saros-dlmm", "saros-sdk", "saros", "saros-config"]
 
 [workspace.package]
 version = "0.1.0"

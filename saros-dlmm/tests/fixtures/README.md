@@ -16,7 +16,12 @@ solana config set --url https://your-own-rpc.com
 
 ```
 cargo run snapshot-amm --amm-id <amm_id>
-cargo run snapshot-amm --amm-id ADPKeitAZsAeRJfhG2GoDrZENB3xt9eZmggkj7iAXY78
+
+#### Mainnet
+cargo run --features mainnet snapshot-amm
+
+#### Devnet
+cargo run --features devnet snapshot-amm
 ```
 
 You should see a new `ADPKeitAZsAeRJfhG2GoDrZENB3xt9eZmggkj7iAXY78` folder being created in `/tests/fixtures/accounts`.

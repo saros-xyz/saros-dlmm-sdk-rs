@@ -9,3 +9,10 @@ anchor-lang = { workspace = true }
 solana-sdk = { workspace = true }
 jupiter-amm-interface = { workspace = true }
 rand = "0.8.5"
+
+saros-config = { path = "../saros-config", default-features = false }
+
+[features]
+default = []
+devnet = []
+mainnet = []
