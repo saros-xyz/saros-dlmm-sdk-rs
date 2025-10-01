@@ -87,19 +87,20 @@ macro_rules! test_exact_out_amms {
     };
 }
 
-const SAROS_DLMM_SAROS_USDC_POOL: Pubkey = pubkey!("ADPKeitAZsAeRJfhG2GoDrZENB3xt9eZmggkj7iAXY78");
-const SAROS_DLMM_LAUNCHCOIN_USDT_POOL: Pubkey = pubkey!("Cy75bt7SkreqcEE481HsKChWJPM7kkS3svVWKRPpS9UK");
+const SAROS_DLMM_DEXV3_USDT_SAROS_POOL: Pubkey =
+    pubkey!("FvKuEuRyfDZ8catHJznC7heKLkC1uopRaaKMDY1Nym2T");
 
 // You can run a single test by doing: `cargo test test_quote_<lower_case_constant>_<default | option_name> -- --nocapture`
 
 test_exact_in_amms! {
-    (SAROS_DLMM_SAROS_USDC_POOL, SarosDlmm, 0),
-    (SAROS_DLMM_LAUNCHCOIN_USDT_POOL, SarosDlmm, 0),
+    // Pool that repaired for devnet testing
+    (SAROS_DLMM_DEXV3_USDT_SAROS_POOL, SarosDlmm, 0),
 }
 
 test_exact_out_amms! {
-    (SAROS_DLMM_SAROS_USDC_POOL, SarosDlmm, 0),
-    (SAROS_DLMM_LAUNCHCOIN_USDT_POOL, SarosDlmm, 0),
+    // Pool that repaired for devnet testing
+    (SAROS_DLMM_DEXV3_USDT_SAROS_POOL, SarosDlmm, 0),
+
 }
 
 async fn test_quoting_with_amm(

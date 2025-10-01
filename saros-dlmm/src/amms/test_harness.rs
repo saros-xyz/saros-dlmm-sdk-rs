@@ -51,6 +51,10 @@ pub const WSOL_MINT: Pubkey = pubkey!("So111111111111111111111111111111111111111
 pub const MASHA_MINT: Pubkey = pubkey!("mae8vJGf8Wju8Ron1oDTQVaTGGBpcpWDwoRQJALMMf2");
 pub const LAUNCHCOIN_MINT: Pubkey = pubkey!("Ey59PH7Z4BFU4HjyKnyMdWt5GGN76KazTAwQihoUXRnk");
 
+// Those token repaired for devnet testing
+pub const DEXV3_USDT_MINT: Pubkey = pubkey!("mnt3Mc5iK8UNZheyPmS9UQKrM6Rz5s4d8x63BUv22F9");
+pub const DEXV3_SAROS_MINT: Pubkey = pubkey!("mntCAkd76nKSVTYxwu8qwQnhPcEE9JyEbgW6eEpwr1N");
+
 lazy_static! {
     // For SwapMode::ExactIn
     pub static ref TOKEN_MINT_AND_IN_AMOUNT: [(Pubkey, u64); 5] = [
@@ -69,12 +73,16 @@ lazy_static! {
         (USDC_MINT, 50_000_000),
         (USDT_MINT, 50_000_000),
     ];
-    pub static ref TOKEN2022_MINT_AND_IN_AMOUNT: [(Pubkey, u64); 1] = [
+    pub static ref TOKEN2022_MINT_AND_IN_AMOUNT: [(Pubkey, u64); 3] = [
         (LAUNCHCOIN_MINT, 100_000_000_000),
+        (DEXV3_USDT_MINT, 1_000_000),
+        (DEXV3_SAROS_MINT, 1_000_000),
 
     ];
-    pub static ref TOKEN2022_MINT_AND_OUT_AMOUNT: [(Pubkey, u64); 1] = [
+    pub static ref TOKEN2022_MINT_AND_OUT_AMOUNT: [(Pubkey, u64); 3] = [
         (LAUNCHCOIN_MINT, 100_000_000_000),
+        (DEXV3_USDT_MINT, 1_000_000),
+        (DEXV3_SAROS_MINT, 1_000_000),
     ];
 
     // Mapping pubkey → amount

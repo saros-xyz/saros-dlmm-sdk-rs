@@ -15,8 +15,8 @@ solana config set --url https://your-own-rpc.com
 #### Create a snapshot for our `INVARIANT_SAROS_USDC` pool in `/saros-dlmm`
 
 ```
-cargo run snapshot-amm --amm-id <amm_id>
-cargo run snapshot-amm --amm-id ADPKeitAZsAeRJfhG2GoDrZENB3xt9eZmggkj7iAXY78
+cargo run -- --rpc-url <rpc_url> snapshot-amm --amm-id <amm_id>
+cargo run -- --rpc-url https://api.devnet.solana.com snapshot-amm --amm-id FvKuEuRyfDZ8catHJznC7heKLkC1uopRaaKMDY1Nym2T
 ```
 
 You should see a new `ADPKeitAZsAeRJfhG2GoDrZENB3xt9eZmggkj7iAXY78` folder being created in `/tests/fixtures/accounts`.

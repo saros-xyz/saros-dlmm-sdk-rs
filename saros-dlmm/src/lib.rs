@@ -363,36 +363,35 @@ impl Amm for SarosDlmm {
         };
 
         let user = *token_transfer_authority;
-        let mut account_meta = Vec::new();
+        let mut account_metas = Vec::new();
 
         {
-            account_meta.push(AccountMeta::new(self.key, false));
-            account_meta.push(AccountMeta::new_readonly(self.pair.token_mint_x, false));
-            account_meta.push(AccountMeta::new_readonly(self.pair.token_mint_y, false));
-            account_meta.push(AccountMeta::new(self.bin_array_key[0], false));
-            account_meta.push(AccountMeta::new(self.bin_array_key[1], false));
-            account_meta.push(AccountMeta::new(self.token_vault[0], false));
-            account_meta.push(AccountMeta::new(self.token_vault[1], false));
-            account_meta.push(AccountMeta::new(*user_vault_x, false));
-            account_meta.push(AccountMeta::new(*user_vault_y, false));
-            account_meta.push(AccountMeta::new_readonly(user, true));
-            account_meta.push(AccountMeta::new_readonly(self.token_program[0], false));
-            account_meta.push(AccountMeta::new_readonly(self.token_program[1], false));
-            account_meta.push(AccountMeta::new_readonly(spl_memo::ID, false));
+            account_metas.push(AccountMeta::new(self.key, false));
+            account_metas.push(AccountMeta::new_readonly(self.pair.token_mint_x, false));
+            account_metas.push(AccountMeta::new_readonly(self.pair.token_mint_y, false));
+            account_metas.push(AccountMeta::new(self.bin_array_key[0], false));
+            account_metas.push(AccountMeta::new(self.bin_array_key[1], false));
+            account_metas.push(AccountMeta::new(self.token_vault[0], false));
+            account_metas.push(AccountMeta::new(self.token_vault[1], false));
+            account_metas.push(AccountMeta::new(*user_vault_x, false));
+            account_metas.push(AccountMeta::new(*user_vault_y, false));
+            account_metas.push(AccountMeta::new_readonly(user, true));
+            account_metas.push(AccountMeta::new_readonly(self.token_program[0], false));
+            account_metas.push(AccountMeta::new_readonly(self.token_program[1], false));
+            account_metas.push(AccountMeta::new_readonly(spl_memo::ID, false));
         }
 
         // If pair does not have hook, hook should be pair key (dummy)
-        account_meta.push(AccountMeta::new(self.hook, false));
-        account_meta.push(AccountMeta::new_readonly(HOOK_PROGRAM_ID, false));
+        account_metas.push(AccountMeta::new(self.hook, false));
+        account_metas.push(AccountMeta::new_readonly(HOOK_PROGRAM_ID, false));
         // This expect as the last of swap instruction
-        account_meta.push(AccountMeta::new_readonly(self.event_authority, false));
-        account_meta.push(AccountMeta::new_readonly(self.program_id, false));
+        account_metas.push(AccountMeta::new_readonly(self.event_authority, false));
+        account_metas.push(AccountMeta::new_readonly(self.program_id, false));
 
-        // Hook & hook program accounts ( incoming account reward-hook)
+        // Remaining account (incoming account rewarder-hook)
         if self.hook != self.key {
-            account_meta.push(AccountMeta::new(self.key, true));
-            account_meta.push(AccountMeta::new(self.active_hook_bin_array_key[0], false));
-            account_meta.push(AccountMeta::new(self.active_hook_bin_array_key[1], false));
+            account_metas.push(AccountMeta::new(self.active_hook_bin_array_key[0], false));
+            account_metas.push(AccountMeta::new(self.active_hook_bin_array_key[1], false));
         }
 
         unimplemented!();
