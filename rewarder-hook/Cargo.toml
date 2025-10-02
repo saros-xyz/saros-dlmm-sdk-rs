@@ -1,0 +1,8 @@
+[package]
+name = "rewarder-hook"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anchor-gen = { workspace = true }
+anchor-lang = { workspace = true }

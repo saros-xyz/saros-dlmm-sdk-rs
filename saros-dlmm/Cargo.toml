@@ -21,6 +21,7 @@ ruint = { workspace = true }
 itertools = { workspace = true }
 
 saros = { path = "../saros" }
+rewarder-hook = { path = "../rewarder-hook" }
 saros-sdk = { path = "../saros-sdk" }
 
 assert_matches = { workspace = true }

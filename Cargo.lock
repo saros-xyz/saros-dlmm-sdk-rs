@@ -4038,6 +4038,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "rewarder-hook"
+version = "0.1.0"
+dependencies = [
+ "anchor-gen",
+ "anchor-lang",
+]
+
+[[package]]
 name = "ring"
 version = "0.17.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4365,6 +4373,7 @@ dependencies = [
  "lazy_static",
  "paste",
  "proptest",
+ "rewarder-hook",
  "ruint",
  "rust_decimal",
  "saros",
@@ -4390,6 +4399,7 @@ dependencies = [
  "arrayref",
  "jupiter-amm-interface",
  "proptest",
+ "rewarder-hook",
  "ruint",
  "solana-sdk",
  "spl-token 8.0.0",
