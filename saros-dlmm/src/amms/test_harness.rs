@@ -339,7 +339,7 @@ impl AmmTestHarnessProgramTest {
 
         let swap_ix = Instruction {
             program_id: saros::ID,
-            accounts: accounts,
+            accounts,
             data,
         };
 
@@ -620,16 +620,15 @@ impl AmmTestHarness {
             self.directory_name()
         ))
         .unwrap()
+        .flatten()
         {
-            if let Ok(entry) = entry {
-                if entry.ends_with("params.json") {
-                    continue;
-                }
-                let file = File::open(entry).unwrap();
-                let keyed_account: RpcKeyedAccount = serde_json::from_reader(file).unwrap();
-                let account: Account = UiAccount::decode(&keyed_account.account).unwrap();
-                account_map.insert(Pubkey::from_str(&keyed_account.pubkey).unwrap(), account);
+            if entry.ends_with("params.json") {
+                continue;
             }
+            let file = File::open(entry).unwrap();
+            let keyed_account: RpcKeyedAccount = serde_json::from_reader(file).unwrap();
+            let account: Account = UiAccount::decode(&keyed_account.account).unwrap();
+            account_map.insert(Pubkey::from_str(&keyed_account.pubkey).unwrap(), account);
         }
         account_map
     }
@@ -811,11 +810,9 @@ impl AmmTestHarness {
             self.directory_name()
         );
         let snapshot_path = Path::new(&snapshot_path_string);
-        if force {
-            if snapshot_path.exists() && snapshot_path.is_dir() {
-                // Remove the directory if it exists
-                remove_dir_all(snapshot_path)?;
-            }
+        if force && snapshot_path.exists() && snapshot_path.is_dir() {
+            // Remove the directory if it exists
+            remove_dir_all(snapshot_path)?;
         }
 
         create_dir_all(snapshot_path)?;

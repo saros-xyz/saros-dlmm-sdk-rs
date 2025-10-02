@@ -14,7 +14,7 @@ pub fn get_bin_array_lower(
         &[
             b"bin_array".as_ref(),
             pair.as_ref(),
-            &(bin_array_index).to_le_bytes().as_ref(),
+            bin_array_index.to_le_bytes().as_ref(),
         ],
         program_id,
     );
@@ -30,7 +30,7 @@ pub fn get_bin_array_upper(
         &[
             b"bin_array".as_ref(),
             pair.as_ref(),
-            &(bin_array_index + 1).to_le_bytes().as_ref(),
+            (bin_array_index + 1).to_le_bytes().as_ref(),
         ],
         program_id,
     );
