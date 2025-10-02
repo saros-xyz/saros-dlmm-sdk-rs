@@ -1,4 +1,3 @@
-use crate::constants::HOOK_PROGRAM_ID;
 use solana_sdk::pubkey::Pubkey;
 
 pub fn find_event_authority(program_id: Pubkey) -> Pubkey {
@@ -45,7 +44,7 @@ pub fn get_hook_bin_array(bin_array_index: u32, hook: Pubkey) -> (Pubkey, Pubkey
             hook.as_ref(),
             (bin_array_index).to_le_bytes().as_ref(),
         ],
-        &HOOK_PROGRAM_ID,
+        &rewarder_hook::ID,
     );
     let (hook_bin_array_upper, _) = Pubkey::find_program_address(
         &[
@@ -53,7 +52,7 @@ pub fn get_hook_bin_array(bin_array_index: u32, hook: Pubkey) -> (Pubkey, Pubkey
             hook.as_ref(),
             (bin_array_index + 1).to_le_bytes().as_ref(),
         ],
-        &HOOK_PROGRAM_ID,
+        &rewarder_hook::ID,
     );
 
     (hook_bin_array_lower, hook_bin_array_upper)
