@@ -7,15 +7,15 @@ use anchor_lang::prelude::AccountMeta;
 use anyhow::{Context, Result};
 use bincode::deserialize;
 use jupiter_amm_interface::{
-    AccountMap, Amm, AmmContext, KeyedAccount, Quote, QuoteParams, Swap, SwapAndAccountMetas,
-    SwapMode, SwapParams, try_get_account_data, try_get_account_data_and_owner,
+    try_get_account_data, try_get_account_data_and_owner, AccountMap, Amm, AmmContext,
+    KeyedAccount, Quote, QuoteParams, Swap, SwapAndAccountMetas, SwapMode, SwapParams,
 };
 use saros_sdk::{
     math::{
         fees::{
-            TokenTransferFee, compute_transfer_amount_for_expected_output, compute_transfer_fee,
+            compute_transfer_amount_for_expected_output, compute_transfer_fee, TokenTransferFee,
         },
-        swap_manager::{SwapType, get_swap_result},
+        swap_manager::{get_swap_result, SwapType},
     },
     state::{
         bin_array::{BinArray, BinArrayPair},
@@ -33,8 +33,8 @@ use solana_sdk::{
     sysvar::{clock, clock::Clock},
 };
 use std::sync::{
-    Arc,
     atomic::{AtomicI64, AtomicU64, Ordering},
+    Arc,
 };
 
 #[derive(Clone)]
