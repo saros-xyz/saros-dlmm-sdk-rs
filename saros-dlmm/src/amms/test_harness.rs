@@ -338,7 +338,7 @@ impl AmmTestHarnessProgramTest {
         .unwrap();
 
         let swap_ix = Instruction {
-            program_id: saros::ID,
+            program_id: liquidity_book::ID,
             accounts,
             data,
         };
@@ -654,7 +654,7 @@ impl AmmTestHarness {
         // Some programs such as Raydium AMM are not functional once this feature gate is enabled
         pt.deactivate_feature(pubkey!("7Vced912WrRnfjaiKRiNBcbuFw7RrnLv3E3z95Y4GTNc"));
 
-        pt.add_program("saros_dlmm", saros::ID, None);
+        pt.add_program("saros_dlmm", liquidity_book::ID, None);
         pt.add_program("rewarder_hook", rewarder_hook::ID, None);
 
         // let modified_label = amm.label().to_lowercase().replace(' ', "_");
@@ -744,7 +744,7 @@ impl AmmTestHarness {
         context: &mut ProgramTestContext,
         reserve_mints: Vec<Pubkey>,
     ) -> ProgramTestAuthority {
-        use saros::find_program_authority;
+        use liquidity_book::find_program_authority;
 
         let authority_id = 0;
         let program_authority = find_program_authority(authority_id);

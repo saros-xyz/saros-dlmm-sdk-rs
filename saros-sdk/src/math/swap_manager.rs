@@ -4,21 +4,25 @@ use crate::{
     state::{bin_array::BinArrayPair, pair::Pair},
 };
 use anyhow::Result;
-use jupiter_amm_interface::SwapMode;
+
+pub enum SwapType {
+    ExactIn,
+    ExactOut,
+}
 
 pub fn get_swap_result(
     pair: &mut Pair,
     bin_array: BinArrayPair,
     amount: u64,
     swap_for_y: bool,
-    swap_type: SwapMode,
+    swap_type: SwapType,
     block_timestamp: u64,
 ) -> Result<(u64, u64)> {
     let mut bin_array = bin_array.clone();
     pair.update_references(block_timestamp)?;
 
     match swap_type {
-        SwapMode::ExactIn => {
+        SwapType::ExactIn => {
             let mut amount_in_left: u64 = amount;
             let mut amount_out: u64 = 0;
             let mut total_protocol_fee: u64 = 0;
@@ -72,7 +76,7 @@ pub fn get_swap_result(
             Ok((amount_out, total_fee_amount))
         }
 
-        SwapMode::ExactOut => {
+        SwapType::ExactOut => {
             let mut amount_out_left: u64 = amount;
             let mut amount_in: u64 = 0;
             let mut total_protocol_fee: u64 = 0;

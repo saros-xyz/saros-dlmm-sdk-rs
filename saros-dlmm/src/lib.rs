@@ -15,7 +15,7 @@ use saros_sdk::{
         fees::{
             TokenTransferFee, compute_transfer_amount_for_expected_output, compute_transfer_fee,
         },
-        swap_manager::get_swap_result,
+        swap_manager::{SwapType, get_swap_result},
     },
     state::{
         bin_array::{BinArray, BinArrayPair},
@@ -298,7 +298,7 @@ impl Amm for SarosDlmm {
                     bin_array,
                     amount_in_after_transfer_fee,
                     swap_for_y,
-                    swap_mode,
+                    SwapType::ExactIn,
                     block_timestamp,
                 )?;
 
@@ -316,7 +316,7 @@ impl Amm for SarosDlmm {
                     bin_array,
                     amount_out_before_transfer_fee,
                     swap_for_y,
-                    swap_mode,
+                    SwapType::ExactOut,
                     block_timestamp,
                 )?;
 

@@ -2,11 +2,11 @@ use crate::constants::{
     BASIS_POINT_MAX, MAX_ACTIVE_ID, PRECISION, SQUARED_PRECISION, VARIABLE_FEE_PRECISION,
 };
 use crate::errors::ErrorCode;
+use crate::math::swap_manager::SwapType;
 use crate::state::bin::BIN_ARRAY_SIZE;
 use crate::state::fee::{DynamicFeeParameters, StaticFeeParameters};
 use anyhow::Result;
 use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
-use jupiter_amm_interface::SwapMode;
 use solana_sdk::program_error::ProgramError;
 use solana_sdk::{
     program_pack::{IsInitialized, Pack, Sealed},
@@ -164,9 +164,9 @@ impl Pair {
         self.active_id / BIN_ARRAY_SIZE
     }
 
-    pub fn resolve_mints(&self, input_mint: Pubkey, swap_mode: SwapMode) -> Result<bool> {
+    pub fn resolve_mints(&self, input_mint: Pubkey, swap_mode: SwapType) -> Result<bool> {
         match swap_mode {
-            SwapMode::ExactIn => {
+            SwapType::ExactIn => {
                 if input_mint == self.token_mint_x {
                     Ok(true)
                 } else if input_mint == self.token_mint_y {
@@ -175,7 +175,7 @@ impl Pair {
                     Err(ErrorCode::InvalidMint.into())
                 }
             }
-            SwapMode::ExactOut => {
+            SwapType::ExactOut => {
                 if input_mint == self.token_mint_x {
                     Ok(false)
                 } else if input_mint == self.token_mint_y {
