@@ -8,10 +8,6 @@ solana program dump [program_id] [filename.so]
 
 #### Make sure you're on the right network, `mainnet-beta`.
 
-```
-solana config set --url https://your-own-rpc.com
-```
-
 #### Create a snapshot for our `INVARIANT_SAROS_USDC` pool in `/saros-dlmm`
 
 ```

@@ -1,0 +1,1866 @@
+{
+  "address": "mdmavMvJpF4ZcLJNg6VSjuKVMiBo5uKwERTg1ZB9yUH",
+  "metadata": {
+    "name": "rewarder_hook",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "before_burn",
+      "discriminator": [
+        7,
+        177,
+        19,
+        160,
+        28,
+        229,
+        57,
+        73
+      ],
+      "accounts": [
+        {
+          "name": "pair_account"
+        },
+        {
+          "name": "hook",
+          "writable": true,
+          "relations": [
+            "active_bin_hook_bin_array_lower",
+            "active_bin_hook_bin_array_upper",
+            "position_hook_bin_array_lower",
+            "position_hook_bin_array_upper"
+          ]
+        },
+        {
+          "name": "position"
+        },
+        {
+          "name": "active_bin_array_lower"
+        },
+        {
+          "name": "active_bin_array_upper"
+        },
+        {
+          "name": "pair",
+          "signer": true,
+          "relations": [
+            "hook"
+          ]
+        },
+        {
+          "name": "active_bin_hook_bin_array_lower",
+          "writable": true
+        },
+        {
+          "name": "active_bin_hook_bin_array_upper",
+          "writable": true
+        },
+        {
+          "name": "hook_position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "hook"
+              },
+              {
+                "kind": "account",
+                "path": "position"
+              }
+            ]
+          }
+        },
+        {
+          "name": "position_hook_bin_array_lower",
+          "writable": true
+        },
+        {
+          "name": "position_hook_bin_array_upper",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "before_mint",
+      "discriminator": [
+        67,
+        27,
+        57,
+        7,
+        28,
+        168,
+        109,
+        153
+      ],
+      "accounts": [
+        {
+          "name": "pair_account"
+        },
+        {
+          "name": "hook",
+          "writable": true,
+          "relations": [
+            "active_bin_hook_bin_array_lower",
+            "active_bin_hook_bin_array_upper",
+            "position_hook_bin_array_lower",
+            "position_hook_bin_array_upper"
+          ]
+        },
+        {
+          "name": "position"
+        },
+        {
+          "name": "active_bin_array_lower"
+        },
+        {
+          "name": "active_bin_array_upper"
+        },
+        {
+          "name": "pair",
+          "signer": true,
+          "relations": [
+            "hook"
+          ]
+        },
+        {
+          "name": "active_bin_hook_bin_array_lower",
+          "writable": true
+        },
+        {
+          "name": "active_bin_hook_bin_array_upper",
+          "writable": true
+        },
+        {
+          "name": "hook_position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "hook"
+              },
+              {
+                "kind": "account",
+                "path": "position"
+              }
+            ]
+          }
+        },
+        {
+          "name": "position_hook_bin_array_lower",
+          "writable": true
+        },
+        {
+          "name": "position_hook_bin_array_upper",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "before_swap",
+      "discriminator": [
+        227,
+        59,
+        240,
+        68,
+        164,
+        9,
+        29,
+        254
+      ],
+      "accounts": [
+        {
+          "name": "pair_account"
+        },
+        {
+          "name": "hook",
+          "writable": true,
+          "relations": [
+            "active_bin_hook_bin_array_lower",
+            "active_bin_hook_bin_array_upper"
+          ]
+        },
+        {
+          "name": "active_bin_array_lower"
+        },
+        {
+          "name": "active_bin_array_upper"
+        },
+        {
+          "name": "pair",
+          "signer": true,
+          "relations": [
+            "hook"
+          ]
+        },
+        {
+          "name": "active_bin_hook_bin_array_lower",
+          "writable": true
+        },
+        {
+          "name": "active_bin_hook_bin_array_upper",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "claim",
+      "discriminator": [
+        62,
+        198,
+        214,
+        193,
+        213,
+        159,
+        108,
+        210
+      ],
+      "accounts": [
+        {
+          "name": "hook",
+          "writable": true,
+          "relations": [
+            "active_bin_hook_bin_array_lower",
+            "active_bin_hook_bin_array_upper",
+            "position_hook_bin_array_lower",
+            "position_hook_bin_array_upper"
+          ]
+        },
+        {
+          "name": "pair",
+          "relations": [
+            "hook",
+            "position",
+            "active_bin_array_lower",
+            "active_bin_array_upper"
+          ]
+        },
+        {
+          "name": "position"
+        },
+        {
+          "name": "position_mint",
+          "relations": [
+            "position"
+          ]
+        },
+        {
+          "name": "position_token_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "account",
+                "path": "position_token_program"
+              },
+              {
+                "kind": "account",
+                "path": "position_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "active_bin_array_lower",
+          "writable": true
+        },
+        {
+          "name": "active_bin_array_upper",
+          "writable": true
+        },
+        {
+          "name": "active_bin_hook_bin_array_lower",
+          "writable": true
+        },
+        {
+          "name": "active_bin_hook_bin_array_upper",
+          "writable": true
+        },
+        {
+          "name": "hook_position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "hook"
+              },
+              {
+                "kind": "account",
+                "path": "position"
+              }
+            ]
+          }
+        },
+        {
+          "name": "position_hook_bin_array_lower",
+          "writable": true
+        },
+        {
+          "name": "position_hook_bin_array_upper",
+          "writable": true
+        },
+        {
+          "name": "reward_token_mint"
+        },
+        {
+          "name": "hook_reserve",
+          "writable": true,
+          "relations": [
+            "hook"
+          ]
+        },
+        {
+          "name": "user_reserve",
+          "writable": true
+        },
+        {
+          "name": "user",
+          "signer": true
+        },
+        {
+          "name": "reward_token_program"
+        },
+        {
+          "name": "position_token_program"
+        },
+        {
+          "name": "memo_program",
+          "address": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+        },
+        {
+          "name": "event_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize_bin_array",
+      "discriminator": [
+        35,
+        86,
+        19,
+        185,
+        78,
+        212,
+        75,
+        211
+      ],
+      "accounts": [
+        {
+          "name": "hook"
+        },
+        {
+          "name": "bin_array",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  105,
+                  110,
+                  95,
+                  97,
+                  114,
+                  114,
+                  97,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "hook"
+              },
+              {
+                "kind": "arg",
+                "path": "index"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "event_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "index",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "initialize_hook",
+      "discriminator": [
+        37,
+        101,
+        119,
+        255,
+        156,
+        39,
+        252,
+        232
+      ],
+      "accounts": [
+        {
+          "name": "hook",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  104,
+                  111,
+                  111,
+                  107
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "hook_authority"
+              },
+              {
+                "kind": "arg",
+                "path": "pair"
+              }
+            ]
+          }
+        },
+        {
+          "name": "reward_token_mint"
+        },
+        {
+          "name": "hook_reserve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "hook"
+              },
+              {
+                "kind": "account",
+                "path": "reward_token_mint_token_program"
+              },
+              {
+                "kind": "account",
+                "path": "reward_token_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "hook_authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "reward_token_mint_token_program"
+        },
+        {
+          "name": "event_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "lb_pair",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "initialize_position",
+      "discriminator": [
+        219,
+        192,
+        234,
+        71,
+        190,
+        191,
+        102,
+        80
+      ],
+      "accounts": [
+        {
+          "name": "hook"
+        },
+        {
+          "name": "lb_position"
+        },
+        {
+          "name": "position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "hook"
+              },
+              {
+                "kind": "account",
+                "path": "lb_position"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "event_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "on_hook_set",
+      "discriminator": [
+        23,
+        126,
+        214,
+        186,
+        197,
+        123,
+        0,
+        235
+      ],
+      "accounts": [
+        {
+          "name": "pair_account"
+        },
+        {
+          "name": "hook"
+        },
+        {
+          "name": "pair",
+          "signer": true,
+          "relations": [
+            "hook"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "set_reward_range",
+      "discriminator": [
+        124,
+        43,
+        236,
+        120,
+        6,
+        88,
+        112,
+        213
+      ],
+      "accounts": [
+        {
+          "name": "hook",
+          "writable": true,
+          "relations": [
+            "active_bin_hook_bin_array_lower",
+            "active_bin_hook_bin_array_upper"
+          ]
+        },
+        {
+          "name": "pair",
+          "relations": [
+            "hook",
+            "active_bin_array_lower",
+            "active_bin_array_upper"
+          ]
+        },
+        {
+          "name": "active_bin_array_lower",
+          "writable": true
+        },
+        {
+          "name": "active_bin_array_upper",
+          "writable": true
+        },
+        {
+          "name": "active_bin_hook_bin_array_lower",
+          "writable": true
+        },
+        {
+          "name": "active_bin_hook_bin_array_upper",
+          "writable": true
+        },
+        {
+          "name": "hook_reserve",
+          "relations": [
+            "hook"
+          ]
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "hook"
+          ]
+        },
+        {
+          "name": "event_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "delta_bin_a",
+          "type": "i32"
+        },
+        {
+          "name": "delta_bin_b",
+          "type": "i32"
+        }
+      ]
+    },
+    {
+      "name": "set_rewards_parameters",
+      "discriminator": [
+        86,
+        145,
+        230,
+        205,
+        136,
+        137,
+        140,
+        193
+      ],
+      "accounts": [
+        {
+          "name": "hook",
+          "writable": true,
+          "relations": [
+            "active_bin_hook_bin_array_lower",
+            "active_bin_hook_bin_array_upper"
+          ]
+        },
+        {
+          "name": "pair",
+          "relations": [
+            "hook",
+            "active_bin_array_lower",
+            "active_bin_array_upper"
+          ]
+        },
+        {
+          "name": "active_bin_array_lower",
+          "writable": true
+        },
+        {
+          "name": "active_bin_array_upper",
+          "writable": true
+        },
+        {
+          "name": "active_bin_hook_bin_array_lower",
+          "writable": true
+        },
+        {
+          "name": "active_bin_hook_bin_array_upper",
+          "writable": true
+        },
+        {
+          "name": "hook_reserve",
+          "relations": [
+            "hook"
+          ]
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "hook"
+          ]
+        },
+        {
+          "name": "event_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "rewards_per_second",
+          "type": "u64"
+        },
+        {
+          "name": "start_time",
+          "type": "i64"
+        },
+        {
+          "name": "duration",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "set_rewards_per_second",
+      "discriminator": [
+        77,
+        81,
+        53,
+        27,
+        248,
+        29,
+        133,
+        203
+      ],
+      "accounts": [
+        {
+          "name": "hook",
+          "writable": true,
+          "relations": [
+            "active_bin_hook_bin_array_lower",
+            "active_bin_hook_bin_array_upper"
+          ]
+        },
+        {
+          "name": "pair",
+          "relations": [
+            "hook",
+            "active_bin_array_lower",
+            "active_bin_array_upper"
+          ]
+        },
+        {
+          "name": "active_bin_array_lower",
+          "writable": true
+        },
+        {
+          "name": "active_bin_array_upper",
+          "writable": true
+        },
+        {
+          "name": "active_bin_hook_bin_array_lower",
+          "writable": true
+        },
+        {
+          "name": "active_bin_hook_bin_array_upper",
+          "writable": true
+        },
+        {
+          "name": "hook_reserve",
+          "relations": [
+            "hook"
+          ]
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "hook"
+          ]
+        },
+        {
+          "name": "event_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "rewards_per_second",
+          "type": "u64"
+        },
+        {
+          "name": "duration",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "sweep",
+      "discriminator": [
+        40,
+        23,
+        234,
+        175,
+        14,
+        61,
+        154,
+        177
+      ],
+      "accounts": [
+        {
+          "name": "hook",
+          "writable": true
+        },
+        {
+          "name": "reward_token_mint"
+        },
+        {
+          "name": "hook_reserve",
+          "writable": true,
+          "relations": [
+            "hook"
+          ]
+        },
+        {
+          "name": "authority_reserve",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "hook"
+          ]
+        },
+        {
+          "name": "reward_token_program"
+        },
+        {
+          "name": "memo_program",
+          "address": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "BinArray",
+      "discriminator": [
+        92,
+        142,
+        92,
+        220,
+        5,
+        148,
+        70,
+        181
+      ]
+    },
+    {
+      "name": "Hook",
+      "discriminator": [
+        125,
+        61,
+        76,
+        173,
+        200,
+        161,
+        92,
+        217
+      ]
+    },
+    {
+      "name": "HookBinArray",
+      "discriminator": [
+        103,
+        134,
+        57,
+        58,
+        74,
+        234,
+        9,
+        157
+      ]
+    },
+    {
+      "name": "HookPosition",
+      "discriminator": [
+        125,
+        149,
+        132,
+        62,
+        52,
+        71,
+        211,
+        143
+      ]
+    },
+    {
+      "name": "Pair",
+      "discriminator": [
+        85,
+        72,
+        49,
+        176,
+        182,
+        228,
+        141,
+        82
+      ]
+    },
+    {
+      "name": "Position",
+      "discriminator": [
+        170,
+        188,
+        143,
+        228,
+        122,
+        64,
+        247,
+        208
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "ClaimEvent",
+      "discriminator": [
+        93,
+        15,
+        70,
+        170,
+        48,
+        140,
+        212,
+        219
+      ]
+    },
+    {
+      "name": "DeltaBinSetEvent",
+      "discriminator": [
+        0,
+        208,
+        34,
+        219,
+        151,
+        91,
+        139,
+        244
+      ]
+    },
+    {
+      "name": "HookInitializationEvent",
+      "discriminator": [
+        229,
+        217,
+        175,
+        38,
+        112,
+        240,
+        117,
+        95
+      ]
+    },
+    {
+      "name": "RewardParametersSetEvent",
+      "discriminator": [
+        191,
+        11,
+        46,
+        163,
+        150,
+        8,
+        126,
+        245
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "CheckedAddSignedOverflow",
+      "msg": "Checked add signed overflow"
+    },
+    {
+      "code": 6001,
+      "name": "CheckedAddOverflow",
+      "msg": "Checked add overflow"
+    },
+    {
+      "code": 6002,
+      "name": "HookBinArrayIndexMismatch",
+      "msg": "Hook bin array index mismatch"
+    },
+    {
+      "code": 6003,
+      "name": "BinNotFound",
+      "msg": "Bin not found"
+    },
+    {
+      "code": 6004,
+      "name": "ShlDivError",
+      "msg": "Shift left division error"
+    },
+    {
+      "code": 6005,
+      "name": "MulDivError",
+      "msg": "Mul div error"
+    },
+    {
+      "code": 6006,
+      "name": "MulShrError",
+      "msg": "Mul shr error"
+    },
+    {
+      "code": 6007,
+      "name": "CheckedMulOverflow",
+      "msg": "Checked Mul overflow"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidStartTime",
+      "msg": "Invalid start time"
+    },
+    {
+      "code": 6009,
+      "name": "CheckedSubUnderflow",
+      "msg": "Checked sub underflow"
+    },
+    {
+      "code": 6010,
+      "name": "ZeroRewards",
+      "msg": "Rewarder won't distribute any rewards"
+    },
+    {
+      "code": 6011,
+      "name": "InvalidDeltaBins",
+      "msg": "Invalid delta bins"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidLBPosition",
+      "msg": "Invalid LB position"
+    }
+  ],
+  "types": [
+    {
+      "name": "Bin",
+      "serialization": "bytemuck",
+      "repr": {
+        "kind": "c"
+      },
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "total_supply",
+            "type": "u128"
+          },
+          {
+            "name": "reserve_x",
+            "type": "u64"
+          },
+          {
+            "name": "reserve_y",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BinArray",
+      "serialization": "bytemuck",
+      "repr": {
+        "kind": "c"
+      },
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pair",
+            "type": "pubkey"
+          },
+          {
+            "name": "bins",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "Bin"
+                  }
+                },
+                256
+              ]
+            }
+          },
+          {
+            "name": "index",
+            "type": "u32"
+          },
+          {
+            "name": "_space",
+            "type": {
+              "array": [
+                "u8",
+                12
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ClaimEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "hook",
+            "type": "pubkey"
+          },
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "rewards",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DeltaBinSetEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "hook",
+            "type": "pubkey"
+          },
+          {
+            "name": "delta_bin_a",
+            "type": "i32"
+          },
+          {
+            "name": "delta_bin_b",
+            "type": "i32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DynamicFeeParameters",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "time_last_updated",
+            "type": "u64"
+          },
+          {
+            "name": "volatility_accumulator",
+            "type": "u32"
+          },
+          {
+            "name": "volatility_reference",
+            "type": "u32"
+          },
+          {
+            "name": "id_reference",
+            "type": "u32"
+          },
+          {
+            "name": "_space",
+            "type": {
+              "array": [
+                "u8",
+                4
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Hook",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": {
+              "array": [
+                "u8",
+                1
+              ]
+            }
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "pair",
+            "type": "pubkey"
+          },
+          {
+            "name": "reward_token_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "hook_reserve",
+            "type": "pubkey"
+          },
+          {
+            "name": "rewards_per_second",
+            "type": "u64"
+          },
+          {
+            "name": "end_time",
+            "type": "i64"
+          },
+          {
+            "name": "last_update",
+            "type": "i64"
+          },
+          {
+            "name": "delta_bin_a",
+            "type": "i32"
+          },
+          {
+            "name": "delta_bin_b",
+            "type": "i32"
+          },
+          {
+            "name": "total_unclaimed_rewards",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "HookBinArray",
+      "serialization": "bytemuck",
+      "repr": {
+        "kind": "c"
+      },
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "hook",
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u32"
+          },
+          {
+            "name": "_space",
+            "type": {
+              "array": [
+                "u8",
+                28
+              ]
+            }
+          },
+          {
+            "name": "accrued_rewards_per_share",
+            "type": {
+              "array": [
+                "u128",
+                256
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "HookInitializationEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "pair",
+            "type": "pubkey"
+          },
+          {
+            "name": "hook",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "HookPosition",
+      "serialization": "bytemuck",
+      "repr": {
+        "kind": "c"
+      },
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user_accrued_rewards_per_share",
+            "type": {
+              "array": [
+                "u128",
+                64
+              ]
+            }
+          },
+          {
+            "name": "pending_rewards",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "_space",
+            "type": {
+              "array": [
+                "u8",
+                7
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Pair",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": {
+              "array": [
+                "u8",
+                1
+              ]
+            }
+          },
+          {
+            "name": "liquidity_book_config",
+            "type": "pubkey"
+          },
+          {
+            "name": "bin_step",
+            "type": "u8"
+          },
+          {
+            "name": "bin_step_seed",
+            "type": {
+              "array": [
+                "u8",
+                1
+              ]
+            }
+          },
+          {
+            "name": "token_mint_x",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_mint_y",
+            "type": "pubkey"
+          },
+          {
+            "name": "static_fee_parameters",
+            "type": {
+              "defined": {
+                "name": "StaticFeeParameters"
+              }
+            }
+          },
+          {
+            "name": "active_id",
+            "type": "u32"
+          },
+          {
+            "name": "dynamic_fee_parameters",
+            "type": {
+              "defined": {
+                "name": "DynamicFeeParameters"
+              }
+            }
+          },
+          {
+            "name": "protocol_fees_x",
+            "type": "u64"
+          },
+          {
+            "name": "protocol_fees_y",
+            "type": "u64"
+          },
+          {
+            "name": "hook",
+            "type": {
+              "option": "pubkey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Position",
+      "serialization": "bytemuck",
+      "repr": {
+        "kind": "c"
+      },
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pair",
+            "type": "pubkey"
+          },
+          {
+            "name": "position_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "liquidity_shares",
+            "type": {
+              "array": [
+                "u128",
+                64
+              ]
+            }
+          },
+          {
+            "name": "lower_bin_id",
+            "type": "u32"
+          },
+          {
+            "name": "upper_bin_id",
+            "type": "u32"
+          },
+          {
+            "name": "_space",
+            "type": {
+              "array": [
+                "u8",
+                8
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "RewardParametersSetEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "hook",
+            "type": "pubkey"
+          },
+          {
+            "name": "rewards_per_second",
+            "type": "u64"
+          },
+          {
+            "name": "start_time",
+            "type": "i64"
+          },
+          {
+            "name": "duration",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StaticFeeParameters",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "base_factor",
+            "type": "u16"
+          },
+          {
+            "name": "filter_period",
+            "type": "u16"
+          },
+          {
+            "name": "decay_period",
+            "type": "u16"
+          },
+          {
+            "name": "reduction_factor",
+            "type": "u16"
+          },
+          {
+            "name": "variable_fee_control",
+            "type": "u32"
+          },
+          {
+            "name": "max_volatility_accumulator",
+            "type": "u32"
+          },
+          {
+            "name": "protocol_share",
+            "type": "u16"
+          },
+          {
+            "name": "_space",
+            "type": {
+              "array": [
+                "u8",
+                2
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

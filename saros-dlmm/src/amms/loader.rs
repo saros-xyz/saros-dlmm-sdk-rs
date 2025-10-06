@@ -11,7 +11,7 @@ use crate::SarosDlmm;
 mod spl_token_swap_programs {
 
     use super::*;
-    pub const SAROS_DLMM: Pubkey = saros::ID;
+    pub const SAROS_DLMM: Pubkey = liquidity_book::ID;
 }
 
 lazy_static! {

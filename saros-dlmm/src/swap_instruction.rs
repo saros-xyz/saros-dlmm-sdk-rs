@@ -56,18 +56,18 @@ pub fn build_swap_instruction_data(
     }: BuildSwapInstructionDataParams,
 ) -> Result<Vec<u8>> {
     Ok(match swap_mode {
-        SwapMode::ExactIn => saros::instruction::Swap {
+        SwapMode::ExactIn => liquidity_book::instruction::Swap {
             _amount: amount,
             _other_amount_threshold: other_amount_threshold,
             _swap_for_y: swap_for_y,
-            _swap_type: saros::SwapType::ExactInput,
+            _swap_type: liquidity_book::SwapType::ExactInput,
         }
         .data(),
-        SwapMode::ExactOut => saros::instruction::Swap {
+        SwapMode::ExactOut => liquidity_book::instruction::Swap {
             _amount: amount,
             _other_amount_threshold: other_amount_threshold,
             _swap_for_y: swap_for_y,
-            _swap_type: saros::SwapType::ExactOutput,
+            _swap_type: liquidity_book::SwapType::ExactOutput,
         }
         .data(),
     })
