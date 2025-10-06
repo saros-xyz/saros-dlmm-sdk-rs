@@ -4,7 +4,7 @@ members = ["saros-dlmm", "saros-sdk", "liquidity-book", "rewarder-hook"]
 
 [workspace.package]
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [workspace.dependencies]
 anchor-lang = "0.31.0"
