@@ -1,10 +1,10 @@
 [workspace]
 resolver = "2"
-members = ["saros-dlmm", "saros-sdk", "saros"]
+members = ["saros-dlmm", "saros-sdk", "liquidity-book", "rewarder-hook"]
 
 [workspace.package]
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [workspace.dependencies]
 anchor-lang = "0.31.0"
@@ -24,7 +24,6 @@ thiserror = "2.0.12"
 ruint = "1.9.0"
 rust_decimal = { version = "1.36.0", features = ["maths", "c-repr"] }
 itertools = "0.14.0"
-saros = { path = "saros" }
 
 
 # use for test

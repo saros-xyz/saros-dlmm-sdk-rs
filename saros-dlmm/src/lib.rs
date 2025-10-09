@@ -15,7 +15,7 @@ use saros_sdk::{
         fees::{
             TokenTransferFee, compute_transfer_amount_for_expected_output, compute_transfer_fee,
         },
-        swap_manager::get_swap_result,
+        swap_manager::{SwapType, get_swap_result},
     },
     state::{
         bin_array::{BinArray, BinArrayPair},
@@ -47,10 +47,12 @@ pub struct SarosDlmm {
     pub bin_array_lower: BinArray,
     pub bin_array_upper: BinArray,
     pub bin_array_key: [Pubkey; 2],
-    pub hook_bin_array_key: [Pubkey; 2],
     pub token_vault: [Pubkey; 2],
     pub token_program: [Pubkey; 2],
     pub event_authority: Pubkey,
+    pub hook: Pubkey,
+    // // Remaining accounts of the LB program cpi call to hooks, will be checked at hook program.
+    pub active_hook_bin_array_key: [Pubkey; 2],
     pub epoch: Arc<AtomicU64>,
     pub timestamp: Arc<AtomicI64>,
 }
@@ -78,7 +80,7 @@ impl Amm for SarosDlmm {
         Self: Sized,
     {
         let account_data = &keyed_account.account.data[..];
-        let pair = Pair::unpack(&account_data)?;
+        let pair = Pair::unpack(account_data)?;
 
         let bin_array_index = pair.bin_array_index();
 
@@ -93,8 +95,19 @@ impl Amm for SarosDlmm {
             &keyed_account.account.owner,
         );
 
-        let (hook_bin_array_lower_key, hook_bin_array_upper_key) =
-            get_hook_bin_array(bin_array_index, &keyed_account.key);
+        let (mut active_hook_bin_array_lower_key, mut active_hook_bin_array_upper_key) =
+            (Pubkey::default(), Pubkey::default());
+
+        let mut hook_key = keyed_account.key; // Dummy key if no hook
+
+        if let Some(pair_hook_key) = pair.hook {
+            (
+                active_hook_bin_array_lower_key,
+                active_hook_bin_array_upper_key,
+            ) = get_hook_bin_array(bin_array_index, pair_hook_key);
+
+            hook_key = pair_hook_key;
+        }
 
         let event_authority = find_event_authority(keyed_account.account.owner);
 
@@ -102,15 +115,19 @@ impl Amm for SarosDlmm {
             program_id: keyed_account.account.owner,
             key: keyed_account.key,
             label: "saros_dlmm".into(),
-            pair,
+            pair: pair.clone(),
             token_transfer_fee: TokenTransferFee::default(),
             bin_array_lower: BinArray::default(),
             bin_array_upper: BinArray::default(),
             bin_array_key: [bin_array_lower_key, bin_array_upper_key],
-            hook_bin_array_key: [hook_bin_array_lower_key, hook_bin_array_upper_key],
             token_vault: [Pubkey::default(), Pubkey::default()],
             token_program: [Pubkey::default(), Pubkey::default()],
             event_authority,
+            hook: hook_key,
+            active_hook_bin_array_key: [
+                active_hook_bin_array_lower_key,
+                active_hook_bin_array_upper_key,
+            ],
             epoch: amm_context.clock_ref.epoch.clone(),
             timestamp: amm_context.clock_ref.unix_timestamp.clone(),
         })
@@ -121,14 +138,14 @@ impl Amm for SarosDlmm {
     }
 
     fn get_accounts_to_update(&self) -> Vec<Pubkey> {
-        return vec![
+        vec![
             self.key,
             self.bin_array_key[0],
             self.bin_array_key[1],
             self.pair.token_mint_x,
             self.pair.token_mint_y,
             clock::ID,
-        ];
+        ]
     }
 
     fn update(&mut self, account_map: &AccountMap) -> Result<()> {
@@ -139,7 +156,7 @@ impl Amm for SarosDlmm {
             )
         })?;
 
-        self.pair = Pair::unpack(&pair_data[..])?;
+        self.pair = Pair::unpack(pair_data)?;
         let bin_array_index = self.pair.bin_array_index();
 
         let (bin_array_lower_key, _) =
@@ -152,9 +169,15 @@ impl Amm for SarosDlmm {
             || self.bin_array_key[1] != bin_array_upper_key
         {
             self.bin_array_key = [bin_array_lower_key, bin_array_upper_key];
-            let (hook_bin_array_lower_key, hook_bin_array_upper_key) =
-                get_hook_bin_array(bin_array_index, &self.key);
-            self.hook_bin_array_key = [hook_bin_array_lower_key, hook_bin_array_upper_key];
+
+            if let Some(hook_key) = self.pair.hook {
+                let (hook_bin_array_lower_key, hook_bin_array_upper_key) =
+                    get_hook_bin_array(bin_array_index, hook_key);
+                self.active_hook_bin_array_key =
+                    [hook_bin_array_lower_key, hook_bin_array_upper_key];
+
+                self.hook = hook_key;
+            }
         } else {
             let bin_array_lower_data = try_get_account_data(account_map, &bin_array_lower_key)
                 .with_context(|| {
@@ -164,7 +187,7 @@ impl Amm for SarosDlmm {
                     )
                 })?;
 
-            self.bin_array_lower = BinArray::unpack(&bin_array_lower_data[..])?;
+            self.bin_array_lower = BinArray::unpack(bin_array_lower_data)?;
 
             let bin_array_upper_data = try_get_account_data(account_map, &bin_array_upper_key)
                 .with_context(|| {
@@ -174,7 +197,7 @@ impl Amm for SarosDlmm {
                     )
                 })?;
 
-            self.bin_array_upper = BinArray::unpack(&bin_array_upper_data[..])?;
+            self.bin_array_upper = BinArray::unpack(bin_array_upper_data)?;
         }
 
         let (mint_x_data, mint_x_owner) =
@@ -200,7 +223,7 @@ impl Amm for SarosDlmm {
             .with_context(|| format!("Sysvar Clock account does not exist : {}", clock::ID))?;
 
         let clock: Clock =
-            deserialize(&clock_data).with_context(|| "Failed to deserialize Clock")?;
+            deserialize(clock_data).with_context(|| "Failed to deserialize Clock")?;
 
         self.epoch = Arc::new(AtomicU64::new(clock.epoch));
         self.timestamp = Arc::new(AtomicI64::new(clock.unix_timestamp));
@@ -208,9 +231,9 @@ impl Amm for SarosDlmm {
         self.token_transfer_fee = TokenTransferFee::new(
             &mut self.token_transfer_fee,
             mint_x_data,
-            &mint_x_owner,
+            mint_x_owner,
             mint_y_data,
-            &mint_y_owner,
+            mint_y_owner,
             self.epoch.load(Ordering::Relaxed),
         )?;
 
@@ -246,10 +269,9 @@ impl Amm for SarosDlmm {
         } = *quote_params;
         let mut pair = self.pair.clone();
 
-        let bin_array =
-            BinArrayPair::merge(self.bin_array_lower.clone(), self.bin_array_upper.clone())?;
+        let bin_array = BinArrayPair::merge(self.bin_array_lower, self.bin_array_upper)?;
 
-        let block_timestamp = self.timestamp.load(Ordering::Relaxed) as u64;
+        let block_timestamp = u64::try_from(self.timestamp.load(Ordering::Relaxed))?;
         let swap_for_y = is_swap_for_y(input_mint, self.pair.token_mint_x);
 
         let (mint_in, epoch_transfer_fee_in, epoch_transfer_fee_out) = if swap_for_y {
@@ -276,7 +298,7 @@ impl Amm for SarosDlmm {
                     bin_array,
                     amount_in_after_transfer_fee,
                     swap_for_y,
-                    swap_mode,
+                    SwapType::ExactIn,
                     block_timestamp,
                 )?;
 
@@ -294,7 +316,7 @@ impl Amm for SarosDlmm {
                     bin_array,
                     amount_out_before_transfer_fee,
                     swap_for_y,
-                    swap_mode,
+                    SwapType::ExactOut,
                     block_timestamp,
                 )?;
 
@@ -339,26 +361,36 @@ impl Amm for SarosDlmm {
         };
 
         let user = *token_transfer_authority;
+        let mut account_metas = Vec::new();
 
-        let _account_metas = vec![
-            AccountMeta::new(self.key, false),
-            AccountMeta::new_readonly(self.pair.token_mint_x, false),
-            AccountMeta::new_readonly(self.pair.token_mint_y, false),
-            AccountMeta::new(self.bin_array_key[0], false),
-            AccountMeta::new(self.bin_array_key[1], false),
-            AccountMeta::new(self.token_vault[0], false),
-            AccountMeta::new(self.token_vault[1], false),
-            AccountMeta::new(*user_vault_x, false),
-            AccountMeta::new(*user_vault_y, false),
-            AccountMeta::new_readonly(user, true),
-            AccountMeta::new_readonly(self.token_program[0], false),
-            AccountMeta::new_readonly(self.token_program[1], false),
-            AccountMeta::new_readonly(spl_memo::ID, false),
-            AccountMeta::new_readonly(self.event_authority, false),
-            AccountMeta::new_readonly(self.program_id, false),
-            AccountMeta::new(self.hook_bin_array_key[0], false),
-            AccountMeta::new(self.hook_bin_array_key[1], false),
-        ];
+        {
+            account_metas.push(AccountMeta::new(self.key, false));
+            account_metas.push(AccountMeta::new_readonly(self.pair.token_mint_x, false));
+            account_metas.push(AccountMeta::new_readonly(self.pair.token_mint_y, false));
+            account_metas.push(AccountMeta::new(self.bin_array_key[0], false));
+            account_metas.push(AccountMeta::new(self.bin_array_key[1], false));
+            account_metas.push(AccountMeta::new(self.token_vault[0], false));
+            account_metas.push(AccountMeta::new(self.token_vault[1], false));
+            account_metas.push(AccountMeta::new(*user_vault_x, false));
+            account_metas.push(AccountMeta::new(*user_vault_y, false));
+            account_metas.push(AccountMeta::new_readonly(user, true));
+            account_metas.push(AccountMeta::new_readonly(self.token_program[0], false));
+            account_metas.push(AccountMeta::new_readonly(self.token_program[1], false));
+            account_metas.push(AccountMeta::new_readonly(spl_memo::ID, false));
+        }
+
+        // If pair does not have hook, hook should be pair key (dummy)
+        account_metas.push(AccountMeta::new(self.hook, false));
+        account_metas.push(AccountMeta::new_readonly(rewarder_hook::ID, false));
+        // This expect as the last of swap instruction
+        account_metas.push(AccountMeta::new_readonly(self.event_authority, false));
+        account_metas.push(AccountMeta::new_readonly(self.program_id, false));
+
+        // Remaining accounts for hook CPI call
+        if self.hook != self.key {
+            account_metas.push(AccountMeta::new(self.active_hook_bin_array_key[0], false));
+            account_metas.push(AccountMeta::new(self.active_hook_bin_array_key[1], false));
+        }
 
         unimplemented!();
 
