@@ -37,16 +37,18 @@
           "name": "position"
         },
         {
-          "name": "active_bin_array_lower"
+          "name": "bin_array_lower"
         },
         {
-          "name": "active_bin_array_upper"
+          "name": "bin_array_upper"
         },
         {
           "name": "pair",
           "signer": true,
           "relations": [
-            "hook"
+            "hook",
+            "active_bin_array_lower",
+            "active_bin_array_upper"
           ]
         },
         {
@@ -92,6 +94,14 @@
         },
         {
           "name": "position_hook_bin_array_upper",
+          "writable": true
+        },
+        {
+          "name": "active_bin_array_lower",
+          "writable": true
+        },
+        {
+          "name": "active_bin_array_upper",
           "writable": true
         }
       ],
@@ -127,16 +137,18 @@
           "name": "position"
         },
         {
-          "name": "active_bin_array_lower"
+          "name": "bin_array_lower"
         },
         {
-          "name": "active_bin_array_upper"
+          "name": "bin_array_upper"
         },
         {
           "name": "pair",
           "signer": true,
           "relations": [
-            "hook"
+            "hook",
+            "active_bin_array_lower",
+            "active_bin_array_upper"
           ]
         },
         {
@@ -182,6 +194,14 @@
         },
         {
           "name": "position_hook_bin_array_upper",
+          "writable": true
+        },
+        {
+          "name": "active_bin_array_lower",
+          "writable": true
+        },
+        {
+          "name": "active_bin_array_upper",
           "writable": true
         }
       ],
@@ -412,6 +432,98 @@
         {
           "name": "memo_program",
           "address": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+        },
+        {
+          "name": "event_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_position",
+      "discriminator": [
+        123,
+        134,
+        81,
+        0,
+        49,
+        68,
+        98,
+        98
+      ],
+      "accounts": [
+        {
+          "name": "hook",
+          "writable": true
+        },
+        {
+          "name": "position"
+        },
+        {
+          "name": "hook_position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "hook"
+              },
+              {
+                "kind": "account",
+                "path": "position"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         },
         {
           "name": "event_authority",
@@ -1376,6 +1488,21 @@
       "code": 6012,
       "name": "InvalidLBPosition",
       "msg": "Invalid LB position"
+    },
+    {
+      "code": 6013,
+      "name": "PairLowerBinArrayMismatch",
+      "msg": "Pair and lower bin array mismatch"
+    },
+    {
+      "code": 6014,
+      "name": "PairUpperBinArrayMismatch",
+      "msg": "Pair and upper bin array mismatch"
+    },
+    {
+      "code": 6015,
+      "name": "NeedToClaimPendingRewardsFirst",
+      "msg": "Need To Claim Pending Rewards First"
     }
   ],
   "types": [
@@ -1658,6 +1785,10 @@
           {
             "name": "bump",
             "type": "u8"
+          },
+          {
+            "name": "user",
+            "type": "pubkey"
           },
           {
             "name": "_space",
