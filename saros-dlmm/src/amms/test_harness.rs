@@ -70,11 +70,11 @@ lazy_static! {
         (USDT_MINT, 50_000_000),
     ];
     pub static ref TOKEN2022_MINT_AND_IN_AMOUNT: [(Pubkey, u64); 1] = [
-        (LAUNCHCOIN_MINT, 100_000_000_000),
+        (LAUNCHCOIN_MINT, 100_000_000),
 
     ];
     pub static ref TOKEN2022_MINT_AND_OUT_AMOUNT: [(Pubkey, u64); 1] = [
-        (LAUNCHCOIN_MINT, 100_000_000_000),
+        (LAUNCHCOIN_MINT, 100_000_000),
     ];
 
     // Mapping pubkey → amount
@@ -338,8 +338,8 @@ impl AmmTestHarnessProgramTest {
         .unwrap();
 
         let swap_ix = Instruction {
-            program_id: saros::ID,
-            accounts: accounts,
+            program_id: liquidity_book::ID,
+            accounts,
             data,
         };
 
@@ -624,16 +624,15 @@ impl AmmTestHarness {
             self.directory_name()
         ))
         .unwrap()
+        .flatten()
         {
-            if let Ok(entry) = entry {
-                if entry.ends_with("params.json") {
-                    continue;
-                }
-                let file = File::open(entry).unwrap();
-                let keyed_account: RpcKeyedAccount = serde_json::from_reader(file).unwrap();
-                let account: Account = UiAccount::decode(&keyed_account.account).unwrap();
-                account_map.insert(Pubkey::from_str(&keyed_account.pubkey).unwrap(), account);
+            if entry.ends_with("params.json") {
+                continue;
             }
+            let file = File::open(entry).unwrap();
+            let keyed_account: RpcKeyedAccount = serde_json::from_reader(file).unwrap();
+            let account: Account = UiAccount::decode(&keyed_account.account).unwrap();
+            account_map.insert(Pubkey::from_str(&keyed_account.pubkey).unwrap(), account);
         }
         account_map
     }
@@ -659,7 +658,8 @@ impl AmmTestHarness {
         // Some programs such as Raydium AMM are not functional once this feature gate is enabled
         pt.deactivate_feature(pubkey!("7Vced912WrRnfjaiKRiNBcbuFw7RrnLv3E3z95Y4GTNc"));
 
-        pt.add_program("saros_dlmm", saros::ID, None);
+        pt.add_program("saros_dlmm", liquidity_book::ID, None);
+        pt.add_program("rewarder_hook", rewarder_hook::ID, None);
 
         // let modified_label = amm.label().to_lowercase().replace(' ', "_");
         pt.add_program(
@@ -748,7 +748,7 @@ impl AmmTestHarness {
         context: &mut ProgramTestContext,
         reserve_mints: Vec<Pubkey>,
     ) -> ProgramTestAuthority {
-        use saros::find_program_authority;
+        use liquidity_book::find_program_authority;
 
         let authority_id = 0;
         let program_authority = find_program_authority(authority_id);
@@ -814,11 +814,9 @@ impl AmmTestHarness {
             self.directory_name()
         );
         let snapshot_path = Path::new(&snapshot_path_string);
-        if force {
-            if snapshot_path.exists() && snapshot_path.is_dir() {
-                // Remove the directory if it exists
-                remove_dir_all(snapshot_path)?;
-            }
+        if force && snapshot_path.exists() && snapshot_path.is_dir() {
+            // Remove the directory if it exists
+            remove_dir_all(snapshot_path)?;
         }
 
         create_dir_all(snapshot_path)?;

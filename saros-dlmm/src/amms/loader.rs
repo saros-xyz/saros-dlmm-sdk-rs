@@ -9,10 +9,9 @@ use std::collections::HashMap;
 use crate::SarosDlmm;
 
 mod spl_token_swap_programs {
-    use solana_sdk::pubkey;
 
     use super::*;
-    pub const SAROS_DLMM: Pubkey = pubkey!("1qbkdrr3z4ryLA7pZykqxvxWPoeifcVKo6ZG9CfkvVE");
+    pub const SAROS_DLMM: Pubkey = liquidity_book::ID;
 }
 
 lazy_static! {
