@@ -61,3 +61,23 @@ pub fn get_hook_bin_array(bin_array_index: u32, hook: Pubkey) -> (Pubkey, Pubkey
 pub fn is_swap_for_y(source_mint: Pubkey, token_x: Pubkey) -> bool {
     source_mint == token_x
 }
+
+pub fn find_position(position_mint: Pubkey) -> Pubkey {
+    Pubkey::find_program_address(
+        &[b"position".as_ref(), position_mint.as_ref()],
+        &liquidity_book::ID,
+    )
+    .0
+}
+
+pub fn find_hook_position(lb_position: Pubkey, hook: Pubkey) -> Pubkey {
+    Pubkey::find_program_address(
+        &[
+            b"position".as_ref(),
+            hook.as_ref(),
+            lb_position.as_ref(),
+        ],
+        &rewarder_hook::ID,
+    )
+    .0
+}
