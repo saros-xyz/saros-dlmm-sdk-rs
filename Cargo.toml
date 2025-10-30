@@ -45,3 +45,9 @@ spl-associated-token-account = { version = "7.0.0", features = [
 spl-memo = { version = "6.0.0" }
 
 proptest = "1.4.0"
+
+# Package path
+liquidity-book.path = "liquidity-book"
+rewarder-hook.path = "rewarder-hook"
+saros-sdk.path = "saros-sdk"
+saros-dlmm.path = "saros-dlmm"
