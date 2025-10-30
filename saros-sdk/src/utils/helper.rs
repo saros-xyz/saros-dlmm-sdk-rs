@@ -1,5 +1,7 @@
 use solana_sdk::pubkey::Pubkey;
 
+use crate::state::{bin::BIN_ARRAY_SIZE, position::Position};
+
 pub fn find_event_authority(program_id: Pubkey) -> Pubkey {
     Pubkey::find_program_address(&[b"__event_authority"], &program_id).0
 }
@@ -72,12 +74,16 @@ pub fn find_position(position_mint: Pubkey) -> Pubkey {
 
 pub fn find_hook_position(lb_position: Pubkey, hook: Pubkey) -> Pubkey {
     Pubkey::find_program_address(
-        &[
-            b"position".as_ref(),
-            hook.as_ref(),
-            lb_position.as_ref(),
-        ],
+        &[b"position".as_ref(), hook.as_ref(), lb_position.as_ref()],
         &rewarder_hook::ID,
     )
     .0
+}
+
+pub fn find_bin_array_at_position(position: Position) -> (u32, [Pubkey; 2]) {
+    let index = position.lower_bin_id / BIN_ARRAY_SIZE;
+    let (bin_array_lower, _) = get_bin_array_lower(index, &position.pair, &liquidity_book::ID);
+    let (bin_array_upper, _) = get_bin_array_upper(index, &position.pair, &liquidity_book::ID);
+
+    (index, [bin_array_lower, bin_array_upper])
 }
