@@ -1,4 +1,7 @@
-anchor_gen::generate_cpi_crate!("idls/liquidity_book.json");
+use anchor_lang::prelude::*;
+
+declare_id!("1qbkdrr3z4ryLA7pZykqxvxWPoeifcVKo6ZG9CfkvVE");
+declare_program!(liquidity_book);
 
 use rand::distributions::{Distribution, Uniform};
 use solana_sdk::pubkey::Pubkey;

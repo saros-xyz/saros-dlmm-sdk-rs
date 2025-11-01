@@ -12,9 +12,10 @@ anyhow = { workspace = true }
 spl-token-2022 = { workspace = true }
 spl-token = { workspace = true }
 ruint = { workspace = true }
-rewarder-hook = { workspace = true }
-liquidity-book = { workspace = true }
 itertools = { workspace = true }
+
+liquidity-book = { workspace = true }
+rewarder-hook = { workspace = true }
 
 [dev-dependencies]
 proptest = { workspace = true }

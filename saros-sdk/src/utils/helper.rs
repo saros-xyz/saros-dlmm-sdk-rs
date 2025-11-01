@@ -1,5 +1,5 @@
 use solana_sdk::pubkey::Pubkey;
-
+use rewarder_hook::rewarder_hook;
 use crate::state::{bin::BIN_ARRAY_SIZE, position::Position};
 
 pub fn find_event_authority(program_id: Pubkey) -> Pubkey {
