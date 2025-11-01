@@ -9,7 +9,11 @@ use jupiter_amm_interface::{
 };
 use lazy_static::lazy_static;
 
-use saros_sdk::utils::helper::is_swap_for_y;
+use saros_sdk::{
+    utils::helper::is_swap_for_y,
+    math::swap_manager::SwapType,
+    instruction::{ BuildSwapInstructionDataParams, build_swap_instruction_data },
+};
 use serde_json::{Value, json};
 use solana_account_decoder::{UiAccount, UiAccountEncoding, encode_ui_account};
 use solana_client::{
@@ -32,7 +36,6 @@ use super::amm::{Amm, KeyedAccount};
 use crate::{
     amms::loader::amm_factory,
     route::get_token_mints_permutations,
-    swap_instruction::{BuildSwapInstructionDataParams, build_swap_instruction_data},
 };
 use ahash::RandomState;
 use solana_sdk::pubkey;
@@ -333,7 +336,10 @@ impl AmmTestHarnessProgramTest {
                 SwapMode::ExactOut => swap_params.in_amount * 2,
             },
             swap_for_y,
-            swap_mode,
+            swap_mode: match swap_mode {
+                SwapMode::ExactIn => SwapType::ExactIn,
+                SwapMode::ExactOut => SwapType::ExactOut,
+            },
         })
         .unwrap();
 

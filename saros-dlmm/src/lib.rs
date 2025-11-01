@@ -1,6 +1,5 @@
 pub mod amms;
 pub mod route;
-pub mod swap_instruction;
 
 pub use amms::amm;
 use anchor_lang::prelude::AccountMeta;
