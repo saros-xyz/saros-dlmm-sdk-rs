@@ -2,6 +2,14 @@ use anchor_lang::InstructionData;
 use anyhow::{Ok, Result};
 use solana_sdk::pubkey::Pubkey;
 
+use liquidity_book::liquidity_book::{
+    client::args::{
+        ClosePosition as ClosePositionArgs, CreatePosition as CreatePositionArgs,
+        DecreasePosition as DecreasePositionArgs, IncreasePosition as IncreasePositionArgs,
+    },
+    types::BinLiquidityDistribution,
+};
+
 use crate::constants::BASIS_POINT_MAX;
 
 #[derive(Clone)]
@@ -12,8 +20,14 @@ pub struct ModifierPositionParams {
     pub position_mint: Pubkey,
     pub user_vault_x: Pubkey,
     pub user_vault_y: Pubkey,
-    pub bin_array_lower: Pubkey,
-    pub bin_array_upper: Pubkey,
+
+    // Bin arrays at position
+    pub bin_array_position_lower: Pubkey,
+    pub bin_array_position_upper: Pubkey,
+
+    // Remaining accounts of the LB program call, need to be checked
+    pub position_hook_bin_array_lower: Pubkey,
+    pub position_hook_bin_array_upper: Pubkey,
 }
 #[derive(Clone)]
 pub struct CreatePositionParams {
@@ -44,8 +58,8 @@ pub struct LiquidityDistribution {
 }
 
 impl LiquidityDistribution {
-    pub fn into_bin_liquidity(self) -> liquidity_book::BinLiquidityDistribution {
-        liquidity_book::BinLiquidityDistribution {
+    pub fn into_bin_liquidity(self) -> BinLiquidityDistribution {
+        BinLiquidityDistribution {
             relative_bin_id: self.relative_bin_id,
             distribution_x: self.distribution_x,
             distribution_y: self.distribution_y,
@@ -60,9 +74,9 @@ pub fn build_create_position_instruction_data(
         ..
     }: CreatePositionParams,
 ) -> Result<Vec<u8>> {
-    Ok(liquidity_book::instruction::CreatePosition {
-        _relative_bin_id_left: relative_bin_id_left,
-        _relative_bin_in_right: relative_bin_id_right,
+    Ok(CreatePositionArgs {
+        relative_bin_id_left: relative_bin_id_left,
+        relative_bin_in_right: relative_bin_id_right,
     }
     .data())
 }
@@ -75,10 +89,10 @@ pub fn build_increase_position_instruction_data(
         ..
     }: IncreasePositionParams,
 ) -> Result<Vec<u8>> {
-    Ok(liquidity_book::instruction::IncreasePosition {
-        _amount_x: amount_x,
-        _amount_y: amount_y,
-        _liquidity_distribution: liquidity_distribution
+    Ok(IncreasePositionArgs {
+        amount_x,
+        amount_y,
+        liquidity_distribution: liquidity_distribution
             .into_iter()
             .map(|ld| ld.into_bin_liquidity())
             .collect(),
@@ -89,11 +103,11 @@ pub fn build_increase_position_instruction_data(
 pub fn build_decrease_position_instruction_data(
     DecreasePositionParams { shares, .. }: DecreasePositionParams,
 ) -> Result<Vec<u8>> {
-    Ok(liquidity_book::instruction::DecreasePosition { _shares: shares }.data())
+    Ok(DecreasePositionArgs { shares }.data())
 }
 
 pub fn build_close_position_instruction_data() -> Result<Vec<u8>> {
-    Ok(liquidity_book::instruction::ClosePosition {}.data())
+    Ok(ClosePositionArgs {}.data())
 }
 
 /// Create a uniform liquidity distribution

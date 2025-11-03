@@ -6,7 +6,9 @@ use solana_sdk::instruction::Instruction;
 
 use crate::math::swap_manager::SwapType;
 
-use liquidity_book;
+use liquidity_book::liquidity_book::{
+    client::args::Swap as SwapArgs, types::SwapType as LbSwapType,
+};
 
 /// All necessary parts to build a `VersionedTransaction`
 #[derive(Clone)]
@@ -58,18 +60,18 @@ pub fn build_swap_instruction_data(
     }: BuildSwapInstructionDataParams,
 ) -> Result<Vec<u8>> {
     Ok(match swap_mode {
-        SwapType::ExactIn => liquidity_book::instruction::Swap {
-            _amount: amount,
-            _other_amount_threshold: other_amount_threshold,
-            _swap_for_y: swap_for_y,
-            _swap_type: liquidity_book::SwapType::ExactInput,
+        SwapType::ExactIn => SwapArgs {
+            amount,
+            other_amount_threshold,
+            swap_for_y,
+            swap_type: LbSwapType::ExactInput,
         }
         .data(),
-        SwapType::ExactOut => liquidity_book::instruction::Swap {
-            _amount: amount,
-            _other_amount_threshold: other_amount_threshold,
-            _swap_for_y: swap_for_y,
-            _swap_type: liquidity_book::SwapType::ExactOutput,
+        SwapType::ExactOut => SwapArgs {
+            amount,
+            other_amount_threshold,
+            swap_for_y,
+            swap_type: LbSwapType::ExactOutput,
         }
         .data(),
     })

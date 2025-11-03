@@ -81,7 +81,7 @@ impl Default for BinArray {
 
 impl IsInitialized for BinArray {
     fn is_initialized(&self) -> bool {
-        true
+        self.pair != Pubkey::default()
     }
 }
 
