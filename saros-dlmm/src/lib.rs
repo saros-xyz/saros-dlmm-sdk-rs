@@ -182,8 +182,8 @@ impl Amm for SarosDlmm {
             bin_array_upper: BinArray::default(),
             bin_array_key: [
                 bin_array_lower_key,
-                bin_array_upper_key,
                 bin_array_middle_key,
+                bin_array_upper_key,
             ],
             active_bin_array_key: [Pubkey::default(), Pubkey::default()],
             token_vault: [Pubkey::default(), Pubkey::default()],
