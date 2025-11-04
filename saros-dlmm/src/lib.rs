@@ -512,32 +512,32 @@ impl SarosPositionManagement for SarosDlmm {
             ..
         } = create_position_params;
 
-        let mut accounts_metas = Vec::new();
+        let mut account_metas = Vec::new();
 
         let position_key = find_position(position_mint);
 
         {
-            accounts_metas.push(AccountMeta::new(self.key(), false));
-            accounts_metas.push(AccountMeta::new(position_key, false));
-            accounts_metas.push(AccountMeta::new(position_mint, true));
-            accounts_metas.push(AccountMeta::new(source_position, false));
-            accounts_metas.push(AccountMeta::new(user, true));
+            account_metas.push(AccountMeta::new(self.key(), false));
+            account_metas.push(AccountMeta::new(position_key, false));
+            account_metas.push(AccountMeta::new(position_mint, true));
+            account_metas.push(AccountMeta::new(source_position, false));
+            account_metas.push(AccountMeta::new(user, true));
 
-            accounts_metas.push(AccountMeta::new_readonly(
+            account_metas.push(AccountMeta::new_readonly(
                 anchor_lang::system_program::ID,
                 false,
             ));
-            accounts_metas.push(AccountMeta::new_readonly(spl_token_2022::ID, false));
-            accounts_metas.push(AccountMeta::new_readonly(
+            account_metas.push(AccountMeta::new_readonly(spl_token_2022::ID, false));
+            account_metas.push(AccountMeta::new_readonly(
                 SarosDlmm::ASSOCIATED_TOKEN_PROGRAM_ADDRESS,
                 false,
             ));
 
-            accounts_metas.push(AccountMeta::new_readonly(self.event_authority, false));
-            accounts_metas.push(AccountMeta::new_readonly(self.program_id(), false));
+            account_metas.push(AccountMeta::new_readonly(self.event_authority, false));
+            account_metas.push(AccountMeta::new_readonly(self.program_id(), false));
         }
 
-        Ok(accounts_metas)
+        Ok(account_metas)
     }
 
     fn get_modifier_position_account_metas(
@@ -558,48 +558,48 @@ impl SarosPositionManagement for SarosDlmm {
             ..
         } = modifier_position_params;
 
-        let mut accounts_metas = Vec::new();
+        let mut account_metas = Vec::new();
 
         {
-            accounts_metas.push(AccountMeta::new(self.key, false));
-            accounts_metas.push(AccountMeta::new(position_key, false));
-            accounts_metas.push(AccountMeta::new(position_mint, true));
-            accounts_metas.push(AccountMeta::new(position_token_account, false));
-            accounts_metas.push(AccountMeta::new(bin_array_position_lower, false));
-            accounts_metas.push(AccountMeta::new(bin_array_position_upper, false));
-            accounts_metas.push(AccountMeta::new_readonly(self.pair.token_mint_x, false));
-            accounts_metas.push(AccountMeta::new_readonly(self.pair.token_mint_y, false));
-            accounts_metas.push(AccountMeta::new(self.token_vault[0], false));
-            accounts_metas.push(AccountMeta::new(self.token_vault[1], false));
-            accounts_metas.push(AccountMeta::new(user_vault_x, false));
-            accounts_metas.push(AccountMeta::new(user_vault_y, false));
-            accounts_metas.push(AccountMeta::new(user, true));
-            accounts_metas.push(AccountMeta::new_readonly(self.token_program[0], false));
-            accounts_metas.push(AccountMeta::new_readonly(self.token_program[1], false));
-            accounts_metas.push(AccountMeta::new_readonly(spl_token_2022::ID, false));
-            accounts_metas.push(AccountMeta::new_readonly(
+            account_metas.push(AccountMeta::new(self.key, false));
+            account_metas.push(AccountMeta::new(position_key, false));
+            account_metas.push(AccountMeta::new(position_mint, true));
+            account_metas.push(AccountMeta::new(position_token_account, false));
+            account_metas.push(AccountMeta::new(bin_array_position_lower, false));
+            account_metas.push(AccountMeta::new(bin_array_position_upper, false));
+            account_metas.push(AccountMeta::new_readonly(self.pair.token_mint_x, false));
+            account_metas.push(AccountMeta::new_readonly(self.pair.token_mint_y, false));
+            account_metas.push(AccountMeta::new(self.token_vault[0], false));
+            account_metas.push(AccountMeta::new(self.token_vault[1], false));
+            account_metas.push(AccountMeta::new(user_vault_x, false));
+            account_metas.push(AccountMeta::new(user_vault_y, false));
+            account_metas.push(AccountMeta::new(user, true));
+            account_metas.push(AccountMeta::new_readonly(self.token_program[0], false));
+            account_metas.push(AccountMeta::new_readonly(self.token_program[1], false));
+            account_metas.push(AccountMeta::new_readonly(spl_token_2022::ID, false));
+            account_metas.push(AccountMeta::new_readonly(
                 anchor_lang::system_program::ID,
                 false,
             ));
-            accounts_metas.push(AccountMeta::new_readonly(spl_memo::ID, false));
+            account_metas.push(AccountMeta::new_readonly(spl_memo::ID, false));
             // If pair does not have hook, hook should be pair key (dummy)
-            accounts_metas.push(AccountMeta::new(self.hook, false));
-            accounts_metas.push(AccountMeta::new_readonly(rewarder_hook::ID, false));
-            accounts_metas.push(AccountMeta::new_readonly(self.event_authority, false));
-            accounts_metas.push(AccountMeta::new_readonly(self.program_id, false));
+            account_metas.push(AccountMeta::new(self.hook, false));
+            account_metas.push(AccountMeta::new_readonly(rewarder_hook::ID, false));
+            account_metas.push(AccountMeta::new_readonly(self.event_authority, false));
+            account_metas.push(AccountMeta::new_readonly(self.program_id, false));
 
             if let Some(hook_key) = self.pair.hook {
                 let hook_position = find_hook_position(position_key, hook_key);
-                accounts_metas.push(AccountMeta::new(self.active_hook_bin_array_key[0], false));
-                accounts_metas.push(AccountMeta::new(self.active_hook_bin_array_key[1], false));
-                accounts_metas.push(AccountMeta::new(hook_position, false));
-                accounts_metas.push(AccountMeta::new(position_hook_bin_array_lower, false));
-                accounts_metas.push(AccountMeta::new(position_hook_bin_array_upper, false));
-                accounts_metas.push(AccountMeta::new(self.active_bin_array_key[0], false));
-                accounts_metas.push(AccountMeta::new(self.active_bin_array_key[1], false));
+                account_metas.push(AccountMeta::new(self.active_hook_bin_array_key[0], false));
+                account_metas.push(AccountMeta::new(self.active_hook_bin_array_key[1], false));
+                account_metas.push(AccountMeta::new(hook_position, false));
+                account_metas.push(AccountMeta::new(position_hook_bin_array_lower, false));
+                account_metas.push(AccountMeta::new(position_hook_bin_array_upper, false));
+                account_metas.push(AccountMeta::new(self.active_bin_array_key[0], false));
+                account_metas.push(AccountMeta::new(self.active_bin_array_key[1], false));
             }
         }
 
-        Ok(accounts_metas)
+        Ok(account_metas)
     }
 }
