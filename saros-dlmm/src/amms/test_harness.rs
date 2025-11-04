@@ -11,10 +11,12 @@ use lazy_static::lazy_static;
 
 use saros_sdk::{
     instruction::{
-        build_swap_instruction_data, get_initialize_hook_bin_array_instruction,
-        get_initialize_hook_position_instruction, BuildSwapInstructionDataParams,
+        build_claim_instruction_data, build_swap_instruction_data,
+        get_initialize_hook_bin_array_instruction, get_initialize_hook_position_instruction,
+        BuildSwapInstructionDataParams, ClaimParams,
     },
     math::swap_manager::SwapType,
+    state::hook::Hook,
     utils::helper::{find_hook_bin_array_at_position, find_hook_position, is_swap_for_y},
 };
 use serde_json::{json, Value};
@@ -494,11 +496,11 @@ impl AmmTestHarnessProgramTest {
             .unwrap()
             .0;
 
-        let amount = 200_000_000;
+        let amount_add_position = 200_000_000;
 
         println!(
             "Testing position life circle with amount: {} -> mint_x: {}, mint_y: {}",
-            amount, mint_x, mint_y
+            amount_add_position, mint_x, mint_y
         );
 
         let position_mint = Keypair::new();
@@ -535,6 +537,7 @@ impl AmmTestHarnessProgramTest {
             vec![ComputeBudgetInstruction::set_compute_unit_limit(1_400_000)];
         let mut ixs_decrease: Vec<Instruction> =
             vec![ComputeBudgetInstruction::set_compute_unit_limit(1_400_000)];
+        let mut ixs_claim = vec![ComputeBudgetInstruction::set_compute_unit_limit(1_400_000)];
         let mut ixs_close: Vec<Instruction> =
             vec![ComputeBudgetInstruction::set_compute_unit_limit(1_400_000)];
 
@@ -638,8 +641,8 @@ impl AmmTestHarnessProgramTest {
         };
 
         let increase_position_params = IncreasePositionParams {
-            amount_x: amount,
-            amount_y: amount,
+            amount_x: amount_add_position,
+            amount_y: amount_add_position,
             liquidity_distribution: create_uniform_distribution(3),
         };
 
@@ -669,6 +672,135 @@ impl AmmTestHarnessProgramTest {
 
         let position_account_increased =
             Position::unpack(&position_account_after_increase.data).unwrap();
+
+        if amm.has_hook() {
+            // Should swap & active reward.
+            let swap_mode = SwapMode::ExactIn;
+            let mut amount_swap = *TOKEN_MINT_TO_IN_AMOUNT.get(mint_x).unwrap();
+
+            let mut accounts: Vec<AccountMeta> = Vec::new();
+            let mut quote_count: u32 = 0;
+            let mut quote_result = None;
+            let mut quote_err = None;
+
+            let reserve_mints: [Pubkey; 2] = amm.get_reserve_mints().try_into().unwrap();
+            let swap_for_y = is_swap_for_y(*mint_x, reserve_mints[0]);
+
+            // solution for amm that cant quote certain amount and also could be bug introducing, divide by 2 until can quote
+            while quote_result.is_none() && quote_count < 10 {
+                amount_swap /= 2;
+                match amm.quote(&QuoteParams {
+                    amount: amount_swap,
+                    input_mint: *mint_x,
+                    output_mint: *mint_y,
+                    swap_mode,
+                }) {
+                    Ok(quote) => quote_result = Some(quote),
+                    Err(e) => {
+                        println!("quote error: {}", e);
+                        quote_err = Some(e);
+                    }
+                }
+
+                quote_count += 1;
+            }
+
+            let swap_params = SwapParams {
+                swap_mode,
+                source_mint: *mint_x,
+                destination_mint: *mint_y,
+                source_token_account: user_mint_x_account,
+                destination_token_account: user_mint_y_account,
+                token_transfer_authority: user,
+                quote_mint_to_referrer: None,
+                in_amount: quote_result.unwrap().in_amount,
+                out_amount: quote_result.unwrap().out_amount,
+                jupiter_program_id: &Pubkey::default(),
+                missing_dynamic_accounts_as_default: false,
+            };
+
+            let SwapAndAccountMetas {
+                swap: _swap,
+                account_metas,
+            } = amm.get_swap_and_account_metas(&swap_params).unwrap();
+
+            accounts.extend(account_metas);
+
+            let data = build_swap_instruction_data(BuildSwapInstructionDataParams {
+                amount: amount_swap,
+                other_amount_threshold: match swap_mode {
+                    SwapMode::ExactIn => 0,
+                    SwapMode::ExactOut => swap_params.in_amount * 2,
+                },
+                swap_for_y,
+                swap_mode: match swap_mode {
+                    SwapMode::ExactIn => SwapType::ExactIn,
+                    SwapMode::ExactOut => SwapType::ExactOut,
+                },
+            })
+            .unwrap();
+
+            let swap_ix = Instruction {
+                program_id: liquidity_book::ID,
+                accounts,
+                data,
+            };
+
+            let mut ixs: Vec<Instruction> =
+                vec![ComputeBudgetInstruction::set_compute_unit_limit(1_400_000)];
+
+            ixs.push(swap_ix);
+
+            let _process_swap = self
+                .process_transaction(&ixs, &[&user_keypair])
+                .await
+                .unwrap();
+
+            let hook_key = amm.get_hook().unwrap();
+
+            let hook_data = self
+                .get_test_rpc_client()
+                .get_account(&hook_key)
+                .await
+                .unwrap();
+
+            let hook = Hook::unpack(&hook_data.data).unwrap();
+
+            let reward_token_info = self
+                .get_test_rpc_client()
+                .get_account(&hook.reward_token_mint)
+                .await
+                .unwrap();
+
+            let user_reserve =
+                create_ata_account(&user, &hook.reward_token_mint, 0, reward_token_info.owner).0;
+
+            // println!("User reserve for rewards... {}", user_reserve);
+
+            let claim_params = ClaimParams {
+                lb_position: position_key_created,
+                user: user_keypair.pubkey(),
+                position_hook_bin_array_lower: bin_hook_position_lower,
+                position_hook_bin_array_upper: bin_hook_position_upper,
+                user_reserve: user_reserve,
+                position_mint: position_mint.pubkey(),
+            };
+
+            let claim_accounts_metas = amm.get_claim_account_metas(claim_params.clone()).unwrap();
+            let data_claim_ixs = build_claim_instruction_data().unwrap();
+
+            let claim_ix = Instruction {
+                program_id: rewarder_hook::ID,
+                accounts: claim_accounts_metas,
+                data: data_claim_ixs,
+            };
+
+            ixs_claim.push(claim_ix);
+            let _claim_result = self
+                .process_transaction(&ixs_claim, &[&user_keypair])
+                .await
+                .unwrap();
+        }
 
         let position_width = (position_account_increased.upper_bin_id
             - position_account_increased.lower_bin_id

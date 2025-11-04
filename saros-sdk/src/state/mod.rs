@@ -4,3 +4,4 @@ pub mod fee;
 pub mod hook_position;
 pub mod pair;
 pub mod position;
+pub mod hook;

@@ -1,7 +1,7 @@
 pub mod amms;
 pub mod route;
 
-use crate::amms::position_manager::SarosPositionManagement;
+use crate::amms::position_manager::{HookInfo, SarosPositionManagement};
 pub use amms::amm;
 use anchor_lang::prelude::AccountMeta;
 use anyhow::{Context, Result};
@@ -12,7 +12,7 @@ use jupiter_amm_interface::{
 };
 use saros_sdk::utils::helper::{get_hook_bin_array, get_pair_bin_array, get_swap_pair_bin_array};
 use saros_sdk::{
-    instruction::{CreatePositionParams, ModifierPositionParams},
+    instruction::{ClaimParams, CreatePositionParams, ModifierPositionParams},
     math::{
         fees::{
             compute_transfer_amount_for_expected_output, compute_transfer_fee, TokenTransferFee,
@@ -21,6 +21,7 @@ use saros_sdk::{
     },
     state::{
         bin_array::{BinArray, BinArrayPair},
+        hook::Hook,
         pair::Pair,
     },
     utils::helper::{
@@ -61,6 +62,7 @@ pub struct SarosDlmm {
     pub active_hook_bin_array_key: [Pubkey; 2],
     pub epoch: Arc<AtomicU64>,
     pub timestamp: Arc<AtomicI64>,
+    pub hook_info: HookInfo,
 }
 
 pub struct BinForSwap {
@@ -72,6 +74,10 @@ pub struct BinForSwap {
 impl SarosDlmm {
     pub const ASSOCIATED_TOKEN_PROGRAM_ADDRESS: Pubkey =
         pubkey!("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
+
+    pub fn use_position_manager(&self) -> bool {
+        true
+    }
 
     pub fn compute_bin_array_swap(&self, swap_for_y: bool) -> Result<BinForSwap> {
         // unpack fixed order
@@ -194,6 +200,7 @@ impl Amm for SarosDlmm {
             active_hook_bin_array_key: [Pubkey::default(), Pubkey::default()],
             epoch: amm_context.clock_ref.epoch.clone(),
             timestamp: amm_context.clock_ref.unix_timestamp.clone(),
+            hook_info: HookInfo::default(),
         })
     }
 
@@ -202,7 +209,7 @@ impl Amm for SarosDlmm {
     }
 
     fn get_accounts_to_update(&self) -> Vec<Pubkey> {
-        vec![
+        let mut defaults = vec![
             self.key,
             self.bin_array_key[0],
             self.bin_array_key[1],
@@ -210,7 +217,19 @@ impl Amm for SarosDlmm {
             self.pair.token_mint_x,
             self.pair.token_mint_y,
             clock::ID,
-        ]
+        ];
+
+        if self.use_position_manager() {
+            if let Some(hook_key) = self.pair.hook {
+                defaults.push(hook_key);
+            }
+
+            if self.hook_info.hook.is_initialized() {
+                defaults.push(self.hook_info.hook.reward_token_mint);
+            }
+        }
+
+        defaults
     }
 
     fn update(&mut self, account_map: &AccountMap) -> Result<()> {
@@ -279,6 +298,31 @@ impl Amm for SarosDlmm {
             self.active_bin_array_key = [active_bin_array_keys.0, active_bin_array_keys.1];
             self.active_hook_bin_array_key =
                 [active_hook_bin_array_keys.0, active_hook_bin_array_keys.1];
+
+            if self.pair.hook.is_some() && self.use_position_manager() {
+                let hook_data =
+                    try_get_account_data(account_map, &self.hook).with_context(|| {
+                        format!(
+                            "Hook account does not exist or has not been initialized: {}",
+                            self.hook
+                        )
+                    })?;
+
+                if self.hook_info.hook.is_initialized() {
+                    let reward_token_mint = self.hook_info.hook.reward_token_mint;
+                    let (_, reward_token_mint_owner) =
+                        try_get_account_data_and_owner(account_map, &reward_token_mint)
+                            .with_context(|| {
+                                format!(
+                                    "Reward token mint not found or invalid: {}",
+                                    reward_token_mint
+                                )
+                            })?;
+                    self.hook_info.reward_token_program = *reward_token_mint_owner;
+                }
+
+                self.hook_info.hook = Hook::unpack(hook_data)?;
+            }
         }
 
         let (mint_x_data, mint_x_owner) =
@@ -598,6 +642,66 @@ impl SarosPositionManagement for SarosDlmm {
                 account_metas.push(AccountMeta::new(self.active_bin_array_key[0], false));
                 account_metas.push(AccountMeta::new(self.active_bin_array_key[1], false));
             }
+        }
+
+        Ok(account_metas)
+    }
+
+    fn get_claim_account_metas(
+        &self,
+        claim_position_params: ClaimParams,
+    ) -> Result<Vec<AccountMeta>> {
+        let ClaimParams {
+            lb_position,
+            position_mint,
+            position_hook_bin_array_lower,
+            position_hook_bin_array_upper,
+            user,
+            user_reserve,
+            ..
+        } = claim_position_params;
+
+        if !self.hook_info.hook.is_initialized() {
+            return Err(anyhow::anyhow!("Hook is not initialized"));
+        }
+        let mut account_metas = Vec::new();
+        let hook_position = find_hook_position(lb_position, self.hook);
+        let position_token_account =
+            spl_associated_token_account::get_associated_token_address_with_program_id(
+                &user,
+                &position_mint,
+                &spl_token_2022::ID,
+            );
+        let event_authority = find_event_authority(rewarder_hook::ID);
+
+        {
+            account_metas.push(AccountMeta::new(self.hook, false));
+            account_metas.push(AccountMeta::new_readonly(self.key, false));
+            account_metas.push(AccountMeta::new_readonly(lb_position, false));
+            account_metas.push(AccountMeta::new_readonly(position_mint, false));
+            account_metas.push(AccountMeta::new_readonly(position_token_account, false));
+            account_metas.push(AccountMeta::new(self.active_bin_array_key[0], false));
+            account_metas.push(AccountMeta::new(self.active_bin_array_key[1], false));
+            account_metas.push(AccountMeta::new(self.active_hook_bin_array_key[0], false));
+            account_metas.push(AccountMeta::new(self.active_hook_bin_array_key[1], false));
+            account_metas.push(AccountMeta::new(hook_position, false));
+            account_metas.push(AccountMeta::new(position_hook_bin_array_lower, false));
+            account_metas.push(AccountMeta::new(position_hook_bin_array_upper, false));
+            account_metas.push(AccountMeta::new(
+                self.hook_info.hook.reward_token_mint,
+                false,
+            ));
+            account_metas.push(AccountMeta::new(self.hook_info.hook.hook_reserve, false));
+            account_metas.push(AccountMeta::new(user_reserve, false));
+            account_metas.push(AccountMeta::new(user, true));
+            account_metas.push(AccountMeta::new_readonly(
+                self.hook_info.reward_token_program,
+                false,
+            ));
+            account_metas.push(AccountMeta::new_readonly(spl_token_2022::ID, false));
+            account_metas.push(AccountMeta::new_readonly(spl_memo::ID, false));
+            account_metas.push(AccountMeta::new_readonly(event_authority, false));
+            account_metas.push(AccountMeta::new_readonly(rewarder_hook::ID, false));
         }
 
         Ok(account_metas)
