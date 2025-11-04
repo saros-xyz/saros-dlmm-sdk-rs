@@ -4,6 +4,7 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
+anchor-lang = { workspace = true }
 solana-sdk = { workspace = true }
 thiserror = { workspace = true }
 arrayref = { workspace = true }
@@ -11,7 +12,10 @@ anyhow = { workspace = true }
 spl-token-2022 = { workspace = true }
 spl-token = { workspace = true }
 ruint = { workspace = true }
-rewarder-hook = { path = "../rewarder-hook" }
+itertools = { workspace = true }
+
+liquidity-book = { workspace = true }
+rewarder-hook = { workspace = true }
 
 [dev-dependencies]
 proptest = { workspace = true }

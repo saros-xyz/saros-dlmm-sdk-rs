@@ -9,9 +9,27 @@ use jupiter_amm_interface::{
 };
 use lazy_static::lazy_static;
 
-use saros_sdk::utils::helper::is_swap_for_y;
-use serde_json::{Value, json};
-use solana_account_decoder::{UiAccount, UiAccountEncoding, encode_ui_account};
+use saros_sdk::{
+    instruction::{
+        build_swap_instruction_data, get_initialize_hook_bin_array_instruction,
+        get_initialize_hook_position_instruction, BuildSwapInstructionDataParams,
+    },
+    math::swap_manager::SwapType,
+    utils::helper::{find_hook_bin_array_at_position, find_hook_position, is_swap_for_y},
+};
+use serde_json::{json, Value};
+use solana_account_decoder::{encode_ui_account, UiAccount, UiAccountEncoding};
+
+use saros_sdk::{
+    instruction::{
+        build_close_position_instruction_data, build_create_position_instruction_data,
+        build_decrease_position_instruction_data, build_increase_position_instruction_data,
+        create_uniform_distribution, get_initialize_bin_array_instruction, CreatePositionParams,
+        DecreasePositionParams, IncreasePositionParams, ModifierPositionParams,
+    },
+    state::position::Position,
+    utils::helper::{find_bin_array_at_position, find_position},
+};
 use solana_client::{
     nonblocking,
     rpc_client::{RpcClient, RpcClientConfig},
@@ -30,9 +48,8 @@ use spl_token_2022::extension::StateWithExtensions;
 // use stakedex_sdk::test_utils::spl_stake_pool;
 use super::amm::{Amm, KeyedAccount};
 use crate::{
-    amms::loader::amm_factory,
+    amms::loader::amm_factory, amms::position_manager::SarosPositionManagement,
     route::get_token_mints_permutations,
-    swap_instruction::{BuildSwapInstructionDataParams, build_swap_instruction_data},
 };
 use ahash::RandomState;
 use solana_sdk::pubkey;
@@ -49,25 +66,28 @@ pub const USDC_MINT: Pubkey = pubkey!("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTD
 pub const USDT_MINT: Pubkey = pubkey!("Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB");
 pub const WSOL_MINT: Pubkey = pubkey!("So11111111111111111111111111111111111111112");
 pub const MASHA_MINT: Pubkey = pubkey!("mae8vJGf8Wju8Ron1oDTQVaTGGBpcpWDwoRQJALMMf2");
+pub const USD1_MINT: Pubkey = pubkey!("USD1ttGY1N17NEEHLmELoaybftRBUSErhqYiQzvEmuB");
 pub const LAUNCHCOIN_MINT: Pubkey = pubkey!("Ey59PH7Z4BFU4HjyKnyMdWt5GGN76KazTAwQihoUXRnk");
 
 lazy_static! {
     // For SwapMode::ExactIn
-    pub static ref TOKEN_MINT_AND_IN_AMOUNT: [(Pubkey, u64); 5] = [
+    pub static ref TOKEN_MINT_AND_IN_AMOUNT: [(Pubkey, u64); 6] = [
         (spl_token::native_mint::ID, 2_500_000_000),
         (SAROS_MINT, 1_000_000_000),
         (MASHA_MINT, 1_000_000_000),
-        (USDC_MINT, 1_110_000_000),
-        (USDT_MINT, 1_110_000_000),
+        (USDC_MINT, 500_000_000),
+        (USD1_MINT, 1_110_000_000),
+        (USDT_MINT, 1_000_000_000),
     ];
 
     // For SwapMode::ExactOut
-    pub static ref TOKEN_MINT_AND_OUT_AMOUNT: [(Pubkey, u64); 5] = [
+    pub static ref TOKEN_MINT_AND_OUT_AMOUNT: [(Pubkey, u64); 6] = [
         (spl_token::native_mint::ID, 100_000_000),
         (SAROS_MINT, 500_000_000),
         (MASHA_MINT, 500_000_000),
-        (USDC_MINT, 50_000_000),
-        (USDT_MINT, 50_000_000),
+        (USDC_MINT, 500_000_000),
+        (USD1_MINT, 50_000_000),
+        (USDT_MINT, 1_000_000_000),
     ];
     pub static ref TOKEN2022_MINT_AND_IN_AMOUNT: [(Pubkey, u64); 1] = [
         (LAUNCHCOIN_MINT, 100_000_000),
@@ -333,7 +353,10 @@ impl AmmTestHarnessProgramTest {
                 SwapMode::ExactOut => swap_params.in_amount * 2,
             },
             swap_for_y,
-            swap_mode,
+            swap_mode: match swap_mode {
+                SwapMode::ExactIn => SwapType::ExactIn,
+                SwapMode::ExactOut => SwapType::ExactOut,
+            },
         })
         .unwrap();
 
@@ -444,6 +467,255 @@ impl AmmTestHarnessProgramTest {
             amm.label(),
             elapsed.as_micros() as f64 / (iterations as f64),
         );
+    }
+
+    pub async fn assert_position_life_circle<T: SarosPositionManagement>(
+        &mut self,
+        amm: &T,
+        mint_x: &Pubkey,
+        mint_y: &Pubkey,
+        bin_left: i32,
+        bin_right: i32,
+    ) where
+        T: SarosPositionManagement + ?Sized,
+    {
+        let user = self.program_test_user.keypair.pubkey();
+
+        let user_mint_x_account = self
+            .program_test_user
+            .mint_to_ata_with_program_id
+            .get(mint_x)
+            .unwrap()
+            .0;
+        let user_mint_y_account = self
+            .program_test_user
+            .mint_to_ata_with_program_id
+            .get(mint_y)
+            .unwrap()
+            .0;
+
+        let amount = 200_000_000;
+
+        println!(
+            "Testing position life circle with amount: {} -> mint_x: {}, mint_y: {}",
+            amount, mint_x, mint_y
+        );
+
+        let position_mint = Keypair::new();
+
+        let position_token_account = get_associated_token_address_with_program_id(
+            &user,
+            &position_mint.pubkey(),
+            &spl_token_2022::ID,
+        );
+
+        let create_position_params = CreatePositionParams {
+            relative_bin_id_left: bin_left,
+            relative_bin_id_right: bin_right,
+            source_position: position_token_account,
+            user,
+            position_mint: position_mint.pubkey(),
+        };
+
+        let create_position_accounts_metas = amm
+            .get_create_position_account_metas(create_position_params.clone())
+            .unwrap();
+
+        let data = build_create_position_instruction_data(create_position_params.clone()).unwrap();
+
+        let create_position_ixs = Instruction {
+            program_id: liquidity_book::ID,
+            accounts: create_position_accounts_metas,
+            data,
+        };
+
+        let mut ixs_create: Vec<Instruction> =
+            vec![ComputeBudgetInstruction::set_compute_unit_limit(1_400_000)];
+        let mut ixs_increase: Vec<Instruction> =
+            vec![ComputeBudgetInstruction::set_compute_unit_limit(1_400_000)];
+        let mut ixs_decrease: Vec<Instruction> =
+            vec![ComputeBudgetInstruction::set_compute_unit_limit(1_400_000)];
+        let mut ixs_close: Vec<Instruction> =
+            vec![ComputeBudgetInstruction::set_compute_unit_limit(1_400_000)];
+
+        ixs_create.push(create_position_ixs);
+        let user_keypair = clone_keypair(&self.program_test_user.keypair);
+
+        let _create_result = self
+            .process_transaction(&ixs_create, &[&user_keypair, &position_mint])
+            .await
+            .unwrap();
+
+        let position_key_created = find_position(position_mint.pubkey());
+        let position_created = self
+            .get_test_rpc_client()
+            .get_account(&position_key_created)
+            .await
+            .unwrap();
+
+        let position_data = Position::unpack(&position_created.data).unwrap();
+
+        let (position_bin_index, [bin_position_lower, bin_position_upper]) =
+            find_bin_array_at_position(position_data.clone());
+
+        let (hook_position_index, [bin_hook_position_lower, bin_hook_position_upper]) = if amm
+            .has_hook()
+        {
+            let hook_key = amm.get_hook().unwrap();
+            let hook_position = find_hook_position(position_mint.pubkey(), hook_key);
+
+            // Check if account exists
+            let hook_account = self
+                .context
+                .banks_client
+                .get_account(hook_position)
+                .await
+                .unwrap();
+
+            // Initialize hook position if not exists
+            if !hook_account.is_some() {
+                let ix_init =
+                    get_initialize_hook_position_instruction(hook_key, position_key_created, user);
+                ixs_increase.push(ix_init);
+            }
+
+            find_hook_bin_array_at_position(position_bin_index, hook_key)
+        } else {
+            (0, [Pubkey::default(), Pubkey::default()])
+        };
+
+        let bin_array_ixs = ensure_bin_arrays_initialized(
+            &self.context.banks_client,
+            position_data.pair,
+            position_bin_index,
+            user,
+            bin_position_lower,
+            bin_position_upper,
+        )
+        .await
+        .unwrap();
+
+        let hook_bin_array_ixs = if amm.has_hook() {
+            ensure_hook_bin_arrays_initialized(
+                &self.context.banks_client,
+                amm.get_hook().unwrap(),
+                hook_position_index,
+                user,
+                bin_hook_position_lower,
+                bin_hook_position_upper,
+            )
+            .await
+            .unwrap()
+        } else {
+            vec![]
+        };
+
+        if !bin_array_ixs.is_empty() {
+            let _setup_result = self
+                .process_transaction(&bin_array_ixs, &[&user_keypair])
+                .await
+                .unwrap();
+        }
+
+        if !hook_bin_array_ixs.is_empty() {
+            let _setup_result = self
+                .process_transaction(&hook_bin_array_ixs, &[&user_keypair])
+                .await
+                .unwrap();
+        }
+
+        let modifier_position_params = ModifierPositionParams {
+            user,
+            position_key: position_key_created,
+            position_token_account,
+            position_mint: position_mint.pubkey(),
+            user_vault_x: user_mint_x_account,
+            user_vault_y: user_mint_y_account,
+            bin_array_position_lower: bin_position_lower,
+            bin_array_position_upper: bin_position_upper,
+            position_hook_bin_array_lower: bin_hook_position_lower,
+            position_hook_bin_array_upper: bin_hook_position_upper,
+        };
+
+        let increase_position_params = IncreasePositionParams {
+            amount_x: amount,
+            amount_y: amount,
+            liquidity_distribution: create_uniform_distribution(3),
+        };
+
+        let increase_position_accounts_metas = amm
+            .get_modifier_position_account_metas(modifier_position_params.clone())
+            .unwrap();
+
+        let data = build_increase_position_instruction_data(increase_position_params).unwrap();
+        let increase_position_ix = Instruction {
+            program_id: liquidity_book::ID,
+            accounts: increase_position_accounts_metas.clone(),
+            data,
+        };
+
+        ixs_increase.push(increase_position_ix);
+
+        let _increase_result = self
+            .process_transaction(&ixs_increase, &[&user_keypair, &position_mint])
+            .await
+            .unwrap();
+
+        let position_account_after_increase = self
+            .get_test_rpc_client()
+            .get_account(&position_key_created)
+            .await
+            .unwrap();
+
+        let position_account_increased =
+            Position::unpack(&position_account_after_increase.data).unwrap();
+
+        let position_width = (position_account_increased.upper_bin_id
+            - position_account_increased.lower_bin_id
+            + 1) as usize;
+        let removed_shares: Vec<u128> = position_account_increased
+            .liquidity_shares
+            .iter()
+            .take(position_width)
+            .map(|s| s / 2)
+            .collect();
+
+        let decrease_position_params = DecreasePositionParams {
+            shares: removed_shares,
+        };
+
+        let decrease_position_accounts_metas = amm
+            .get_modifier_position_account_metas(modifier_position_params.clone())
+            .unwrap();
+
+        let data = build_decrease_position_instruction_data(decrease_position_params).unwrap();
+        let decrease_position_ix = Instruction {
+            program_id: liquidity_book::ID,
+            accounts: decrease_position_accounts_metas,
+            data,
+        };
+        ixs_decrease.push(decrease_position_ix);
+
+        let _decrease_result = self
+            .process_transaction(&ixs_decrease, &[&user_keypair, &position_mint])
+            .await
+            .unwrap();
+
+        let close_position_accounts_metas = amm
+            .get_modifier_position_account_metas(modifier_position_params.clone())
+            .unwrap();
+
+        let data_close_ixs = build_close_position_instruction_data().unwrap();
+        let close_position_ix = Instruction {
+            program_id: liquidity_book::ID,
+            accounts: close_position_accounts_metas,
+            data: data_close_ixs,
+        };
+        ixs_close.push(close_position_ix);
+        let _close_result = self
+            .process_transaction(&ixs_close, &[&user_keypair, &position_mint])
+            .await
+            .unwrap();
     }
 }
 
@@ -1066,4 +1338,61 @@ pub async fn get_amm_context(rpc_client: &RpcClient) -> anyhow::Result<AmmContex
     Ok(AmmContext {
         clock_ref: get_clock_ref(rpc_client).await?,
     })
+}
+
+pub async fn ensure_bin_arrays_initialized(
+    rpc_client: &BanksClient,
+    pair: Pubkey,
+    bin_array_index: u32,
+    payer: Pubkey,
+    bin_lower: Pubkey,
+    bin_upper: Pubkey,
+) -> Result<Vec<Instruction>> {
+    let mut ixs = Vec::new();
+    let bin_lower_account = rpc_client.get_account(bin_lower).await?;
+    let bin_upper_account = rpc_client.get_account(bin_upper).await?;
+
+    // Lower
+    if !bin_lower_account.is_some() {
+        let ix = get_initialize_bin_array_instruction(pair, bin_array_index, payer, bin_lower);
+        ixs.push(ix);
+    }
+    // Upper
+    if !bin_upper_account.is_some() {
+        let ix = get_initialize_bin_array_instruction(pair, bin_array_index + 1, payer, bin_upper);
+        ixs.push(ix);
+    }
+    Ok(ixs)
+}
+
+pub async fn ensure_hook_bin_arrays_initialized(
+    rpc_client: &BanksClient,
+    hook_key: Pubkey,
+    bin_array_index: u32,
+    payer: Pubkey,
+    bin_lower: Pubkey,
+    bin_upper: Pubkey,
+) -> Result<Vec<Instruction>> {
+    let mut ixs = Vec::new();
+
+    let bin_array_lower_account = rpc_client.get_account(bin_lower).await?;
+    let bin_array_upper_account = rpc_client.get_account(bin_upper).await?;
+
+    // Lower
+    if !bin_array_lower_account.is_some() {
+        let ix =
+            get_initialize_hook_bin_array_instruction(hook_key, bin_array_index, payer, bin_lower);
+        ixs.push(ix);
+    }
+    // Upper
+    if !bin_array_upper_account.is_some() {
+        let ix = get_initialize_hook_bin_array_instruction(
+            hook_key,
+            bin_array_index + 1,
+            payer,
+            bin_upper,
+        );
+        ixs.push(ix);
+    }
+    Ok(ixs)
 }

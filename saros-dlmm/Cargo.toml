@@ -20,9 +20,9 @@ spl-memo = { workspace = true }
 ruint = { workspace = true }
 itertools = { workspace = true }
 
-liquidity-book = { path = "../liquidity-book" }
-rewarder-hook = { path = "../rewarder-hook" }
-saros-sdk = { path = "../saros-sdk" }
+liquidity-book = { workspace = true }
+rewarder-hook = { workspace = true }
+saros-sdk = { workspace = true }
 
 assert_matches = { workspace = true }
 async-trait = { workspace = true }

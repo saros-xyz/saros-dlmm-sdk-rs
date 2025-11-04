@@ -1,10 +1,14 @@
 use itertools::Itertools;
 
-use anchor_lang::{InstructionData, prelude::*};
+use anchor_lang::{prelude::*, InstructionData};
 use anyhow::{Ok, Result};
 use solana_sdk::instruction::Instruction;
 
-use jupiter_amm_interface::SwapMode;
+use crate::math::swap_manager::SwapType;
+
+use liquidity_book::liquidity_book::{
+    client::args::Swap as SwapArgs, types::SwapType as LbSwapType,
+};
 
 /// All necessary parts to build a `VersionedTransaction`
 #[derive(Clone)]
@@ -44,7 +48,7 @@ pub struct BuildSwapInstructionDataParams {
     pub amount: u64,
     pub other_amount_threshold: u64,
     pub swap_for_y: bool,
-    pub swap_mode: SwapMode,
+    pub swap_mode: SwapType,
 }
 
 pub fn build_swap_instruction_data(
@@ -56,18 +60,18 @@ pub fn build_swap_instruction_data(
     }: BuildSwapInstructionDataParams,
 ) -> Result<Vec<u8>> {
     Ok(match swap_mode {
-        SwapMode::ExactIn => liquidity_book::instruction::Swap {
-            _amount: amount,
-            _other_amount_threshold: other_amount_threshold,
-            _swap_for_y: swap_for_y,
-            _swap_type: liquidity_book::SwapType::ExactInput,
+        SwapType::ExactIn => SwapArgs {
+            amount,
+            other_amount_threshold,
+            swap_for_y,
+            swap_type: LbSwapType::ExactInput,
         }
         .data(),
-        SwapMode::ExactOut => liquidity_book::instruction::Swap {
-            _amount: amount,
-            _other_amount_threshold: other_amount_threshold,
-            _swap_for_y: swap_for_y,
-            _swap_type: liquidity_book::SwapType::ExactOutput,
+        SwapType::ExactOut => SwapArgs {
+            amount,
+            other_amount_threshold,
+            swap_for_y,
+            swap_type: LbSwapType::ExactOutput,
         }
         .data(),
     })

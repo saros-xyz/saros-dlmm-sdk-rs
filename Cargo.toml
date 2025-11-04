@@ -1,6 +1,10 @@
 [workspace]
 resolver = "2"
-members = ["saros-dlmm", "saros-sdk", "liquidity-book", "rewarder-hook"]
+members = [
+    "programs/*",
+    "saros-sdk",
+    "saros-dlmm",
+]
 
 [workspace.package]
 version = "0.1.0"
@@ -9,7 +13,6 @@ edition = "2021"
 [workspace.dependencies]
 anchor-lang = "0.31.0"
 anchor-syn = "0.31.0"
-anchor-gen = "0.4.1"
 solana-sdk = ">=2.2"
 solana-program = ">=2.2"
 solana-client = ">=2.2"
@@ -45,3 +48,9 @@ spl-associated-token-account = { version = "7.0.0", features = [
 spl-memo = { version = "6.0.0" }
 
 proptest = "1.4.0"
+
+# Package path
+liquidity-book.path = "programs/liquidity-book"
+rewarder-hook.path = "programs/rewarder-hook"
+saros-sdk.path = "saros-sdk"
+saros-dlmm.path = "saros-dlmm"
