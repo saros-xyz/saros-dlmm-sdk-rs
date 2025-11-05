@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Result};
 use jupiter_amm_interface::{Amm, AmmContext, KeyedAccount};
 use lazy_static::lazy_static;
 use solana_sdk::pubkey::Pubkey;
@@ -10,8 +10,10 @@ use crate::SarosDlmm;
 
 mod spl_token_swap_programs {
 
+    use saros_sdk::constants::LIQUIDITY_BOOK_PROGRAM_ID;
+
     use super::*;
-    pub const SAROS_DLMM: Pubkey = liquidity_book::ID;
+    pub const SAROS_DLMM: Pubkey = LIQUIDITY_BOOK_PROGRAM_ID;
 }
 
 lazy_static! {

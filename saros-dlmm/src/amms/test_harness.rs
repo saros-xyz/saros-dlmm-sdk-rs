@@ -10,6 +10,7 @@ use jupiter_amm_interface::{
 use lazy_static::lazy_static;
 
 use saros_sdk::{
+    constants::{HOOK_PROGRAM_ID, LIQUIDITY_BOOK_PROGRAM_ID},
     instruction::{
         build_swap_instruction_data, get_initialize_hook_bin_array_instruction,
         get_initialize_hook_position_instruction, BuildSwapInstructionDataParams,
@@ -361,7 +362,7 @@ impl AmmTestHarnessProgramTest {
         .unwrap();
 
         let swap_ix = Instruction {
-            program_id: liquidity_book::ID,
+            program_id: LIQUIDITY_BOOK_PROGRAM_ID,
             accounts,
             data,
         };
@@ -524,7 +525,7 @@ impl AmmTestHarnessProgramTest {
         let data = build_create_position_instruction_data(create_position_params.clone()).unwrap();
 
         let create_position_ixs = Instruction {
-            program_id: liquidity_book::ID,
+            program_id: LIQUIDITY_BOOK_PROGRAM_ID,
             accounts: create_position_accounts_metas,
             data,
         };
@@ -649,7 +650,7 @@ impl AmmTestHarnessProgramTest {
 
         let data = build_increase_position_instruction_data(increase_position_params).unwrap();
         let increase_position_ix = Instruction {
-            program_id: liquidity_book::ID,
+            program_id: LIQUIDITY_BOOK_PROGRAM_ID,
             accounts: increase_position_accounts_metas.clone(),
             data,
         };
@@ -690,7 +691,7 @@ impl AmmTestHarnessProgramTest {
 
         let data = build_decrease_position_instruction_data(decrease_position_params).unwrap();
         let decrease_position_ix = Instruction {
-            program_id: liquidity_book::ID,
+            program_id: LIQUIDITY_BOOK_PROGRAM_ID,
             accounts: decrease_position_accounts_metas,
             data,
         };
@@ -707,7 +708,7 @@ impl AmmTestHarnessProgramTest {
 
         let data_close_ixs = build_close_position_instruction_data().unwrap();
         let close_position_ix = Instruction {
-            program_id: liquidity_book::ID,
+            program_id: LIQUIDITY_BOOK_PROGRAM_ID,
             accounts: close_position_accounts_metas,
             data: data_close_ixs,
         };
@@ -930,8 +931,8 @@ impl AmmTestHarness {
         // Some programs such as Raydium AMM are not functional once this feature gate is enabled
         pt.deactivate_feature(pubkey!("7Vced912WrRnfjaiKRiNBcbuFw7RrnLv3E3z95Y4GTNc"));
 
-        pt.add_program("saros_dlmm", liquidity_book::ID, None);
-        pt.add_program("rewarder_hook", rewarder_hook::ID, None);
+        pt.add_program("saros_dlmm", LIQUIDITY_BOOK_PROGRAM_ID, None);
+        pt.add_program("rewarder_hook", HOOK_PROGRAM_ID, None);
 
         // let modified_label = amm.label().to_lowercase().replace(' ', "_");
         pt.add_program(
