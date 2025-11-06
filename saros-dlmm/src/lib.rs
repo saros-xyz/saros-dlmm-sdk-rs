@@ -3,13 +3,13 @@ pub mod route;
 
 use crate::amms::position_manager::SarosPositionManagement;
 pub use amms::amm;
-use anchor_lang::prelude::AccountMeta;
 use anyhow::{Context, Result};
 use bincode::deserialize;
 use jupiter_amm_interface::{
     try_get_account_data, try_get_account_data_and_owner, AccountMap, Amm, AmmContext,
     KeyedAccount, Quote, QuoteParams, Swap, SwapAndAccountMetas, SwapMode, SwapParams,
 };
+use saros_sdk::constants::REWARDER_HOOK_PROGRAM_ID;
 use saros_sdk::utils::helper::{get_hook_bin_array, get_pair_bin_array, get_swap_pair_bin_array};
 use saros_sdk::{
     instruction::{CreatePositionParams, ModifierPositionParams},
@@ -29,6 +29,7 @@ use saros_sdk::{
     },
 };
 use solana_sdk::{
+    instruction::AccountMeta,
     program_pack::IsInitialized,
     program_pack::Pack,
     pubkey,
@@ -460,7 +461,7 @@ impl Amm for SarosDlmm {
 
         // If pair does not have hook, hook should be pair key (dummy)
         account_metas.push(AccountMeta::new(self.hook, false));
-        account_metas.push(AccountMeta::new_readonly(rewarder_hook::ID, false));
+        account_metas.push(AccountMeta::new_readonly(REWARDER_HOOK_PROGRAM_ID, false));
         // This expect as the last of swap instruction
         account_metas.push(AccountMeta::new_readonly(self.event_authority, false));
         account_metas.push(AccountMeta::new_readonly(self.program_id, false));
@@ -584,7 +585,7 @@ impl SarosPositionManagement for SarosDlmm {
             account_metas.push(AccountMeta::new_readonly(spl_memo::ID, false));
             // If pair does not have hook, hook should be pair key (dummy)
             account_metas.push(AccountMeta::new(self.hook, false));
-            account_metas.push(AccountMeta::new_readonly(rewarder_hook::ID, false));
+            account_metas.push(AccountMeta::new_readonly(REWARDER_HOOK_PROGRAM_ID, false));
             account_metas.push(AccountMeta::new_readonly(self.event_authority, false));
             account_metas.push(AccountMeta::new_readonly(self.program_id, false));
 
