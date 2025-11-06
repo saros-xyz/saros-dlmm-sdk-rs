@@ -3,7 +3,6 @@ pub mod route;
 
 use crate::amms::position_manager::SarosPositionManagement;
 pub use amms::amm;
-use anchor_lang::prelude::AccountMeta;
 use anyhow::{Context, Result};
 use bincode::deserialize;
 use jupiter_amm_interface::{
@@ -29,6 +28,7 @@ use saros_sdk::{
     },
 };
 use solana_sdk::{
+    instruction::AccountMeta,
     program_pack::IsInitialized,
     program_pack::Pack,
     pubkey,
