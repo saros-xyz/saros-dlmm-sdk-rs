@@ -84,21 +84,11 @@ impl SarosDlmm {
 
         // case 1: all initialized → normal swap
         if lower_init && middle_init && upper_init {
-            return if swap_for_y {
-                // X → Y: go left, bin down, (middle -> lower)
-                Ok(BinForSwap {
-                    bin_arrays: [self.bin_array_lower.clone(), self.bin_array_middle.clone()],
-                    bin_array_keys: [lower_key, middle_key],
-                    hook_bin_array_keys: [hook_lower_key, hook_middle_key],
-                })
-            } else {
-                // Y → X: go right, bin up (middle -> upper)
-                Ok(BinForSwap {
-                    bin_arrays: [self.bin_array_middle.clone(), self.bin_array_upper.clone()],
-                    bin_array_keys: [middle_key, upper_key],
-                    hook_bin_array_keys: [hook_middle_key, hook_upper_key],
-                })
-            };
+            return Ok(BinForSwap {
+                bin_arrays: [self.bin_array_middle.clone(), self.bin_array_upper.clone()],
+                bin_array_keys: [middle_key, upper_key],
+                hook_bin_array_keys: [hook_middle_key, hook_upper_key],
+            });
         }
         // case 2: some bin not init → handle partial
         match (lower_init, middle_init, upper_init) {
@@ -351,13 +341,13 @@ impl Amm for SarosDlmm {
         let mut pair = self.pair.clone();
 
         let block_timestamp = u64::try_from(self.timestamp.load(Ordering::Relaxed))?;
-        let swap_for_y = is_swap_for_y(input_mint, self.pair.token_mint_x);
 
-        let bin_for_swap = self.compute_bin_array_swap(swap_for_y)?;
+        let bin_for_swap = self.compute_bin_array_swap()?;
 
         let bin_array =
             BinArrayPair::merge(bin_for_swap.bin_arrays[0], bin_for_swap.bin_arrays[1])?;
 
+        let swap_for_y = is_swap_for_y(input_mint, self.pair.token_mint_x);
         let (mint_in, epoch_transfer_fee_in, epoch_transfer_fee_out) = if swap_for_y {
             (
                 self.pair.token_mint_x,
@@ -429,9 +419,8 @@ impl Amm for SarosDlmm {
             ..
         } = swap_params;
 
+        let bin_for_swap = self.compute_bin_array_swap()?;
         let swap_for_y = is_swap_for_y(*source_mint, self.pair.token_mint_x);
-
-        let bin_for_swap = self.compute_bin_array_swap(swap_for_y)?;
 
         let (user_vault_x, user_vault_y) = if swap_for_y {
             (source_token_account, destination_token_account)
