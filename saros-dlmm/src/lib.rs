@@ -73,7 +73,7 @@ impl SarosDlmm {
     pub const ASSOCIATED_TOKEN_PROGRAM_ADDRESS: Pubkey =
         pubkey!("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
 
-    pub fn compute_bin_array_swap(&self, swap_for_y: bool) -> Result<BinForSwap> {
+    pub fn compute_bin_array_swap(&self) -> Result<BinForSwap> {
         // unpack fixed order
         let [lower_key, middle_key, upper_key] = self.bin_array_key;
         let [hook_lower_key, hook_middle_key, hook_upper_key] = self.hook_bin_array_key;
