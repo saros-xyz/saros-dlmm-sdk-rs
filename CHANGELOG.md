@@ -1,43 +1,21 @@
 # Changelog
 
-## [Unreleased]
+## [0.1.1] - 2025-10-01
 
-## [Added]
-- **Rewarder Hook (Mainnet Preparation)**  
-  - Introduced a new `rewarder-hook` crate containing the IDL.
-  - Added a new `rewarder_hook.so` binary fixture built with the `mainnet` feature.
-  - Integrated rewarder hook support into DLMM swap flow.
-  - Hook execution will be enabled once pools are upgraded and `has_hook` is set to `true` .
+### Fixes
 
-- **Liquidity Book Refactor**  
-  - Introduced a new `liquidity-book` crate (previously part of the `saros` module).
-  - Moved related IDL and logic to the new crate for better modularity and separation of concerns.
+#### 1. Corrected `bin_array_index()` logic to prevent out-of-range or misaligned bin selection
+This new logic ensures:
+	•	If the active bin is closer to the lower half of the current bin-array group, we snap to the previous group
+	•	Guarantees the middle bin-array always contains or surrounds the active bin
+	•	Improves compatibility with hook_bin_array_key and ensures reward accounting logic behaves as expected
 
-- **Swap Instruction Enhancements**  
-  - Added two new required accounts to the swap instruction: `hook` and `hook_program`.
-  - Added conditional hook execution logic triggered when `has_hook = true` on the pool.
+#### 2. Standardized `compute_bin_array_swap` to always simulate from [middle, upper]
+Now:
+	•	Always uses [middle, upper] as the simulated bin-array range
+	•	Simplifies assumptions for hooks and reward range pairing
+	•	Ensures consistency and reproducibility between simulations and real swaps
 
-- **Testing & Fixtures**  
-  - Added `.so` fixture files for both `liquidity-book` and `rewarder-hook` programs (mainnet build).
-  - Updated DLMM tests to include scenarios for rewarder hook integration.
-  - Added example setup in `test_amms.rs` for future devnet testing once hooks are enabled.
-
-## [Changed]
-- **Workspace & Build Configuration**  
-  - Updated `Cargo.toml` workspace to include `liquidity-book` and `rewarder-hook` crates.
-  - Changed Rust edition from `2024` → `2021` for better toolchain compatibility.
-
-- **DLMM SDK Core**  
-  - Refactored `swap_instruction.rs`, `loader.rs`, and `test_harness.rs` to support hook account handling.
-  - Improved program structure for future integration with rewarder hook logic.
-  - Updated test and fixture handling for smoother local build & deployment.
-
-## [Removed]
-- Removed legacy references to the old `saros` structure and migrated related logic to the new `liquidity-book` crate.
-
-## 📌 Notes
-- Pool upgrade (to set `hook = Some(Pubkey)`) will be required to enable this feature.  
-- Once activated, the swap instruction will require:
-  - `hook` account
-  - `hook_program` account
-  - **Remaining accounts**: 2 additional accounts corresponding to the active hook bin array (lower & upper).
+### Packages updated
+- `saros-dlmm-sdk` → `0.1.1`
+- `saros-sdk` → `0.1.1`
