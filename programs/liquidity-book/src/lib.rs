@@ -16,7 +16,11 @@ pub fn find_authorities() -> Vec<Pubkey> {
 }
 
 pub fn find_event_authority() -> Pubkey {
-    Pubkey::find_program_address(&[b"__event_authority"], &crate::ID).0
+    Pubkey::find_program_address(
+        &[b"__event_authority"],
+        &Pubkey::new_from_array(*crate::ID.as_array()),
+    )
+    .0
 }
 
 pub fn find_find_program_authority_id((start, end): (u8, u8)) -> u8 {
@@ -26,5 +30,9 @@ pub fn find_find_program_authority_id((start, end): (u8, u8)) -> u8 {
 }
 
 pub fn find_program_authority(id: u8) -> Pubkey {
-    Pubkey::find_program_address(&[AUTHORITY_SEED, &[id]], &crate::ID).0
+    Pubkey::find_program_address(
+        &[AUTHORITY_SEED, &[id]],
+        &Pubkey::new_from_array(*crate::ID.as_array()),
+    )
+    .0
 }
